@@ -14,6 +14,10 @@ const uint8_t latchPin = 17;
 const uint8_t clockPin = 16;
 const uint8_t dataPin = 14;
 
+// TFT not handled by TFT_eSPI
+const uint8_t tftGndEnable = 27;
+const uint8_t tftReset = 26;
+
 void setup() {
   // put your setup code here, to run once:
   Serial.begin(115200);
@@ -39,10 +43,35 @@ void setup() {
   digitalWrite(latchPin, LOW);
   digitalWrite(dataPin, LOW);
   digitalWrite(clockPin, LOW);
-  shiftOut(dataPin, clockPin, MSBFIRST, 0x40);  // 
+  shiftOut(dataPin, clockPin, MSBFIRST, 0x00);
   digitalWrite(latchPin, HIGH);
 
+  // Enabled ground on the TFTs
+  pinMode(tftGndEnable, OUTPUT);
+  pinMode(tftReset, OUTPUT);
+  digitalWrite(tftGndEnable, HIGH); // Drives a MOSFET to GND, so HIGH here means enable GND.
+  digitalWrite(tftReset, HIGH);     // Reset is active low.
+  delay(100);
   tft.init();
+
+  Serial.println("Done with setup()");
+}
+
+void loop() {
+  Serial.println("Hello world!");
+  if (digitalRead(buttonMode) == LOW) {
+    Serial.println("Mode Button.");
+  }
+  if (digitalRead(buttonLeft) == LOW) {
+    Serial.println("Left Button.");
+  }
+  if (digitalRead(buttonRight) == LOW) {
+    Serial.println("Right Button.");
+  }
+  if (digitalRead(buttonPower) == LOW) {
+    Serial.println("Power Button.");
+  }
+
   tft.fillScreen(TFT_WHITE);
   // Set "cursor" at top left corner of display (0,0) and select font 4
   tft.setCursor(0, 0, 4);
@@ -62,24 +91,6 @@ void setup() {
   tft.setTextColor(TFT_BLUE, TFT_BLACK);
   tft.println("Blue text");
 
-  Serial.println("Done with setup()");
-}
+  delay(1000);
 
-void loop() {
-  // put your main code here, to run repeatedly:
-  delay(2000);
-  Serial.println("Hello world!");
-  if (digitalRead(buttonMode) == LOW) {
-    Serial.println("Mode Button.");
-  }
-  if (digitalRead(buttonLeft) == LOW) {
-    Serial.println("Left Button.");
-  }
-  if (digitalRead(buttonRight) == LOW) {
-    Serial.println("Right Button.");
-  }
-  if (digitalRead(buttonPower) == LOW) {
-    Serial.println("Power Button.");
-  }
-  
 }

@@ -36,20 +36,24 @@ the documentation below is RIGHT TO LEFT.
 3. TFT pin 5, SDA, ESP32 pin 37, IO23, VSPID
 4. TFT pin 6, SCL, ESP32 pin 30, IO18, VSPICLK
 5. TFT pin 4, RS, ESP32 pin 10, IO25
-6. TFT pin 3, RESET,  ESP32 pin 11, IO26
+6. TFT pin 3, RESET (active low),  ESP32 pin 11, IO26
 7. TFT pin 8, Chip Select, driven by 74HC595
 8. WS2812, GND (Tied to 13)
-  * Separate from TFT GND, not sure why, but here we are.
 9. N/C
 10. TFT pin 1 and 7, Vdd and LEDA (Tied to 12)
 11. TFT pin 2, GND 
+  * Tied to system ground through a MOSFET, controlled by ESP32 pin 12, IO27, so the displays can be completely turned off.
+  * (If I (SmittyHalibut) were doing this, I'd have used a P channel MOSFET and controlled LEDA, which would allow dimming as well as completely shutting it off. Oh well.)
 12. TFT pin 1 and 7, Vdd and LEDA (Tied to 10)
 13. WS2812, GND  (Tied to 8)
 
 ## Chip Select Shift Register
 There's a [74HC595](https://www.arduino.cc/en/Tutorial/Foundations/ShiftOut)
 ([datasheet](https://www.arduino.cc/en/uploads/Tutorial/595datasheet.pdf))
-that drives the 6 SPI Chip Select lines on the displays.  Thankfully, they're in order:
+that drives the 6 SPI Chip Select lines on the displays.  Chip Select lines are Active Low,
+so write 1s to the displays you do NOT want to update, a 0 to the display you want to update.
+
+Q0 is the most recent bit written to the shift register, Q7 is the oldest bit written.
 
 Outputs:
 * Q0: Hour Tens

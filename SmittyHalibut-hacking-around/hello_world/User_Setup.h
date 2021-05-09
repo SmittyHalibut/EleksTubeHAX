@@ -23,9 +23,8 @@
 //#define TFT_MISO 7
 #define TFT_SCLK 18
 #define TFT_CS    -1 // Not connected
-// 25 and 26 are connected to all displays, but I can't tell what they're used for yet.
-#define TFT_DC    25
-#define TFT_RST   26  // Connect reset to ensure display initialises
+//#define TFT_DC    -1
+#define TFT_RST   25  // Connect reset to ensure display initialises
 
 
 // DSTIKE stepup
