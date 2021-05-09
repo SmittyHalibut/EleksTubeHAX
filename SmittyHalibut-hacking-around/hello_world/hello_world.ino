@@ -43,7 +43,7 @@ void setup() {
   digitalWrite(latchPin, LOW);
   digitalWrite(dataPin, LOW);
   digitalWrite(clockPin, LOW);
-  shiftOut(dataPin, clockPin, MSBFIRST, 0x00);
+  shiftOut(dataPin, clockPin, LSBFIRST, 0x3E);  // 0x1F = Left most, 0x3E = Right most
   digitalWrite(latchPin, HIGH);
 
   // Enabled ground on the TFTs
@@ -52,7 +52,9 @@ void setup() {
   digitalWrite(tftGndEnable, HIGH); // Drives a MOSFET to GND, so HIGH here means enable GND.
   digitalWrite(tftReset, HIGH);     // Reset is active low.
   delay(100);
+
   tft.init();
+  tft.fillScreen(0xF81F);
 
   Serial.println("Done with setup()");
 }
@@ -72,6 +74,17 @@ void loop() {
     Serial.println("Power Button.");
   }
 
+  /*
+  setup_t user;
+  tft.getSetup(user);
+  Serial.print("TFT_eSPI ver = "); Serial.println(user.version);
+  Serial.print("Display driver = "); Serial.println(user.tft_driver, HEX); // Hexadecimal code
+  Serial.print("Display width  = "); Serial.println(user.tft_width);  // Rotation 0 width and height
+  Serial.print("Display height = "); Serial.println(user.tft_height);
+  Serial.println();
+  */
+
+  /*
   tft.fillScreen(TFT_WHITE);
   // Set "cursor" at top left corner of display (0,0) and select font 4
   tft.setCursor(0, 0, 4);
@@ -90,7 +103,25 @@ void loop() {
   
   tft.setTextColor(TFT_BLUE, TFT_BLACK);
   tft.println("Blue text");
+  */
 
+  static uint32_t wr = 1;
+  static uint32_t rd = 0xFFFFFFFF;
+
+  tft.drawPixel(30,30,wr);
+  Serial.print(" Pixel value written = ");Serial.println(wr,HEX);
+  
+  rd = tft.readPixel(30,30);
+                Serial.print(" Pixel value read    = ");Serial.println(rd,HEX);
+
+  if (rd!=wr) {
+    Serial.println(" ERROR                 ^^^^");
+    //while(1) yield();
+  }
+  else Serial.println(" PASS ");
+  // Walking 1 test
+  wr = wr<<1;
+  if (wr >= 0x10000) wr = 1;
   delay(1000);
 
 }
