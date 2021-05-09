@@ -11,8 +11,7 @@ Check in [original-firmware/](original-firmware/) for a direct dump of the firmw
 * Microcontroller: ESP32-WROOM-32D
   * [Datasheet](https://www.espressif.com/sites/default/files/documentation/esp32-wroom-32d_esp32-wroom-32u_datasheet_en.pdf)
   * [Technical Reference Manual](https://www.espressif.com/sites/default/files/documentation/esp32_technical_reference_manual_en.pdf)
-* Displays: [TFT 1.14" 135x240](https://drive.google.com/file/d/1yNx8xv3QHelXeaZiQ4Ia_Et1136Wh8VI/view)
-  * This isn't the exact module, but it looks like the same display.
+* Displays: [TFT 1.14" 135x240](https://www.aliexpress.com/item/32564432870.html)
 
 ## Libraries
 * Talking to displays: [TFT_eSPI](https://github.com/Bodmer/TFT_eSPI)
