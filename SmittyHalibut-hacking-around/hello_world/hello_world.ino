@@ -16,7 +16,6 @@ const uint8_t dataPin = 14;
 
 // TFT not handled by TFT_eSPI
 const uint8_t tftGndEnable = 27;
-const uint8_t tftReset = 26;
 
 void setup() {
   // put your setup code here, to run once:
@@ -43,17 +42,36 @@ void setup() {
   digitalWrite(latchPin, LOW);
   digitalWrite(dataPin, LOW);
   digitalWrite(clockPin, LOW);
-  shiftOut(dataPin, clockPin, LSBFIRST, 0x3E);  // 0x1F = Left most, 0x3E = Right most
+  shiftOut(dataPin, clockPin, MSBFIRST, 0xF7);  // 0x1F = Right most, 0x3E = Left most
   digitalWrite(latchPin, HIGH);
 
   // Enabled ground on the TFTs
   pinMode(tftGndEnable, OUTPUT);
-  pinMode(tftReset, OUTPUT);
   digitalWrite(tftGndEnable, HIGH); // Drives a MOSFET to GND, so HIGH here means enable GND.
-  digitalWrite(tftReset, HIGH);     // Reset is active low.
-  delay(100);
 
   tft.init();
+  tft.fillScreen(TFT_BLUE);
+  delay(1000);
+  // Set "cursor" at top left corner of display (0,0) and select font 4
+  tft.setCursor(0, 0, 4);
+  // Set the font colour to be white with a black background
+  tft.setTextColor(TFT_WHITE, TFT_BLACK);
+
+  // We can now plot text on screen using the "print" class
+  tft.println("Intialised default\n");
+  tft.println("White text");
+  
+  tft.setTextColor(TFT_RED, TFT_BLACK);
+  tft.println("Red text");
+  
+  tft.setTextColor(TFT_GREEN, TFT_BLACK);
+  tft.println("Green text");
+  
+  tft.setTextColor(TFT_BLUE, TFT_BLACK);
+  tft.println("Blue text");
+
+  delay(5000);
+  
   tft.fillScreen(0xF81F);
 
   Serial.println("Done with setup()");
@@ -75,17 +93,7 @@ void loop() {
   }
 
   /*
-  setup_t user;
-  tft.getSetup(user);
-  Serial.print("TFT_eSPI ver = "); Serial.println(user.version);
-  Serial.print("Display driver = "); Serial.println(user.tft_driver, HEX); // Hexadecimal code
-  Serial.print("Display width  = "); Serial.println(user.tft_width);  // Rotation 0 width and height
-  Serial.print("Display height = "); Serial.println(user.tft_height);
-  Serial.println();
-  */
-
-  /*
-  tft.fillScreen(TFT_WHITE);
+  tft.fillScreen(TFT_BLUE);
   // Set "cursor" at top left corner of display (0,0) and select font 4
   tft.setCursor(0, 0, 4);
   // Set the font colour to be white with a black background
@@ -122,6 +130,7 @@ void loop() {
   // Walking 1 test
   wr = wr<<1;
   if (wr >= 0x10000) wr = 1;
-  delay(1000);
 
+  
+  delay(1000);
 }

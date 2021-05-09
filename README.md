@@ -35,7 +35,7 @@ the documentation below is RIGHT TO LEFT.
 2. WS2812 Out
 3. TFT pin 5, SDA, ESP32 pin 37, IO23, VSPID
 4. TFT pin 6, SCL, ESP32 pin 30, IO18, VSPICLK
-5. TFT pin 4, RS, ESP32 pin 10, IO25
+5. TFT pin 4, RS (Register Select, or DC Data Command), ESP32 pin 10, IO25
 6. TFT pin 3, RESET (active low),  ESP32 pin 11, IO26
 7. TFT pin 8, Chip Select, driven by 74HC595
 8. WS2812, GND (Tied to 13)
