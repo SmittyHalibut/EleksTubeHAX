@@ -3,10 +3,16 @@
 
 TFT_eSPI tft = TFT_eSPI();
 
+// Buttons
 const uint8_t buttonLeft = 33;
 const uint8_t buttonMode = 32;
 const uint8_t buttonRight = 35;
 const uint8_t buttonPower = 34;
+
+// Chip Select shift register
+const uint8_t latchPin = 17;
+const uint8_t clockPin = 16;
+const uint8_t dataPin = 14;
 
 void setup() {
   // put your setup code here, to run once:
@@ -27,16 +33,13 @@ void setup() {
   pinMode(buttonPower, INPUT);
   
   // Setup 74HC595 chip select. For now, just enable all of them.
-  const uint8_t latchPin = 17;
-  const uint8_t clockPin = 16;
-  const uint8_t dataPin = 14;
   pinMode(latchPin, OUTPUT);
   pinMode(dataPin, OUTPUT);
   pinMode(clockPin, OUTPUT);
   digitalWrite(latchPin, LOW);
   digitalWrite(dataPin, LOW);
   digitalWrite(clockPin, LOW);
-  shiftOut(dataPin, clockPin, LSBFIRST, 0x55);
+  shiftOut(dataPin, clockPin, MSBFIRST, 0x37);  // 
   digitalWrite(latchPin, HIGH);
 
   tft.init();
