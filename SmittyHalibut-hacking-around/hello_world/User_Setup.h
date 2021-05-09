@@ -24,8 +24,8 @@
 #define TFT_SCLK 18
 #define TFT_CS    -1 // Not connected
 // 25 and 26 are connected to all displays, but I can't tell what they're used for yet.
-#define TFT_DC    26
-#define TFT_RST   25  // Connect reset to ensure display initialises
+#define TFT_DC    25
+#define TFT_RST   26  // Connect reset to ensure display initialises
 
 
 // DSTIKE stepup
@@ -61,7 +61,7 @@
 #define SMOOTH_FONT
 
 
-// #define SPI_FREQUENCY  27000000
+//#define SPI_FREQUENCY  27000000
 #define SPI_FREQUENCY  40000000
 
 #define SPI_READ_FREQUENCY  20000000

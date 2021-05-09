@@ -39,7 +39,7 @@ void setup() {
   digitalWrite(latchPin, LOW);
   digitalWrite(dataPin, LOW);
   digitalWrite(clockPin, LOW);
-  shiftOut(dataPin, clockPin, MSBFIRST, 0x37);  // 
+  shiftOut(dataPin, clockPin, MSBFIRST, 0x40);  // 
   digitalWrite(latchPin, HIGH);
 
   tft.init();
