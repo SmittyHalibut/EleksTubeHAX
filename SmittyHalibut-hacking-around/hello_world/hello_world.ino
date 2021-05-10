@@ -1,5 +1,14 @@
-#include "User_Setup.h"
 #include <TFT_eSPI.h>
+/*
+ * If your screens are blank after loading this code, make sure you 
+ * modify Arduino/libraries/TFT_eSPI/User_Setup_Select.h
+ * so that it #include </path/to/your/code/hello_world/User_Setup.h>
+ * instead of including <User_Setup.h> or any of the other setup files.
+ * 
+ * Yes, this means we have to modify the distributed library. I'm not
+ * happy about it either, but that's how the library is written. It's
+ * documentaiton tells you how to do this.
+ */
 
 TFT_eSPI tft = TFT_eSPI();
 
@@ -69,11 +78,7 @@ void setup() {
   
   tft.setTextColor(TFT_BLUE, TFT_BLACK);
   tft.println("Blue text");
-
-  delay(5000);
   
-  tft.fillScreen(0xF81F);
-
   Serial.println("Done with setup()");
 }
 
@@ -92,45 +97,5 @@ void loop() {
     Serial.println("Power Button.");
   }
 
-  /*
-  tft.fillScreen(TFT_BLUE);
-  // Set "cursor" at top left corner of display (0,0) and select font 4
-  tft.setCursor(0, 0, 4);
-  // Set the font colour to be white with a black background
-  tft.setTextColor(TFT_WHITE, TFT_BLACK);
-
-  // We can now plot text on screen using the "print" class
-  tft.println("Intialised default\n");
-  tft.println("White text");
-  
-  tft.setTextColor(TFT_RED, TFT_BLACK);
-  tft.println("Red text");
-  
-  tft.setTextColor(TFT_GREEN, TFT_BLACK);
-  tft.println("Green text");
-  
-  tft.setTextColor(TFT_BLUE, TFT_BLACK);
-  tft.println("Blue text");
-  */
-
-  static uint32_t wr = 1;
-  static uint32_t rd = 0xFFFFFFFF;
-
-  tft.drawPixel(30,30,wr);
-  Serial.print(" Pixel value written = ");Serial.println(wr,HEX);
-  
-  rd = tft.readPixel(30,30);
-                Serial.print(" Pixel value read    = ");Serial.println(rd,HEX);
-
-  if (rd!=wr) {
-    Serial.println(" ERROR                 ^^^^");
-    //while(1) yield();
-  }
-  else Serial.println(" PASS ");
-  // Walking 1 test
-  wr = wr<<1;
-  if (wr >= 0x10000) wr = 1;
-
-  
   delay(1000);
 }

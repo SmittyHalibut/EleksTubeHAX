@@ -19,35 +19,12 @@
 //#define TFT_INVERSION_OFF
 
 // EleksTube IPS
+#define TFT_SDA_READ      // Read and write on the MOSI/SDA pin, no separate MISO pin
 #define TFT_MOSI 23
-//#define TFT_MISO 7
 #define TFT_SCLK 18
-#define TFT_CS    -1 // Not connected
-// 25 and 26 are connected to all displays, but I can't tell what they're used for yet.
-#define TFT_DC    25
-#define TFT_RST   26  // Connect reset to ensure display initialises
-
-
-// DSTIKE stepup
-//#define TFT_DC    23
-//#define TFT_RST   32
-//#define TFT_MOSI  26
-//#define TFT_SCLK  27
-
-// Generic ESP32 setup
-//#define TFT_MISO 19
-//#define TFT_MOSI 23
-//#define TFT_SCLK 18
 //#define TFT_CS    -1 // Not connected
-//#define TFT_DC    2
-//#define TFT_RST   4  // Connect reset to ensure display initialises
-
-// For NodeMCU - use pin numbers in the form PIN_Dx where Dx is the NodeMCU pin designation
-//#define TFT_CS   -1      // Define as not used
-//#define TFT_DC   PIN_D1  // Data Command control pin
-//#define TFT_RST  PIN_D4  // TFT reset pin (could connect to NodeMCU RST, see next line)
-//#define TFT_RST  -1      // TFT reset pin connect to NodeMCU RST, must also then add 10K pull down to TFT SCK
-
+#define TFT_DC   25  // Data Command, aka Register Select or RS
+#define TFT_RST  26  // Connect reset to ensure display initialises
 
 #define LOAD_GLCD   // Font 1. Original Adafruit 8 pixel font needs ~1820 bytes in FLASH
 #define LOAD_FONT2  // Font 2. Small 16 pixel high font, needs ~3534 bytes in FLASH, 96 characters
@@ -63,13 +40,6 @@
 
 //#define SPI_FREQUENCY  27000000
 #define SPI_FREQUENCY  40000000
-
-//#define SPI_READ_FREQUENCY  20000000
-
-//#define SPI_TOUCH_FREQUENCY  2500000
-
-// #define SUPPORT_TRANSACTIONS
-
 
 /*
  * To make the Library not over-write all this:
