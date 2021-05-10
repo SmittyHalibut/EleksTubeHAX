@@ -42,7 +42,7 @@ void setup() {
   digitalWrite(latchPin, LOW);
   digitalWrite(dataPin, LOW);
   digitalWrite(clockPin, LOW);
-  shiftOut(dataPin, clockPin, MSBFIRST, 0xF7);  // 0x1F = Right most, 0x3E = Left most
+  shiftOut(dataPin, clockPin, MSBFIRST, 0x40);  // 0x1F = Right most, 0x3E = Left most
   digitalWrite(latchPin, HIGH);
 
   // Enabled ground on the TFTs
