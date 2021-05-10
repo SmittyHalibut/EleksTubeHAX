@@ -42,7 +42,7 @@ void setup() {
   digitalWrite(latchPin, LOW);
   digitalWrite(dataPin, LOW);
   digitalWrite(clockPin, LOW);
-  shiftOut(dataPin, clockPin, MSBFIRST, 0x40);  // 0x1F = Right most, 0x3E = Left most
+  shiftOut(dataPin, clockPin, MSBFIRST, 0xFF ^ B0010101);  // 0 = On, Right most bit is left most display.. here we light every other display 
   digitalWrite(latchPin, HIGH);
 
   // Enabled ground on the TFTs
