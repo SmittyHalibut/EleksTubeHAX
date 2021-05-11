@@ -56,6 +56,9 @@ private:
   void rainbowPattern();
   void pulsePattern();
   void breathPattern();
+
+  // Helper methods
+  uint8_t phaseToColor(uint16_t phase);
 };
 
 #endif // BACKLIGHTS_H

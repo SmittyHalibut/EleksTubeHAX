@@ -4,14 +4,24 @@
 #ifndef ELEKSTUBEHAX_HARDWARE_H
 #define ELEKSTUBEHAX_HARDWARE_H
 
+#include <stdint.h> 
+#include <Arduino.h> // for HIGH and LOW
+
 // Common indexing scheme, used to identify the digit
 #define SECONDS_ONES (0)
 #define SECONDS_TENS (1)
 #define MINUTES_ONES (2)
 #define MINUTES_TENS (3)
-#define HOURS_ONES (4)
-#define HOURS_TENS (5)
-#define NUM_DIGITS (6)
+#define HOURS_ONES   (4)
+#define HOURS_TENS   (5)
+#define NUM_DIGITS   (6)
+
+#define SECONDS_ONES_MAP (0x01 << SECONDS_ONES)
+#define SECONDS_TENS_MAP (0x01 << SECONDS_TENS)
+#define MINUTES_ONES_MAP (0x01 << MINUTES_ONES)
+#define MINUTES_TENS_MAP (0x01 << MINUTES_TENS)
+#define HOURS_ONES_MAP   (0x01 << HOURS_ONES)
+#define HOURS_TENS_MAP   (0x01 << HOURS_TENS)
 
 // WS2812 (or compatible) LEDs on the back of the display modules.
 #define BACKLIGHTS_PIN (12)
