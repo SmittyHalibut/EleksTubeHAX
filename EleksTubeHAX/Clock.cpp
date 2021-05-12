@@ -33,8 +33,8 @@ time_t Clock::syncProvider() {
     ntp_now = ntpTimeClient.getEpochTime();
     Serial.println(" Done.");
 
-    // Sync the RTC to NTP if needed. Allowing for 1 second slip forward.
-    if (ntp_now - rtc_now > 1 || ntp_now - rtc_now < 0) {
+    // Sync the RTC to NTP if needed.
+    if (ntp_now - rtc_now != 0) {
       RTC.set(ntp_now);
       Serial.println("NTP, RTC, Diff: ");
       Serial.println(ntp_now);

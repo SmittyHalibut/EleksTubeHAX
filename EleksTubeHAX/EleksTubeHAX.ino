@@ -69,7 +69,6 @@ void loop() {
   // Update the clock.
   updateClockDisplay();
   
-  /*
   // Backlight pattern debug
   if (buttons.left.isDownEdge()) {
     backlights.setPrevPattern();
@@ -81,13 +80,6 @@ void loop() {
     Serial.print("Pattern: ");
     Serial.println(backlights.getPatternStr());
   }
-  if (buttons.mode.isDownEdge()) {
-    tfts.setDigit(0, tfts.getDigit(0)+1);
-  }
-  if (buttons.power.isDownEdge()) {
-    tfts.setDigit(0, tfts.getDigit(0)-1);
-  }
-  */
   
   /* 
   // Buttons debug

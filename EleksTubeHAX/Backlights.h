@@ -20,7 +20,7 @@ public:
   Backlights() : Adafruit_NeoPixel(NUM_DIGITS, BACKLIGHTS_PIN, NEO_GRB + NEO_KHZ800), 
     pattern(dark), pattern_needs_init(true),
     // Sane default for the patterns. These can be over-written with setters.
-    test_ms_delay(200), pattern_color(0xFF0000), pulse_bpm(72), breath_per_min(10)
+    test_ms_delay(200), pattern_color(0x913500), pulse_bpm(72), breath_per_min(10)
     {};
 
   enum patterns { dark, test, constant, rainbow, pulse, breath, num_patterns };

@@ -5,6 +5,88 @@ Buy your own clock here: [EleksTube IPS Clock](https://www.banggood.com/Pseudo-g
 
 [Original documentation and software from EleksMaker.](https://wiki.eleksmaker.com/doku.php?id=ips)
 
+# How to build this firmware
+Unfortunately, it's not simple plug-and-play.  You need to do some things.  These instructions assume you already know how to use the Arduino IDE, and just need to know WHAT to do.
+
+## Download this code
+You're either reading this file after downloading it already, or you're reading it on github.  I'll assume you can figure out how to get the code from github and put it somewhere on your local machine.  This is your preference.
+
+### Configure your WiFi network
+In the source code directory (where ever you just installed it), copy `wifi_creds-example.h` to `wifi_creds.h` and edit it for your WiFi SSID and Password.
+
+Note that `wifi_creds.h` is in `.gitignore`, so you can safely put credentials in that file and still submit pull requests, push code, whatever.  git will never store your credentials in a repository.
+
+## Setup Arduino IDE
+Development was done on Arduino 1.8.13.  It might work on earlier or later versions, I don't know.
+
+### Windows Only: Install the USB Serial Port Device Driver (??)
+I'm not a Windows user, but the [EleksTube instructions](https://wiki.eleksmaker.com/doku.php?id=ips) have you installing a driver to get the serial port to work.  So I assume that's necessary.  It seemed to work out of the box on my Ubuntu 16.04 machine.
+
+### Install ESP32 board support from Espressif
+File -> Preferences, add `https://dl.espressif.com/dl/package_esp32_index.json` to your Board Manager URLs.  (Comma separated if there's already something there.)
+
+Tools -> Board -> Board Manager, add the `esp32` boards by `Espressif Systems`.  Development was done on v1.0.6.
+
+Tools -> Board -> ESP32 Arduino -> ESP32 Dev Module
+
+The default configs in the Tools menu should be fine. The important ones are:
+* Flash Size: 4MB
+* Partition Scheme: Any that includes at least 1MB for SPIFFS.  I use the "Default 4MB: 1.2MB App, 1.5MB SPIFFS" one.
+* Port: Set it to whatever serial port your clock shows up as when plugged in.
+
+### Install Libraries
+All these libraries are in Library Manager.  Several libraries have very similar names, so make sure you select the correct one based on the author.
+The listed "developed on" versions are just the versions I had installed while developing this code.  Newer (or possibly older) versions should be fine too.
+
+Sketch -> Include Library -> Library Manager
+* `NTPClient` by Fabrice Weinberg (developed on v3.2.0)
+* `Adafruit NeoPixel` by Adafruit (developed on v1.8.0)
+* `DS1307RTC` by Michael Margolis (developed on v1.4.1)
+* `TFT_eSPI` by Bodmer (developed on v2.3.61)
+* `Time` by Michael Margolis (developed on v1.6.0)
+
+### Configure the `TFT_eSPI` library
+**IMPORTANT** You have to do this after every time you install or update the `TFT_eSPI` library!  **IMPORTANT**
+
+The full documentation for this is in the `TFT_eSPI` library, but tl,dr:
+* Edit `Arduino/libraries/TFT_eSPI/User_Setup_Select.h`
+* Comment out all `#include` lines.  (The only one that comes from install is `#include <User_Setup.h>`.)
+* Add a `#include` line pointing to `User-Setup.h` in this code.
+  * eg: `#include </home/foo/src/EleksTubeHAX/EleksTubeHAX/User_Setup.h>`
+  * Obviously, update the path to point to where ever you keep your code.  Mac and Windows paths will look very different.
+
+### Install SPIFFS uploader
+The code is [here](https://github.com/me-no-dev/arduino-esp32fs-plugin/releases/), and instructions to install it are [here](https://randomnerdtutorials.com/install-esp32-filesystem-uploader-arduino-ide/).
+
+tl,dr: Download and unzip [this file](https://github.com/me-no-dev/arduino-esp32fs-plugin/releases/download/1.0/ESP32FS-1.0.zip) into your `Arduino/tools/` directory.  There might not be a `tools/` subdirectory yet, but if you see `Arduino/libraries/` that's the right place.
+
+### Restart Arduino
+After installing the ESP32 support, all the libraries, and the SPIFFS uploader, restart Arduino to make sure it knows its all there.
+ 
+## Upload New Firmware
+Make sure you configured everything:
+* Put your wifi credentials in `wifi_creds.h`
+* Pointed `User_Setup_Select.h` in the TFT_eSPI library to our `User_Setup.h`
+
+Connect the clock to your computer with USB.  You'll see a new serial port pop up.  Make sure that's the serial port selected in Tools.
+
+### Compile and Upload the Code
+Compile (Ctrl-R) and Upload (Ctrl-U) the code.  At this point, it should upload cleanly and successfully.  You'll see the clock boot up and connect to WiFi.  But it doesn't have any bitmaps to display on the screen yet.
+
+### Upload Bitmaps
+The repository comes with a set of BMP files, nixie tubes from the original firmware, in the `data/` directory. See below if you want to make your own.
+
+Tools -> ESP32 Sketch Data Upload, will upload the files to the SPIFFS filesystem on the micro.  They'll stay there, even if you re-upload the firmware multiple times.
+
+### Custom Bitmaps (Optional)
+If you want to change these:
+* Create your own BMP files.  Resolution must be 135x240 pixels, 24bit RGB.
+* Name them `0.bmp` through `9.bmp` and put them in the `data/` directory.
+
+Then do the "Tools -> ESP32 Sketch Data Upload" dance again.
+
+
+# Development Process:
 ## Original Firmware
 Check in [original-firmware/](original-firmware/) for a direct dump of the firmware as I received my clock, and instructions for how to restore it to the clock.  This is useful if you're hacking around and get some non-working code, and just want to restore it to original.
 
