@@ -3,8 +3,23 @@ Buy your own clock here: [EleksTube IPS Clock](https://www.banggood.com/Pseudo-g
 
 [Reddit discussion on the hack is here.](https://www.reddit.com/r/arduino/comments/mq5td9/hacking_the_elekstube_ips_clock_anyone_tried_it/)
 
+[Original documentation and software from EleksMaker.](https://wiki.eleksmaker.com/doku.php?id=ips)
+
 ## Original Firmware
 Check in [original-firmware/](original-firmware/) for a direct dump of the firmware as I received my clock, and instructions for how to restore it to the clock.  This is useful if you're hacking around and get some non-working code, and just want to restore it to original.
+
+## Unpacking BMPs from original firmware
+Download and unpack the original software (link above).  It contains a directory called `IPSimages/` which contains several pre-made SPIFFS images full of the BMPs available in the original software.  You can see what they all look like in the `gallery/` directory, same numbers.
+
+To unpack one of these SPIFFS images into the original BMPs:
+* Make a destination directory, eg: `unpacked/`
+* Run: `mkspiffs -u unpacked/ [image].bin`
+  * This assumes you've already installed ESP32 support in Arduino. `mkspiffs` comes with the ESP32 tools.  On my Linux system, it's in `~/.arduino15/packages/esp32/tools/mkspiffs/0.2.3/mkspiffs`.
+  * If you're on Windows, the IPS software also comes with `mkspiffs.exe` which I assume works the same way, but I haven't confirmed.
+
+This puts 12 files in `unpacked/`:
+* `0.bmp` through `9.bmp` which are 135x240px 24 bit BMPs for the 10 digits
+* `month.bmp` and `date.bmp` another couple BMPs, but I'm not sure where they're ever used.  We won't need these in our firmware, so they can be deleted.
 
 # Documentation
 ## Hardware

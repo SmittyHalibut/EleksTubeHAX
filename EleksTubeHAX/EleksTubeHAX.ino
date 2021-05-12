@@ -13,20 +13,13 @@ Buttons buttons;
 TFTs tfts;
 Clock uclock;
 
-
-void updateClockDisplay(TFTs::show_t show=TFTs::yes) {
-  tfts.setDigit(HOURS_TENS, uclock.getHoursTens(), show);
-  tfts.setDigit(HOURS_ONES, uclock.getHoursOnes(), show);
-  tfts.setDigit(MINUTES_TENS, uclock.getMinutesTens(), show);
-  tfts.setDigit(MINUTES_ONES, uclock.getMinutesOnes(), show);
-  tfts.setDigit(SECONDS_TENS, uclock.getSecondsTens(), show);
-  tfts.setDigit(SECONDS_ONES, uclock.getSecondsOnes(), show);
-}
+// Helper function, defined below.
+void updateClockDisplay(TFTs::show_t show=TFTs::yes);
 
 
 void setup() {
   Serial.begin(115200);
-  delay(500);
+  delay(1000);  // Waiting for serial monitor to catch up.
   Serial.println("");
   Serial.println("In setup().");  
 
@@ -55,12 +48,13 @@ void setup() {
   uclock.begin();
 
   // Leave boot up messages on screen for a few seconds.
-  for (uint8_t ndx=0; ndx < 5; ndx++) {
+  for (uint8_t ndx=0; ndx < 2; ndx++) {
     tfts.print(".");
     delay(1000);
   }
 
   // Setup initial clock display.
+  tfts.fillScreen(TFT_BLACK);
   updateClockDisplay(TFTs::force);
   
   Serial.println("Done with setup().");
@@ -116,4 +110,13 @@ void loop() {
   }
   */
   delay(20);
+}
+
+void updateClockDisplay(TFTs::show_t show) {
+  tfts.setDigit(HOURS_TENS, uclock.getHoursTens(), show);
+  tfts.setDigit(HOURS_ONES, uclock.getHoursOnes(), show);
+  tfts.setDigit(MINUTES_TENS, uclock.getMinutesTens(), show);
+  tfts.setDigit(MINUTES_ONES, uclock.getMinutesOnes(), show);
+  tfts.setDigit(SECONDS_TENS, uclock.getSecondsTens(), show);
+  tfts.setDigit(SECONDS_ONES, uclock.getSecondsOnes(), show);
 }
