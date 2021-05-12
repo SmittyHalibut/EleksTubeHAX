@@ -13,6 +13,15 @@ void TFTs::begin() {
   init();
 }
 
+void TFTs::setDigit(uint8_t digit, uint8_t value, show_t show) {
+  uint8_t old_value = digits[digit];
+  digits[digit] = value;
+  
+  if (show != no && (old_value != value || show == force)) {
+    showDigit(digit);
+  }
+}
+
 /* 
  * Where the rubber meets the road.  Displays the bitmap for the value to the given digit. 
  */

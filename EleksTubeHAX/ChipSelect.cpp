@@ -16,11 +16,10 @@ void ChipSelect::update() {
   // Q7 is the first bit written, Q0 is the last.  So we push two dummy bits, then start with
   // Seconds Ones and end with Hours Tens.
   // CS is Active Low, but digits_map is 1 for enable, 0 for disable.  So we bit-wise NOT first.
-  uint8_t to_shift = (~digits_map) << 2;
-  Serial.print("Shifting: ");
-  Serial.println(to_shift, BIN);
-  digitalWrite(CSSR_LATCH_PIN, LOW);
 
+  uint8_t to_shift = (~digits_map) << 2;
+
+  digitalWrite(CSSR_LATCH_PIN, LOW);
   shiftOut(CSSR_DATA_PIN, CSSR_CLOCK_PIN, LSBFIRST, to_shift);
   digitalWrite(CSSR_LATCH_PIN, HIGH);
 }
