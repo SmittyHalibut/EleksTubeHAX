@@ -46,18 +46,28 @@ void setup() {
 
   // Setup the clock.  It needs WiFi to be established already.
   uclock.begin();
+  tfts.print("\nSet 12h clock ");
+  tfts.println(twelvehour);
+  uclock.setTwelveHour(twelvehour);
+  tfts.print("\nSet UTC offset ");
+  tfts.println(UTCoffset);
+  uclock.setTimeZoneOffset(UTCoffset);
+
+  tfts.println("\nDone with setup().");
 
   // Leave boot up messages on screen for a few seconds.
-  for (uint8_t ndx=0; ndx < 2; ndx++) {
+  for (uint8_t ndx=0; ndx < 5; ndx++) {
     tfts.print(".");
     delay(1000);
   }
+ 
 
   // Setup initial clock display.
   tfts.fillScreen(TFT_BLACK);
   updateClockDisplay(TFTs::force);
   
-  Serial.println("Done with setup().");
+
+
 }
 
 void loop() {
