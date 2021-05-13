@@ -1,8 +1,12 @@
-#include "Button.h"
-
+#ifndef BUTTONS_H
+#define BUTTONS_H
 /*
  * A simple helper class to call common functions on all buttons at once.
  */
+
+#include "Button.h"
+#include "Hardware.h"
+
 class Buttons {
 public:
   Buttons() : left(BUTTON_LEFT_PIN), mode(BUTTON_MODE_PIN), right(BUTTON_RIGHT_PIN), power(BUTTON_POWER_PIN) {}
@@ -18,3 +22,5 @@ public:
   Button left, mode, right, power;
 private: 
 };
+
+#endif // BUTTONS_H

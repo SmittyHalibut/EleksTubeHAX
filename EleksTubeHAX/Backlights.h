@@ -40,6 +40,7 @@ public:
   void setBreathRate(uint8_t per_min)         { breath_per_min = per_min; }
   // Used by all constant color patterns.
   void setPatternColor(uint32_t color)        { pattern_color = color; }
+  uint32_t getPatternColor()                  { return pattern_color; }
   
 private:
   patterns pattern;

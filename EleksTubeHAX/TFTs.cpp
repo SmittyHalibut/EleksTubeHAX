@@ -30,31 +30,13 @@ void TFTs::setDigit(uint8_t digit, uint8_t value, show_t show) {
 /* 
  * Where the rubber meets the road.  Displays the bitmap for the value to the given digit. 
  */
-void TFTs::showDigit(uint8_t digit, bool debug) {
+void TFTs::showDigit(uint8_t digit) {
   chip_select.setDigit(digit);
 
   // Filenames are no bigger than "255.bmp\0"
   char file_name[10];
   sprintf(file_name, "/%d.bmp", digits[digit]);
   drawBmp(file_name, 0, 0);
-  
-  /*
-  // Dummy code, to just write text to the given display, for testing.
-  fillScreen(TFT_BLUE);
-  setCursor(40, 80, 8);
-  setTextColor(TFT_WHITE, TFT_BLUE);
-  //print("Digit: ");
-  //println(digit);
-  //print("Value: ");
-  println(digits[digit]);
-  */
-
-  // Debugging code, just overlays the BMP
-  if (debug) {
-    setCursor(0, 0, 2);
-    setTextColor(TFT_WHITE, TFT_BLACK);
-    println(file_name);
-  }
 }
 
 

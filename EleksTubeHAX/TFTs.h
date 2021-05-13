@@ -19,11 +19,12 @@ public:
   enum show_t { no, yes, force };
   void begin();
   void showAllDigits()  { for (uint8_t digit=0; digit < NUM_DIGITS; digit++) showDigit(digit); }
-  void showDigit(uint8_t digit, bool debug=false);
+  void showDigit(uint8_t digit);
 
   // Controls the power to all displays
   void enableAllDisplays()    { digitalWrite(TFT_ENABLE_PIN, HIGH); enabled = true; }
   void disableAllDisplays()   { digitalWrite(TFT_ENABLE_PIN, LOW); enabled = false; }
+  void toggleAllDisplays()    { if (enabled) disableAllDisplays(); else enableAllDisplays(); }
   bool isEnabled()            { return enabled; }
 
   void setDigit(uint8_t digit, uint8_t value, show_t show=yes);

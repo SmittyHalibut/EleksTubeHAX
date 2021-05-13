@@ -13,7 +13,8 @@
 
 class Clock {
 public:
-  Clock() : loop_time(0), local_time(0), time_valid(false), twelve_hour(true), time_zone_offset(-7*3600) {}
+  // twelve_hour and time_zone_offset are overwritten immediately in begin() from values in wifi_creds.h
+  Clock() : loop_time(0), local_time(0), time_valid(false), twelve_hour(true), time_zone_offset(0) {}
   
   // The global WiFi from WiFi.h must already be .begin()'d before calling Clock::begin()
   void begin(); 
@@ -24,12 +25,14 @@ public:
   static time_t syncProvider();
 
   // Set preferred hour format. true = 12hr, false = 24hr
-  void setTwelveHour(bool th)           { twelve_hour = th; }
+  void setTwelveHour(bool twelve_hour_) { twelve_hour = twelve_hour_; }
   bool getTwelveHour()                  { return twelve_hour; }
+  void toggleTwelveHour()               { twelve_hour = !twelve_hour; }
 
   // Internal time is kept in UTC. This affects the displayed time.
   void setTimeZoneOffset(time_t offset) { time_zone_offset = offset; }
   time_t getTimeZoneOffset()            { return time_zone_offset; }
+  void adjustTimeZoneOffset(time_t adj) { time_zone_offset += adj; }
 
   // Proxy C functions from TimeLib.h
   // I really wish it were a class we could just subclass, but here we are.

@@ -34,7 +34,7 @@ time_t Clock::syncProvider() {
     Serial.println(" Done.");
 
     // Sync the RTC to NTP if needed.
-    if (ntp_now - rtc_now != 0) {
+    if (ntp_now != rtc_now) {
       RTC.set(ntp_now);
       Serial.println("NTP, RTC, Diff: ");
       Serial.println(ntp_now);

@@ -6,8 +6,9 @@
  * for changes between calls to .loop().  If a button changes states multiple times 
  * between calls to .loop(), only the state when .loop() is called is registered.
  */
-#include "Hardware.h"
 
+// For HIGH and LOW
+#include <Arduino.h>
 
 class Button {
 public:
