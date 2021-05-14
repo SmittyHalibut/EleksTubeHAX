@@ -4,5 +4,3 @@
 // patching files when you update from git.
 const char *ssid = "foo";
 const char *password = "bar";
-boolean    twelvehour = false;
-int        UTCoffset = 7200;

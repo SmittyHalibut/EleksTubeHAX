@@ -1,6 +1,17 @@
 #include "Clock.h"
 
-void Clock::begin() {
+void Clock::begin(StoredConfig::Config::Clock *config_) {
+  config = config_;
+
+  if (config->is_valid != StoredConfig::valid) {
+    // Config is invalid, probably a new device never had its config written.
+    // Load some reasonable defaults.
+    Serial.println("Loaded Clock config is invalid, using default.  This is normal on first boot.");
+    setTwelveHour(true);
+    setTimeZoneOffset(0);
+    config->is_valid = StoredConfig::valid;
+  }
+  
   ntpTimeClient.begin();
   ntpTimeClient.update();
   Serial.println(ntpTimeClient.getFormattedTime());
@@ -13,7 +24,7 @@ void Clock::loop() {
   }
   else {
     loop_time = now();
-    local_time = loop_time + time_zone_offset;
+    local_time = loop_time + config->time_zone_offset;
     time_valid = true;
   }
 }

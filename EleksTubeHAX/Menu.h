@@ -20,6 +20,7 @@ public:
     idle=0,              // idle == out of menu
     backlight_pattern,   // Change the backlight patterns
     pattern_color,       // Change the backlight pattern color. TODO pattern speeds?
+    backlight_intensity, // Change how bright the backlight LEDs are.
     twelve_hour,         // Select 12 hour or 24 hour format
     utc_offset_hour,     // Change the UTC offset by an hour
     utc_offset_15m,      // Change the UTC offset by 15 minutes

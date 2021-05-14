@@ -1,7 +1,25 @@
 #include "Backlights.h"
 
+void Backlights::begin(StoredConfig::Config::Backlights *config_)  {
+  config=config_;
+
+  if (config->is_valid != StoredConfig::valid) {
+    // Config is invalid, probably a new device never had its config written.
+    // Load some reasonable defaults.
+    Serial.println("Loaded Backlights config is invalid, using default.  This is normal on first boot.");
+    setPattern(dark);
+    setColorPhase(0);
+    setIntensity(max_intensity-1);
+    setPulseRate(72);
+    setBreathRate(10);
+    config->is_valid = StoredConfig::valid;
+  }
+}
+
+
+// These feel like they should be generalizable into a helper function.
 void Backlights::setNextPattern(int8_t i) {
-  int8_t next_pattern = (pattern + i) % num_patterns;
+  int8_t next_pattern = (config->pattern + i) % num_patterns;
   // https://stackoverflow.com/questions/11720656/modulo-operation-with-negative-numbers
   while (next_pattern < 0) {
     next_pattern += num_patterns;
@@ -9,30 +27,53 @@ void Backlights::setNextPattern(int8_t i) {
   setPattern(patterns(next_pattern));
 }
 
+void Backlights::adjustColorPhase(int16_t adj) {
+  int16_t new_phase = (int16_t(config->color_phase%max_phase) + adj) % max_phase;
+  while (new_phase < 0) {
+    new_phase += max_phase;
+  }
+  setColorPhase(new_phase); 
+}
+
+void Backlights::adjustIntensity(int16_t adj) {
+  int16_t new_intensity = (int16_t(config->intensity) + adj) % max_intensity;
+  while (new_intensity < 0) {
+    new_intensity += max_intensity;
+  }
+  setIntensity(new_intensity);
+}
+
+void Backlights::setIntensity(uint8_t intensity) {
+  config->intensity = intensity;
+  setBrightness(0xFF >> max_intensity - config->intensity - 1);
+  pattern_needs_init = true;
+}
+
 void Backlights::loop() {
   //   enum patterns { dark, test, constant, rainbow, pulse, breath, num_patterns };
-  if (pattern == dark) {
+  if (config->pattern == dark) {
     if (pattern_needs_init) {
       clear();
       show();
     }
   }
-  else if (pattern == test) {
+  else if (config->pattern == test) {
     testPattern();
   }
-  else if (pattern == constant) {
+  else if (config->pattern == constant) {
     if (pattern_needs_init) {
-      fill(pattern_color);
+      setBrightness(0xFF >> max_intensity - config->intensity - 1);
+      fill(phaseToColor(config->color_phase));
       show();
     }
   }
-  else if (pattern == rainbow) {
+  else if (config->pattern == rainbow) {
     rainbowPattern();
   }
-  else if (pattern == pulse) {
+  else if (config->pattern == pulse) {
     pulsePattern();
   }
-  else if (pattern == breath) {
+  else if (config->pattern == breath) {
     breathPattern();
   }
 
@@ -57,7 +98,7 @@ void Backlights::testPattern() {
 
 }
 
-uint8_t Backlights::phaseToColor(uint16_t phase) {
+uint8_t Backlights::phaseToIntensity(uint16_t phase) {
   uint16_t color = 0;
   if (phase <= 255) {
     // Ramping up
@@ -77,24 +118,29 @@ uint8_t Backlights::phaseToColor(uint16_t phase) {
   return uint8_t(color % 256);
 }
 
+uint32_t Backlights::phaseToColor(uint16_t phase) {
+  uint8_t red = phaseToIntensity(phase);
+  uint8_t green = phaseToIntensity((phase + 256)%max_phase);
+  uint8_t blue = phaseToIntensity((phase + 512)%max_phase);
+  return(uint32_t(red) << 16 | uint32_t(green) << 8 | uint32_t(blue));
+}
+
 void Backlights::rainbowPattern() {
-  const uint16_t max_phase = 768;   // 256 up, 256 down, 256 off
+  // Divide by 3 to spread it out some, so the whole rainbow isn't displayed at once.
   // TODO Make this /3 a parameter
   const uint16_t phase_per_digit = (max_phase/NUM_DIGITS)/3;
 
+  // Divide by 10 to slow down the rainbow rotation rate.
   // TODO Make this /10 a parameter
   uint16_t phase = millis()/10 % max_phase;  
   
   for (uint8_t digit=0; digit < NUM_DIGITS; digit++) {
     // Shift the phase for this LED.
     uint16_t my_phase = (phase + digit*phase_per_digit) % max_phase;
-    uint8_t red = phaseToColor(my_phase);
-    uint8_t green = phaseToColor((my_phase + 256)%max_phase);
-    uint8_t blue = phaseToColor((my_phase + 512)%max_phase);
-    setPixelColor(digit, red, green, blue);
+    setPixelColor(digit, phaseToColor(my_phase));
   }
   show();
 }
 
 const String Backlights::patterns_str[Backlights::num_patterns] = 
-  { "dark", "test", "constant", "rainbow", "pulse", "breath" };
+  { "Dark", "Test", "Constant", "Rainbow", "Pulse", "Breath" };

@@ -4,6 +4,7 @@
 #include "TFTs.h"
 #include "Clock.h"
 #include "Menu.h"
+#include "StoredConfig.h"
 
 // put two lines in here defining `const char *ssid` and `const char *password`.
 // The file wifi_creds.h is in .gitignore so we don't risk accidentally sharing our creds with the world.
@@ -14,6 +15,7 @@ Buttons buttons;
 TFTs tfts;
 Clock uclock;
 Menu menu;
+StoredConfig stored_config;
 
 // Helper function, defined below.
 void updateClockDisplay(TFTs::show_t show=TFTs::yes);
@@ -25,7 +27,10 @@ void setup() {
   Serial.println("");
   Serial.println("In setup().");  
 
-  backlights.begin();
+  stored_config.begin();
+  stored_config.load();
+
+  backlights.begin(&stored_config.config.backlights);
   buttons.begin();
   menu.begin();
 
@@ -41,6 +46,9 @@ void setup() {
   tfts.print("Joining wifi.");
   
   // ssid and password are defined in `wifi_creds.h`
+  // TODO Once we've added a way to SET the SSID and Password from the menu, use
+  // stored_config.config.wifi to store and recall them.
+  // For now, we're still pulling them from wifi_creds.h
   WiFi.begin(ssid, password);
   while (WiFi.status() != WL_CONNECTED) {
     delay(500);
@@ -49,14 +57,8 @@ void setup() {
   tfts.println("\nDone.");
 
   // Setup the clock.  It needs WiFi to be established already.
-  uclock.begin();
-  tfts.print("\nSet 12h clock ");
-  tfts.println(twelvehour);
-  uclock.setTwelveHour(twelvehour);
-  tfts.print("Set UTC offset ");
-  tfts.println(UTCoffset);
-  uclock.setTimeZoneOffset(UTCoffset);
-
+  uclock.begin(&stored_config.config.uclock);
+  
   // Leave boot up messages on screen for a few seconds.
   for (uint8_t ndx=0; ndx < 2; ndx++) {
     tfts.print(".");
@@ -65,8 +67,9 @@ void setup() {
   tfts.println("\nDone with setup().");
 
   // Start up the clock displays.
-  //tfts.fillScreen(TFT_BLACK);
-  //updateClockDisplay(TFTs::force);
+  tfts.fillScreen(TFT_BLACK);
+  uclock.loop();
+  updateClockDisplay(TFTs::force);
 }
 
 void loop() {
@@ -91,30 +94,43 @@ void loop() {
     Menu::states menu_state = menu.getState();
     int8_t menu_change = menu.getChange();
 
-    Serial.print(menu_state);
-    Serial.print(" ");
-    Serial.println(menu_change);
-    
     if (menu_state == Menu::idle) {
-      // We just changed into idle, so redraw the hours tens digit
-      tfts.showDigit(HOURS_TENS);
+      // We just changed into idle, so force redraw everything, and save the config.
+      updateClockDisplay(TFTs::force);
+      Serial.print("Saving config.");
+      stored_config.save();
+      Serial.println(" Done.");
     }
     else {
-      // backlight_pattern, pattern_color, twelve_hour, utc_offset_hour, utc_offset_15m
+      // Backlight Pattern
       if (menu_state == Menu::backlight_pattern) {
-        backlights.setNextPattern(menu_change);
+        if (menu_change != 0) {
+          backlights.setNextPattern(menu_change);
+        }
 
         setupMenu();
         tfts.println("Pattern:");
         tfts.println(backlights.getPatternStr());
       }
+      // Backlight Color
       else if (menu_state == Menu::pattern_color) {
-        // TODO Adjust the color through the color wheel.  Reuse this code for the Rainbow pattern?
-
+        if (menu_change != 0) {
+          backlights.adjustColorPhase(menu_change*16);
+        }
         setupMenu();
         tfts.println("Color:");
-        tfts.println(backlights.getPatternColor(), HEX); 
+        tfts.printf("%06X\n", backlights.getColor()); 
       }
+      // Backlight Intensity
+      else if (menu_state == Menu::backlight_intensity) {
+        if (menu_change != 0) {
+          backlights.adjustIntensity(menu_change);
+        }
+        setupMenu();
+        tfts.println("Intensity:");
+        tfts.println(backlights.getIntensity());
+      }
+      // 12 Hour or 24 Hour mode?
       else if (menu_state == Menu::twelve_hour) {
         if (menu_change != 0) {
           uclock.toggleTwelveHour();
@@ -126,6 +142,7 @@ void loop() {
         tfts.println("12 Hour?");
         tfts.println(uclock.getTwelveHour() ? "12 hour" : "24 hour"); 
       }
+      // UTC Offset, hours
       else if (menu_state == Menu::utc_offset_hour) {
         if (menu_change != 0) {
           uclock.adjustTimeZoneOffset(menu_change * 3600);
@@ -141,6 +158,7 @@ void loop() {
         int8_t offset_min = (offset%3600)/60;
         tfts.printf("%d:%02d\n", offset_hour, offset_min);
       }
+      // UTC Offset, 15 minutes
       else if (menu_state == Menu::utc_offset_15m) {
         if (menu_change != 0) {
           uclock.adjustTimeZoneOffset(menu_change * 900);
@@ -158,6 +176,7 @@ void loop() {
         int8_t offset_min = (offset%3600)/60;
         tfts.printf("%d:%02d\n", offset_hour, offset_min);
       }
+      // Exit the menu?
       else if (menu_state == Menu::exit_menu) {
         setupMenu();
         tfts.println("Exit Menu?");
@@ -184,7 +203,7 @@ void setupMenu() {
   tfts.chip_select.setHoursTens();
   tfts.setTextColor(TFT_WHITE, TFT_BLACK);
   tfts.fillRect(0, 120, 135, 120, TFT_BLACK);
-  tfts.setCursor(0, 120, 4);
+  tfts.setCursor(0, 124, 4);
 }
 
 void updateClockDisplay(TFTs::show_t show) {

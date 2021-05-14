@@ -11,13 +11,14 @@
 // For the DS3231 RTC
 #include <DS1307RTC.h>
 
+#include "StoredConfig.h"
+
 class Clock {
 public:
-  // twelve_hour and time_zone_offset are overwritten immediately in begin() from values in wifi_creds.h
-  Clock() : loop_time(0), local_time(0), time_valid(false), twelve_hour(true), time_zone_offset(0) {}
+  Clock() : loop_time(0), local_time(0), time_valid(false), config(NULL) {}
   
   // The global WiFi from WiFi.h must already be .begin()'d before calling Clock::begin()
-  void begin(); 
+  void begin(StoredConfig::Config::Clock *config_); 
   void loop();
 
   // Calls NTPClient::getEpochTime() or RTC::get() as appropriate
@@ -25,21 +26,21 @@ public:
   static time_t syncProvider();
 
   // Set preferred hour format. true = 12hr, false = 24hr
-  void setTwelveHour(bool twelve_hour_) { twelve_hour = twelve_hour_; }
-  bool getTwelveHour()                  { return twelve_hour; }
-  void toggleTwelveHour()               { twelve_hour = !twelve_hour; }
+  void setTwelveHour(bool twelve_hour_) { config->twelve_hour = twelve_hour_; }
+  bool getTwelveHour()                  { return config->twelve_hour; }
+  void toggleTwelveHour()               { config->twelve_hour = !config->twelve_hour; }
 
   // Internal time is kept in UTC. This affects the displayed time.
-  void setTimeZoneOffset(time_t offset) { time_zone_offset = offset; }
-  time_t getTimeZoneOffset()            { return time_zone_offset; }
-  void adjustTimeZoneOffset(time_t adj) { time_zone_offset += adj; }
+  void setTimeZoneOffset(time_t offset) { config->time_zone_offset = offset; }
+  time_t getTimeZoneOffset()            { return config->time_zone_offset; }
+  void adjustTimeZoneOffset(time_t adj) { config->time_zone_offset += adj; }
 
   // Proxy C functions from TimeLib.h
   // I really wish it were a class we could just subclass, but here we are.
   uint16_t getYear()       { return year(local_time); }
   uint8_t getMonth()       { return month(local_time); }
   uint8_t getDay()         { return day(local_time); }
-  uint8_t getHour()        { return twelve_hour ? hourFormat12(local_time) : hour(local_time); }
+  uint8_t getHour()        { return config->twelve_hour ? hourFormat12(local_time) : hour(local_time); }
   uint8_t getHour12()      { return hourFormat12(local_time); }
   uint8_t getHour24()      { return hour(local_time); }
   uint8_t getMinute()      { return minute(local_time); }
@@ -62,8 +63,7 @@ public:
 private:
   time_t loop_time, local_time;
   bool time_valid;
-  bool twelve_hour;
-  time_t time_zone_offset;  // In seconds.  This is just added to the UTC time when returning values.
+  StoredConfig::Config::Clock *config;
 
   // Static variables needed for syncProvider()
   static WiFiUDP ntpUDP;

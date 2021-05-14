@@ -13,44 +13,48 @@
  */
 #include <stdint.h>
 #include "Hardware.h"
+#include "StoredConfig.h"
 #include <Adafruit_NeoPixel.h>
 
 class Backlights: public Adafruit_NeoPixel {
 public:
-  Backlights() : Adafruit_NeoPixel(NUM_DIGITS, BACKLIGHTS_PIN, NEO_GRB + NEO_KHZ800), 
-    pattern(dark), pattern_needs_init(true),
-    // Sane default for the patterns. These can be over-written with setters.
-    test_ms_delay(200), pattern_color(0x913500), pulse_bpm(72), breath_per_min(10)
-    {};
+  Backlights() : config(NULL), pattern_needs_init(true),
+    Adafruit_NeoPixel(NUM_DIGITS, BACKLIGHTS_PIN, NEO_GRB + NEO_KHZ800)
+    {}
 
   enum patterns { dark, test, constant, rainbow, pulse, breath, num_patterns };
   const static String patterns_str[num_patterns];
 
-  void setPattern(patterns p) { pattern = p; pattern_needs_init = true; }
-  patterns getPattern()       { return pattern; }
-  String getPatternStr()      { return patterns_str[pattern]; }
-  void setNextPattern(int8_t i=1);
-  void setPrevPattern()       { setNextPattern(-1); }
-
+  void begin(StoredConfig::Config::Backlights *config_);
   void loop();
 
+  void setPattern(patterns p)      { config->pattern = uint8_t(p); pattern_needs_init = true; }
+  patterns getPattern()            { return patterns(config->pattern); }
+  String getPatternStr()           { return patterns_str[config->pattern]; }
+  void setNextPattern(int8_t i=1);
+  void setPrevPattern()            { setNextPattern(-1); }
+
+
   // Configure the patterns
-  void setTestPatternDelay(uint32_t ms_delay) { test_ms_delay = ms_delay; }
-  void setPulseRate(uint8_t bpm)              { pulse_bpm = bpm; }
-  void setBreathRate(uint8_t per_min)         { breath_per_min = per_min; }
+  void setPulseRate(uint8_t bpm)              { config->pulse_bpm = bpm; }
+  void setBreathRate(uint8_t per_min)         { config->breath_per_min = per_min; }
+  
   // Used by all constant color patterns.
-  void setPatternColor(uint32_t color)        { pattern_color = color; }
-  uint32_t getPatternColor()                  { return pattern_color; }
+  void setColorPhase(uint16_t phase)          { config->color_phase = phase % max_phase; pattern_needs_init = true; }
+  void adjustColorPhase(int16_t adj);
+  uint16_t getColorPhase()                    { return config->color_phase; }
+  uint32_t getColor()                         { return phaseToColor(config->color_phase); }
+  
+  void setIntensity(uint8_t intensity);
+  void adjustIntensity(int16_t adj);
+  uint8_t getIntensity()                      { return config->intensity; }
+  
   
 private:
-  patterns pattern;
   bool pattern_needs_init;
 
-  // Pattern configs
-  uint32_t pattern_color;
-  uint32_t test_ms_delay;
-  uint8_t pulse_bpm;
-  uint8_t breath_per_min;
+  // Pattern configs, get backed up.
+  StoredConfig::Config::Backlights *config;
 
   // Pattern methods
   void testPattern();
@@ -59,7 +63,13 @@ private:
   void breathPattern();
 
   // Helper methods
-  uint8_t phaseToColor(uint16_t phase);
+  uint8_t phaseToIntensity(uint16_t phase);
+  uint32_t phaseToColor(uint16_t phase);
+
+  const uint16_t max_phase = 768;   // 256 up, 256 down, 256 off
+  const uint8_t max_intensity = 8;  // 0 to 7
+  const uint32_t test_ms_delay = 250; 
+
 };
 
 #endif // BACKLIGHTS_H
