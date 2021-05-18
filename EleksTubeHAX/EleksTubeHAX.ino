@@ -90,7 +90,7 @@ void loop() {
 
 
   // Menu
-  if (menu.stateChanged()) {
+  if (menu.stateChanged() && tfts.isEnabled()) {
     Menu::states menu_state = menu.getState();
     int8_t menu_change = menu.getChange();
 
