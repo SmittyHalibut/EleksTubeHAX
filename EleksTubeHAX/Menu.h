@@ -22,6 +22,7 @@ public:
     pattern_color,       // Change the backlight pattern color. TODO pattern speeds?
     backlight_intensity, // Change how bright the backlight LEDs are.
     twelve_hour,         // Select 12 hour or 24 hour format
+    blank_hours_zero,    // Whether to blank the leading zero in the hours column.
     utc_offset_hour,     // Change the UTC offset by an hour
     utc_offset_15m,      // Change the UTC offset by 15 minutes
   

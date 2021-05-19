@@ -12,6 +12,8 @@
 #include <DS1307RTC.h>
 
 #include "StoredConfig.h"
+// For TFTs::blanked
+#include "TFTs.h"
 
 class Clock {
 public:
@@ -26,9 +28,13 @@ public:
   static time_t syncProvider();
 
   // Set preferred hour format. true = 12hr, false = 24hr
-  void setTwelveHour(bool twelve_hour_) { config->twelve_hour = twelve_hour_; }
+  void setTwelveHour(bool th)           { config->twelve_hour = th; }
   bool getTwelveHour()                  { return config->twelve_hour; }
   void toggleTwelveHour()               { config->twelve_hour = !config->twelve_hour; }
+  // Blanked: 1:23   Not blanked: 01:23
+  void setBlankHoursZero(bool bhz)      { config->blank_hours_zero = bhz; }
+  bool getBlankHoursZero()              { return config->blank_hours_zero; }
+  void toggleBlankHoursZero()           { config->blank_hours_zero = !config->blank_hours_zero; }
 
   // Internal time is kept in UTC. This affects the displayed time.
   void setTimeZoneOffset(time_t offset) { config->time_zone_offset = offset; }
@@ -49,7 +55,7 @@ public:
   bool isPm()              { return isPM(local_time); }
 
   // Helper functions for making a clock.
-  uint8_t getHoursTens()    { return getHour()/10; }
+  uint8_t getHoursTens();
   uint8_t getHoursOnes()    { return getHour()%10; }
   uint8_t getHours12Tens()  { return getHour12()/10; }
   uint8_t getHours12Ones()  { return getHour12()%10; }

@@ -142,6 +142,17 @@ void loop() {
         tfts.println("12 Hour?");
         tfts.println(uclock.getTwelveHour() ? "12 hour" : "24 hour"); 
       }
+      // Blank leading zeros on the hours?
+      else if (menu_state == Menu::blank_hours_zero) {
+        if (menu_change != 0) {
+          uclock.toggleBlankHoursZero();
+          tfts.setDigit(HOURS_TENS, uclock.getHoursTens(), TFTs::force);
+        }
+        
+        setupMenu();
+        tfts.println("Blank zero?");
+        tfts.println(uclock.getBlankHoursZero() ? "yes" : "no");
+      }
       // UTC Offset, hours
       else if (menu_state == Menu::utc_offset_hour) {
         if (menu_change != 0) {

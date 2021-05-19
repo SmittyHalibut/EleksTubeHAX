@@ -8,6 +8,7 @@ void Clock::begin(StoredConfig::Config::Clock *config_) {
     // Load some reasonable defaults.
     Serial.println("Loaded Clock config is invalid, using default.  This is normal on first boot.");
     setTwelveHour(true);
+    setBlankHoursZero(true);
     setTimeZoneOffset(0);
     config->is_valid = StoredConfig::valid;
   }
@@ -57,6 +58,17 @@ time_t Clock::syncProvider() {
   }
   Serial.println("Using RTC time.");
   return rtc_now;
+}
+
+uint8_t Clock::getHoursTens() {
+  uint8_t hour_tens = getHour()/10;
+  
+  if (config->blank_hours_zero && hour_tens == 0) {
+    return TFTs::blanked;
+  }
+  else {
+    return hour_tens;
+  }
 }
 
 uint32_t Clock::millis_last_ntp = 0;

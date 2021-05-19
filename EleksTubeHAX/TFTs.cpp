@@ -33,10 +33,15 @@ void TFTs::setDigit(uint8_t digit, uint8_t value, show_t show) {
 void TFTs::showDigit(uint8_t digit) {
   chip_select.setDigit(digit);
 
-  // Filenames are no bigger than "255.bmp\0"
-  char file_name[10];
-  sprintf(file_name, "/%d.bmp", digits[digit]);
-  drawBmp(file_name, 0, 0);
+  if (digits[digit] == blanked) {
+    fillScreen(TFT_BLACK);
+  }
+  else {
+    // Filenames are no bigger than "255.bmp\0"
+    char file_name[10];
+    sprintf(file_name, "/%d.bmp", digits[digit]);
+    drawBmp(file_name, 0, 0);
+  }
 }
 
 

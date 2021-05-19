@@ -2,6 +2,17 @@
 #define STORED_CONFIG_H
 
 #include <Preferences.h>
+/*
+ * TODO: This was originally written for the EEPROM library where all this logic was needed.
+ * But Preferences.h does a lot of this itself.  It might make sense to just use Preferences
+ * directly, using "Backlights", "Clock", and "Wifi" as the name space in begin(), and 
+ * "pattern", "color_phase", etc as they key in that name space. 
+ * 
+ * The advantage to the way we're doing it now is the name space and keys are checked syntatically
+ * at compile time: there's no way to accidentally typo the wrong value, the compiler would catch it.
+ * Where-as if we change all that to arbitrary strings, we'd lose that.  So for now, I'm keeping it
+ * the way it is. -- @SmittyHalibut
+ */
 
 class StoredConfig {
 public:
@@ -10,8 +21,6 @@ public:
   void load()     { prefs.getBytes(prefs_namespace, &config, config_size); loaded = true; }
   void save()     { prefs.putBytes(prefs_namespace, &config, config_size); }
   bool isLoaded() { return loaded; }
-  bool isValid()  { return config.backlights.pattern < 255 && config.backlights.intensity < 8; } // Simple test for valid data
-  // An un-written to Flash will return all 0xFF.  So if we haven't been written to, we should start up with defaults.
 
   const static uint8_t str_buffer_size = 32;
 
@@ -28,6 +37,7 @@ public:
     struct Clock {
       bool     twelve_hour;
       time_t   time_zone_offset;
+      bool     blank_hours_zero;
       uint8_t  is_valid;       // Write StoredConfig::valid here when valid data is loaded.
     } uclock;
   
