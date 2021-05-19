@@ -47,6 +47,8 @@ private:
   uint16_t read16(fs::File &f);
   uint32_t read32(fs::File &f);
 
+  static uint16_t output_buffer[TFT_HEIGHT][TFT_WIDTH];
+
 };
 
 #endif // TFTS_H
