@@ -85,6 +85,25 @@ If you want to change these:
 
 Then do the "Tools -> ESP32 Sketch Data Upload" dance again.
 
+## Setup the Arduino IDE (CLI)
+
+Install the [arduino-cli](https://arduino.github.io/arduino-cli/latest/installation/).
+
+`$ make setup`
+
+You'll still need to [configure the `TFT_eSPI` library](#configure-the-tft_espi-library).
+
+### Compile and Upload
+
+```
+export SERIAL_DEV=/dev/ttyUSB0
+$ make compile
+$ make upload_bin upload_spiffs
+```
+
+or simply
+
+`$ make SERIAL_DEV=/dev/ttyUSB0``
 
 # Development Process:
 ## Original Firmware

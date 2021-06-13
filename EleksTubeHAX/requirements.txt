@@ -1,0 +1,5 @@
+NTPClient@3.2.0
+Adafruit Neopixel@1.8.0
+DS1307RTC@1.4.1
+TFT_eSPI@2.3.61
+Time@1.6.0
