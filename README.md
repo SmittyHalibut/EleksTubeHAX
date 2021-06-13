@@ -51,7 +51,7 @@ Sketch -> Include Library -> Library Manager
 The full documentation for this is in the `TFT_eSPI` library, but tl,dr:
 * Edit `Arduino/libraries/TFT_eSPI/User_Setup_Select.h`
 * Comment out all `#include` lines.  (The only one that comes from install is `#include <User_Setup.h>`.)
-* Add a `#include` line pointing to `User-Setup.h` in this code.
+* Add a `#include` line pointing to `User_Setup.h` in this code.
   * eg: `#include </home/foo/src/EleksTubeHAX/EleksTubeHAX/User_Setup.h>`
   * Obviously, update the path to point to where ever you keep your code.  Mac and Windows paths will look very different.
 
