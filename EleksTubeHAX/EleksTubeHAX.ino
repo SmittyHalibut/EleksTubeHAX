@@ -83,6 +83,7 @@ void loop() {
   // Power button
   if (buttons.power.isDownEdge()) {
     tfts.toggleAllDisplays();
+    backlights.togglePower();
   }
 
   // Update the clock.

@@ -18,7 +18,7 @@
 
 class Backlights: public Adafruit_NeoPixel {
 public:
-  Backlights() : config(NULL), pattern_needs_init(true),
+  Backlights() : config(NULL), pattern_needs_init(true), off(true),
     Adafruit_NeoPixel(NUM_DIGITS, BACKLIGHTS_PIN, NEO_GRB + NEO_KHZ800)
     {}
 
@@ -27,6 +27,8 @@ public:
 
   void begin(StoredConfig::Config::Backlights *config_);
   void loop();
+
+  void togglePower() { off = !off; pattern_needs_init = true; }
 
   void setPattern(patterns p)      { config->pattern = uint8_t(p); pattern_needs_init = true; }
   patterns getPattern()            { return patterns(config->pattern); }
@@ -52,6 +54,7 @@ public:
   
 private:
   bool pattern_needs_init;
+  bool off;
 
   // Pattern configs, get backed up.
   StoredConfig::Config::Backlights *config;
