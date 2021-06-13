@@ -1,4 +1,5 @@
 #include "Backlights.h"
+#include <math.h>
 
 void Backlights::begin(StoredConfig::Config::Backlights *config_)  {
   config=config_;
@@ -82,9 +83,35 @@ void Backlights::loop() {
   pattern_needs_init = false;
 }
 
-// TODO Implement these
-void Backlights::pulsePattern() {}
-void Backlights::breathPattern() {}
+void Backlights::pulsePattern() {
+  if (pattern_needs_init) {
+    fill(phaseToColor(config->color_phase));
+  }
+
+  float pulse_length_millis = (60.0f * 1000) / config->breath_per_min;
+  float val = 1 + abs(sin(2 * M_PI * millis() / pulse_length_millis)) * 254;
+  setBrightness((uint8_t)val);
+
+  show();
+
+}
+
+void Backlights::breathPattern() {
+  if (pattern_needs_init) {
+    fill(phaseToColor(config->color_phase));
+  }
+
+  // https://sean.voisen.org/blog/2011/10/breathing-led-with-arduino/
+  // Avoid a 0 value as it shuts off the LEDs and we have to re-initialize.
+  float pulse_length_millis = (60.0f * 1000) / config->breath_per_min;
+  float val = (exp(sin(2 * M_PI * millis() / pulse_length_millis)) - 0.36787944f) * 108.0f;
+
+  uint8_t brightness = (uint8_t)val;
+  if (brightness < 1) { brightness = 1; }
+  setBrightness(brightness);
+
+  show();
+}
 
 void Backlights::testPattern() {
   const uint8_t num_colors = 4;  // or 3 if you don't want black
