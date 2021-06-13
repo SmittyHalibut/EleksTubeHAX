@@ -14,6 +14,8 @@ void Backlights::begin(StoredConfig::Config::Backlights *config_)  {
     setBreathRate(10);
     config->is_valid = StoredConfig::valid;
   }
+
+  off = false;
 }
 
 
@@ -51,7 +53,7 @@ void Backlights::setIntensity(uint8_t intensity) {
 
 void Backlights::loop() {
   //   enum patterns { dark, test, constant, rainbow, pulse, breath, num_patterns };
-  if (config->pattern == dark) {
+  if (off || config->pattern == dark) {
     if (pattern_needs_init) {
       clear();
       show();
