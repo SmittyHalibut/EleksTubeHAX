@@ -103,7 +103,7 @@ $ make upload_bin upload_spiffs
 
 or simply
 
-`$ make SERIAL_DEV=/dev/ttyUSB0``
+`$ make SERIAL_DEV=/dev/ttyUSB0`
 
 # Development Process:
 ## Original Firmware
