@@ -49,6 +49,7 @@ void setup() {
   // TODO Once we've added a way to SET the SSID and Password from the menu, use
   // stored_config.config.wifi to store and recall them.
   // For now, we're still pulling them from wifi_creds.h
+  WiFi.mode(WIFI_STA);
   WiFi.begin(ssid, password);
   while (WiFi.status() != WL_CONNECTED) {
     delay(500);
