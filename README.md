@@ -58,7 +58,7 @@ The full documentation for this is in the `TFT_eSPI` library, but tl,dr:
 ### Install SPIFFS uploader
 The code is [here](https://github.com/me-no-dev/arduino-esp32fs-plugin/releases/), and instructions to install it are [here](https://randomnerdtutorials.com/install-esp32-filesystem-uploader-arduino-ide/).
 
-tl,dr: Download and unzip [this file](https://github.com/me-no-dev/arduino-esp32fs-plugin/releases/download/1.0/ESP32FS-1.0.zip) into your `Arduino/tools/` directory.  There might not be a `tools/` subdirectory yet, but if you see `Arduino/libraries/` that's the right place.
+tl,dr: Download and unzip [this file](https://github.com/lorol/arduino-esp32fs-plugin/releases/download/2.0.7/esp32fs.zip) ([old file, reportedly not working](https://github.com/me-no-dev/arduino-esp32fs-plugin/releases/download/1.0/ESP32FS-1.0.zip)) into your `Arduino/tools/` directory.  There might not be a `tools/` subdirectory yet, but if you see `Arduino/libraries/` that's the right place.
 
 ### Restart Arduino
 After installing the ESP32 support, all the libraries, and the SPIFFS uploader, restart Arduino to make sure it knows its all there.
