@@ -5,8 +5,8 @@
  * File description: Global configuration for the complete project
  */
  
-#ifndef global_defines_H_
-#define global_defines_H_
+#ifndef GLOBAL_DEFINES_H_
+#define GLOBAL_DEFINES_H_
 
 #include <stdint.h>
 #include <Arduino.h>
@@ -28,11 +28,14 @@
 
 
 // ************ MQTT config *********************
+
+// #define MQTT_ENABLED  // enable after creating an account, setting up the device on smartnest.cz and pilling in all the data below:
+
 #define MQTT_BROKER "smartnest.cz"             // Broker host
 #define MQTT_PORT 1883                         // Broker port
-#define MQTT_USERNAME " *** username *** "             // Username from Smartnest
-#define MQTT_PASSWORD " *** api key *** "      // Password from Smartnest or API key
-#define MQTT_CLIENT " *** client id *** "                // Device Id from smartnest
+#define MQTT_USERNAME " *** username *** "     // Username from Smartnest
+#define MQTT_PASSWORD " *** api key *** "      // Password from Smartnest or API key (under MY Account)
+#define MQTT_CLIENT " *** client id *** "      // Device Id from smartnest
 
 #define MQTT_REPORT_STATUS_EVERY_SEC  60 // How ofter report status to MQTT Broker
 
@@ -84,4 +87,4 @@
 // Active HIGH.
 #define TFT_ENABLE_PIN (27)
 
-#endif /* global_defines_H_ */
+#endif /* GLOBAL_DEFINES_H_ */

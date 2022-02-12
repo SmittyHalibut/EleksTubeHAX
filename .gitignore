@@ -1,3 +1,1 @@
-wifi_creds.h
-*.swp
-build/
+GLOBAL_DEFINES.h

@@ -1,7 +1,7 @@
 #ifndef CHIP_SELECT_H
 #define CHIP_SELECT_H
 
-#include "global_defines.h"
+#include "GLOBAL_DEFINES.h"
 
 /*
  * `digit`s are as defined in Hardware.h, 0 == seconds ones, 5 == hours tens.

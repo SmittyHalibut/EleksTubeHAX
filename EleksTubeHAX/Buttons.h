@@ -1,7 +1,7 @@
 #ifndef BUTTONS_H
 #define BUTTONS_H
 
-#include "global_defines.h"
+#include "GLOBAL_DEFINES.h"
 
 /*
  * A simple class to keep track of button states.  It's asynchronous, only checking

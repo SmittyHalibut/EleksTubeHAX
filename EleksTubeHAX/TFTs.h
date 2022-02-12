@@ -1,7 +1,7 @@
 #ifndef TFTS_H
 #define TFTS_H
 
-#include "global_defines.h"
+#include "GLOBAL_DEFINES.h"
 
 // Call up the SPIFFS FLASH filing system this is part of the ESP Core
 #define FS_NO_GLOBALS

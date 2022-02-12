@@ -1,7 +1,7 @@
 #ifndef WIFI_WPS_H
 #define WIFI_WPS_H
 
-#include "global_defines.h"
+#include "GLOBAL_DEFINES.h"
 
 #include <Arduino.h>
 #include <WiFi.h> // ESP32

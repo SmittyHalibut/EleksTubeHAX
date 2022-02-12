@@ -1,7 +1,7 @@
 #ifndef BACKLIGHTS_H
 #define BACKLIGHTS_H
 
-#include "global_defines.h"
+#include "GLOBAL_DEFINES.h"
 
 /*
  * A simple sub-class of the Adafruit_NeoPixel class, to configure it for

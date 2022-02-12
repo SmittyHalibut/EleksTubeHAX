@@ -1,7 +1,7 @@
 #ifndef STORED_CONFIG_H
 #define STORED_CONFIG_H
 
-#include "global_defines.h"
+#include "GLOBAL_DEFINES.h"
 
 #include <Preferences.h>
 /*
