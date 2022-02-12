@@ -25,10 +25,11 @@ public:
     blank_hours_zero,    // Whether to blank the leading zero in the hours column.
     utc_offset_hour,     // Change the UTC offset by an hour
     utc_offset_15m,      // Change the UTC offset by 15 minutes
+    selected_graphic,    // Select clock "font" 0...9 -> first char in file name "00.bmp to 90.bmp"
+    start_wps,           // connect to WiFi using wps pushbutton mode
   
     // When there's more things to change in the menu, add them here.
     
-    exit_menu,           // If left or right are pressed here, exit from the menu immeidately.
     num_states
   };
 
@@ -38,7 +39,7 @@ public:
 
 
 private:
-  const uint16_t idle_timeout_ms = 15000;  // Timeout and return to idle after 15 seconds of inactivity.
+  const uint16_t idle_timeout_ms = 10000;  // Timeout and return to idle after 10 seconds of inactivity.
 
   // State variables
   states state;

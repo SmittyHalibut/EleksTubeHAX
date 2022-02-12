@@ -1,4 +1,5 @@
 #include "TFTs.h"
+#include "WiFi_WPS.h"
 
 void TFTs::begin() {
   // Start with all displays selected.
@@ -18,12 +19,32 @@ void TFTs::begin() {
   }
 }
 
+void TFTs::clear() {
+  // Start with all displays selected.
+  chip_select.setAll();
+  enableAllDisplays();
+}
+
+void TFTs::showNoWifiStatus() {
+  chip_select.setSecondsTens();
+  setTextColor(TFT_RED, TFT_BLACK);
+  fillRect(0, TFT_HEIGHT - 27, 135, 27, TFT_BLACK);
+  setCursor(5, TFT_HEIGHT-29, 4);
+  println("NO WIFI !");
+  }
+
+
 void TFTs::setDigit(uint8_t digit, uint8_t value, show_t show) {
   uint8_t old_value = digits[digit];
   digits[digit] = value;
   
   if (show != no && (old_value != value || show == force)) {
     showDigit(digit);
+
+    if (digit == SECONDS_TENS) 
+      if (WifiState != connected) { 
+        showNoWifiStatus();
+      }    
   }
 }
 
@@ -39,7 +60,7 @@ void TFTs::showDigit(uint8_t digit) {
   else {
     // Filenames are no bigger than "255.bmp\0"
     char file_name[10];
-    sprintf(file_name, "/%d.bmp", digits[digit]);
+    sprintf(file_name, "/%d%d.bmp", current_graphic, digits[digit]);
     drawBmp(file_name, 0, 0);
   }
 }
@@ -54,10 +75,10 @@ void TFTs::showDigit(uint8_t digit) {
 // Too big to fit on the stack.
 uint16_t TFTs::output_buffer[TFT_HEIGHT][TFT_WIDTH];
 
-bool TFTs::drawBmp(const char *filename, int16_t x, int16_t y) {
-  // Nothing to do.
-  if ((x >= width()) || (y >= height())) return(true);
+//bool TFTs::drawBmp(const char *filename) {
+  bool TFTs::drawBmp(const char *filename, int16_t xx, int16_t yy) { // ignore x and y; center on the screen
 
+  uint32_t StartTime = millis();
   fs::File bmpFS;
 
   // Open requested file on SD card
@@ -65,18 +86,22 @@ bool TFTs::drawBmp(const char *filename, int16_t x, int16_t y) {
 
   if (!bmpFS)
   {
-    Serial.println("File not found");
+    Serial.print("File not found: ");
+    Serial.println(filename);
     return(false);
   }
 
   uint32_t seekOffset;
   int16_t w, h, row, col;
-  uint8_t  r, g, b;
-  uint32_t startTime = millis();
+  uint16_t  r, g, b;
 
+  // black background - clear whole buffer
+  memset(output_buffer, '\0', sizeof(output_buffer));
+  
   uint16_t magic = read16(bmpFS);
   if (magic == 0xFFFF) {
-    Serial.println("File not found. Make sure you upload the SPIFFs image with BMPs.");
+    Serial.print("Can't openfile. Make sure you upload the SPIFFs image with BMPs. : ");
+    Serial.println(filename);
     bmpFS.close();
     return(false);
   }
@@ -94,7 +119,16 @@ bool TFTs::drawBmp(const char *filename, int16_t x, int16_t y) {
   read32(bmpFS);
   w = read32(bmpFS);
   h = read32(bmpFS);
-
+/*
+  Serial.print("image W, H: ");
+  Serial.print(w); 
+  Serial.print(", "); 
+  Serial.println(h);
+*/  
+  // center image on the display
+  int16_t x = (TFT_WIDTH - w) / 2;
+  int16_t y = (TFT_HEIGHT - h) / 2;
+  
   if ((read16(bmpFS) != 1) || (read16(bmpFS) != 24) || (read32(bmpFS) != 0)) {
     Serial.println("BMP format not recognized.");
     bmpFS.close();
@@ -120,16 +154,34 @@ bool TFTs::drawBmp(const char *filename, int16_t x, int16_t y) {
       b = *bptr++;
       g = *bptr++;
       r = *bptr++;
-      output_buffer[row][col] = ((r & 0xF8) << 8) | ((g & 0xFC) << 3) | (b >> 3);
+      b *= dimming;
+      g *= dimming;
+      r *= dimming;
+      b = b >> 8;
+      g = g >> 8;
+      r = r >> 8;
+      output_buffer[row+y][col+x] = ((r & 0xF8) << 8) | ((g & 0xFC) << 3) | (b >> 3);
     }
   }
-  
-  pushImage(x, y, w, h, (uint16_t *)output_buffer);
+
+  uint32_t LoadConvertTime = millis();
+
+
+  pushImage(0,0, TFT_WIDTH, TFT_HEIGHT, (uint16_t *)output_buffer);
   setSwapBytes(oldSwapBytes);
 
+  uint32_t TransferTime = millis();
+
   bmpFS.close();
+/*  
+  Serial.print("image load and transfer (ms): ");
+  Serial.print(LoadConvertTime - StartTime);  
+  Serial.print(", ");  
+  Serial.println(TransferTime - LoadConvertTime);  
+*/  
   return(true);
 }
+
 
 // These read 16- and 32-bit types from the SD card file.
 // BMP data is stored little-endian, Arduino is little-endian too.

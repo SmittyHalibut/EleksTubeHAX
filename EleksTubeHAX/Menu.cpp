@@ -2,10 +2,10 @@
 
 // Big ol' state machine: menu and buttons as the state, buttons as the transition triggers.
 void Menu::loop(Buttons &buttons) {
-  Button::state left_state = buttons.left.getState();
-  Button::state mode_state = buttons.mode.getState();
-  Button::state right_state = buttons.right.getState();
-  // Power doesn't affect menu, is handled in the main program.
+  Button::state left_state = buttons.left.getState();   // decrement value
+  Button::state mode_state = buttons.mode.getState();   // next menu
+  Button::state right_state = buttons.right.getState(); // increment value
+  Button::state power_state = buttons.power.getState(); // exit menu
 
   // Reset the change value in every case.  We don't always change the state though.
   change = 0;
@@ -47,9 +47,8 @@ void Menu::loop(Buttons &buttons) {
     return;
   }
 
-  // Exit is a special case, so handle it first.
-  if (state == exit_menu && (left_state == Button::down_edge || right_state == Button::down_edge)) {
-    // Explicit request to edit the menu.
+  // Exit with a power button.
+  if (state != idle && (power_state == Button::down_edge)) {
     state = idle;
     state_changed = true;
     return;
