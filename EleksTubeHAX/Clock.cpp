@@ -1,4 +1,5 @@
 #include "Clock.h"
+#include "WiFi_WPS.h"
 
 void Clock::begin(StoredConfig::Config::Clock *config_) {
   config = config_;
@@ -7,14 +8,16 @@ void Clock::begin(StoredConfig::Config::Clock *config_) {
     // Config is invalid, probably a new device never had its config written.
     // Load some reasonable defaults.
     Serial.println("Loaded Clock config is invalid, using default.  This is normal on first boot.");
-    setTwelveHour(true);
-    setBlankHoursZero(true);
-    setTimeZoneOffset(0);
+    setTwelveHour(false);
+    setBlankHoursZero(false);
+    setTimeZoneOffset(1);
+    setActiveGraphicIdx(1);
     config->is_valid = StoredConfig::valid;
   }
   
   ntpTimeClient.begin();
   ntpTimeClient.update();
+  Serial.print("NTP time = ");
   Serial.println(ntpTimeClient.getFormattedTime());
   setSyncProvider(&Clock::syncProvider);
 }
@@ -38,23 +41,33 @@ time_t Clock::syncProvider() {
   rtc_now = RTC.get();
 
   if (millis() - millis_last_ntp > refresh_ntp_every_ms || millis_last_ntp == 0) {
-    // It's time to get a new NTP sync
-    Serial.print("Getting NTP.");
-    ntpTimeClient.forceUpdate();
-    Serial.print(".");
-    ntp_now = ntpTimeClient.getEpochTime();
-    Serial.println(" Done.");
-
-    // Sync the RTC to NTP if needed.
-    if (ntp_now != rtc_now) {
-      RTC.set(ntp_now);
-      Serial.println("NTP, RTC, Diff: ");
-      Serial.println(ntp_now);
-      Serial.println(rtc_now);
-      Serial.println(ntp_now-rtc_now);
-    }
-    millis_last_ntp = millis();
-    return ntp_now;    
+    if (WifiState == connected) { 
+      // It's time to get a new NTP sync
+      Serial.print("Getting NTP.");
+      ntpTimeClient.forceUpdate();
+      Serial.print(".");
+      ntp_now = ntpTimeClient.getEpochTime();
+      Serial.println("NTP query done.");
+      if (ntp_now > 1644601505) { //is it valid - reasonable number?
+          // Sync the RTC to NTP if needed.
+        Serial.println("NTP, RTC, Diff: ");
+        Serial.println(ntp_now);
+        Serial.println(rtc_now);
+        Serial.println(ntp_now-rtc_now);
+        if (ntp_now != rtc_now) {
+          RTC.set(ntp_now);
+          Serial.println("Updating RTC");
+        }
+        millis_last_ntp = millis();
+        Serial.println("Using NTP time.");
+        return ntp_now;
+      } else {  // NTP valid
+      Serial.println("Invalid NTP response, using RTC time.");
+      return rtc_now;
+      }
+    } // no wifi
+    Serial.println("No WiFi, using RTC time.");
+    return rtc_now;
   }
   Serial.println("Using RTC time.");
   return rtc_now;

@@ -1,6 +1,8 @@
 #ifndef STORED_CONFIG_H
 #define STORED_CONFIG_H
 
+#include "global_defines.h"
+
 #include <Preferences.h>
 /*
  * TODO: This was originally written for the EEPROM library where all this logic was needed.
@@ -17,9 +19,9 @@
 class StoredConfig {
 public:
   StoredConfig() : prefs(), config_size(sizeof(config)), loaded(false) {}
-  void begin()    { prefs.begin(prefs_namespace, false); Serial.print("Config size: "); Serial.println(config_size); }
-  void load()     { prefs.getBytes(prefs_namespace, &config, config_size); loaded = true; }
-  void save()     { prefs.putBytes(prefs_namespace, &config, config_size); }
+  void begin()    { prefs.begin(SAVED_CONFIG_NAMESPACE, false); Serial.print("Config size: "); Serial.println(config_size); }
+  void load()     { prefs.getBytes(SAVED_CONFIG_NAMESPACE, &config, config_size); loaded = true; }
+  void save()     { prefs.putBytes(SAVED_CONFIG_NAMESPACE, &config, config_size); }
   bool isLoaded() { return loaded; }
 
   const static uint8_t str_buffer_size = 32;
@@ -38,13 +40,14 @@ public:
       bool     twelve_hour;
       time_t   time_zone_offset;
       bool     blank_hours_zero;
+      int8_t   selected_graphic;
       uint8_t  is_valid;       // Write StoredConfig::valid here when valid data is loaded.
     } uclock;
   
     struct Wifi {
       char     ssid[str_buffer_size];
       char     password[str_buffer_size];
-      uint8_t  is_valid;       // Write StoredConfig::valid here when valid data is loaded.
+      uint8_t  WPS_connected;       // Write StoredConfig::valid here when valid data is loaded.
     } wifi;
   } config;
 
@@ -52,7 +55,6 @@ public:
   
 private:
   Preferences prefs;
-  const static char prefs_namespace[];
   uint16_t config_size; 
   bool loaded;
 };

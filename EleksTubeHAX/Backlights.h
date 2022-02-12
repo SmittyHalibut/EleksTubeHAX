@@ -1,6 +1,8 @@
 #ifndef BACKLIGHTS_H
 #define BACKLIGHTS_H
 
+#include "global_defines.h"
+
 /*
  * A simple sub-class of the Adafruit_NeoPixel class, to configure it for
  * the EleksTube-IPS clock, and to add a little functionality.
@@ -12,7 +14,6 @@
  * Otherwise, class Backlights behaves exactly as Adafruit_NeoPixel does.
  */
 #include <stdint.h>
-#include "Hardware.h"
 #include "StoredConfig.h"
 #include <Adafruit_NeoPixel.h>
 
@@ -29,6 +30,8 @@ public:
   void loop();
 
   void togglePower() { off = !off; pattern_needs_init = true; }
+  void PowerOn()  { off = false; pattern_needs_init = true; }
+  void PowerOff() { off = true; pattern_needs_init = true; }
 
   void setPattern(patterns p)      { config->pattern = uint8_t(p); pattern_needs_init = true; }
   patterns getPattern()            { return patterns(config->pattern); }
@@ -50,7 +53,8 @@ public:
   void setIntensity(uint8_t intensity);
   void adjustIntensity(int16_t adj);
   uint8_t getIntensity()                      { return config->intensity; }
-  
+
+  bool dimming = false;
   
 private:
   bool pattern_needs_init;

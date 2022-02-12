@@ -1,13 +1,14 @@
 #ifndef TFTS_H
 #define TFTS_H
 
+#include "global_defines.h"
+
 // Call up the SPIFFS FLASH filing system this is part of the ESP Core
 #define FS_NO_GLOBALS
 #include <FS.h>
 #include "SPIFFS.h"  // For ESP32 only
 
 #include <TFT_eSPI.h>
-#include "Hardware.h"
 #include "ChipSelect.h"
 
 class TFTs : public TFT_eSPI {
@@ -19,8 +20,13 @@ public:
   enum show_t { no, yes, force };
   // A digit of 0xFF means blank the screen.
   const static uint8_t blanked = 255;
+
+  uint8_t dimming = 255; // amount of dimming graphics
+  uint8_t current_graphic = 0;
   
   void begin();
+  void clear();
+  void showNoWifiStatus();
 
   void setDigit(uint8_t digit, uint8_t value, show_t show=yes);
   uint8_t getDigit(uint8_t digit)                 { return digits[digit]; }

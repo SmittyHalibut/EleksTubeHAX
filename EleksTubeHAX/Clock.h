@@ -2,6 +2,7 @@
 #define CLOCK_H
 
 #include <stdint.h>
+#include "global_defines.h"
 #include <TimeLib.h>
 
 // For NTP
@@ -40,6 +41,18 @@ public:
   void setTimeZoneOffset(time_t offset) { config->time_zone_offset = offset; }
   time_t getTimeZoneOffset()            { return config->time_zone_offset; }
   void adjustTimeZoneOffset(time_t adj) { config->time_zone_offset += adj; }
+  void  setActiveGraphicIdx(int8_t idx) { config->selected_graphic = idx;}
+  int8_t getActiveGraphicIdx()          { return config->selected_graphic; }
+  void adjustClockGraphicsIdx(int8_t adj) {
+    config->selected_graphic += adj;
+    if (config->selected_graphic > NUMBER_OF_CLOCK_FONTS) { config->selected_graphic = NUMBER_OF_CLOCK_FONTS; }
+    if (config->selected_graphic < 1) { config->selected_graphic = 1; }   
+  }
+  void setClockGraphicsIdx(int8_t set) {
+    config->selected_graphic = set;
+    if (config->selected_graphic > NUMBER_OF_CLOCK_FONTS) { config->selected_graphic = NUMBER_OF_CLOCK_FONTS; }
+    if (config->selected_graphic < 1) { config->selected_graphic = 1; }   
+  }
 
   // Proxy C functions from TimeLib.h
   // I really wish it were a class we could just subclass, but here we are.
