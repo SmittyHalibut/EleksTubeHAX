@@ -39,8 +39,10 @@ void MqttPeriodicReportBack();
 char topic[100];
 char msg[5];
 uint32_t lastTimeSent = -20000;
-byte LastNotificationChecksum = 0;
+uint8_t LastNotificationChecksum = 0;
+uint32_t LastTimeTriedToConnect = 0;
 
+bool MqttConnected = true; // skip error meggase if disabled
 // commands from server    // = "directive/status"
 bool MqttCommandPower = true;
 int  MqttCommandState = 1;  
@@ -73,26 +75,28 @@ void sendToBroker(char* topic, char* message) {
 
 void MqttStart() {
 #ifdef MQTT_ENABLED
+  MqttConnected = false;
+  if (((millis() - LastTimeTriedToConnect) > (MQTT_RECONNECT_WAIT_SEC * 1000)) || (LastTimeTriedToConnect == 0)) {
+    LastTimeTriedToConnect = millis();
     MQTTclient.setServer(MQTT_BROKER, MQTT_PORT);
     MQTTclient.setCallback(callback);
 
-//    while (!MQTTclient.connected()) {
-        Serial.println("Connecting to MQTT...");
-        if (MQTTclient.connect(MQTT_CLIENT, MQTT_USERNAME, MQTT_PASSWORD)) {
-            Serial.println("connected");
+    Serial.println("Connecting to MQTT...");
+    if (MQTTclient.connect(MQTT_CLIENT, MQTT_USERNAME, MQTT_PASSWORD)) {
+        Serial.println("MQTT connected");
+        MqttConnected = true;
+    } else {
+        if (MQTTclient.state() == 5) {
+            Serial.println("Connection not allowed by broker, possible reasons:");
+            Serial.println("- Device is already online. Wait some seconds until it appears offline");
+            Serial.println("- Wrong Username or password. Check credentials");
+            Serial.println("- Client Id does not belong to this username, verify ClientId");
         } else {
-            if (MQTTclient.state() == 5) {
-                Serial.println("Connection not allowed by broker, possible reasons:");
-                Serial.println("- Device is already online. Wait some seconds until it appears offline");
-                Serial.println("- Wrong Username or password. Check credentials");
-                Serial.println("- Client Id does not belong to this username, verify ClientId");
-            } else {
-                Serial.print("Not possible to connect to Broker Error code:");
-                Serial.println(MQTTclient.state());
-            }
-            delay(0x7530);
-          }
-//    }
+            Serial.print("Not possible to connect to Broker Error code:");
+            Serial.println(MQTTclient.state());
+        }
+        // delay(0x7530);
+      }
 
     char subscibeTopic[100];
     sprintf(subscibeTopic, "%s/#", MQTT_CLIENT);
@@ -103,6 +107,7 @@ void MqttStart() {
     sendToBroker("report/ip", (char*)WiFi.localIP().toString().c_str());  // Reports the ip
     sendToBroker("report/network", (char*)WiFi.SSID().c_str());  // Reports the network name
     MqttReportWiFiSignal();
+  }
 #endif
 }
 
@@ -118,7 +123,8 @@ int splitTopic(char* topic, char* tokens[], int tokensNumber) {
 }
 
 void checkMqtt() {
-    if (!MQTTclient.connected()) {
+  MqttConnected = MQTTclient.connected();
+  if (!MqttConnected) {
         MqttStart();
     }
 }

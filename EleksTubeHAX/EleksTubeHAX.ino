@@ -263,18 +263,20 @@ void loop() {
     }
   }
 
-  // Sleep for up to 20ms, less if we've spent time doing stuff above.
   uint32_t time_in_loop = millis() - millis_at_top;
-  /*
-  if (time_in_loop == 0) {
-    Serial.print(".");
-  }
-  else {
-    Serial.println(time_in_loop);
-  }
-  */
+#ifdef DEBUG_OUTPUT
+  if (time_in_loop <= 1) Serial.print(".");
+  else Serial.println(time_in_loop);
+#endif
   if (time_in_loop < 20) {
-    delay(20 - time_in_loop);
+    // we have free time, spend it for loading next image into buffer
+    tfts.LoadNextImage();
+
+  // Sleep for up to 20ms, less if we've spent time doing stuff above.
+    time_in_loop = millis() - millis_at_top;
+    if (time_in_loop < 20) {
+      delay(20 - time_in_loop);
+    }
   }
 }
 
@@ -309,11 +311,12 @@ void updateClockDisplay(TFTs::show_t show) {
     }
     hour_old = current_hour;
   } 
-    
-  tfts.setDigit(HOURS_TENS, uclock.getHoursTens(), show);
-  tfts.setDigit(HOURS_ONES, uclock.getHoursOnes(), show);
-  tfts.setDigit(MINUTES_TENS, uclock.getMinutesTens(), show);
-  tfts.setDigit(MINUTES_ONES, uclock.getMinutesOnes(), show);
-  tfts.setDigit(SECONDS_TENS, uclock.getSecondsTens(), show);
+
+  // refresh starting on seconds
   tfts.setDigit(SECONDS_ONES, uclock.getSecondsOnes(), show);
+  tfts.setDigit(SECONDS_TENS, uclock.getSecondsTens(), show);
+  tfts.setDigit(MINUTES_ONES, uclock.getMinutesOnes(), show);
+  tfts.setDigit(MINUTES_TENS, uclock.getMinutesTens(), show);
+  tfts.setDigit(HOURS_ONES, uclock.getHoursOnes(), show);
+  tfts.setDigit(HOURS_TENS, uclock.getHoursTens(), show);
 }
