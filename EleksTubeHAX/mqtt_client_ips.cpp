@@ -5,7 +5,7 @@
  * Hardware: ESP32
  * File description: Connects to the MQTT Broker "smartnest.cz". Uses a device "Thermostat".
  * Sends status and receives commands from WebApp, Android app or connected devices (SmartThings, Google assistant, Alexa, etc.)
- * Configuration: open file "global_defines.h"
+ * Configuration: open file "GLOBAL_DEFINES.h"
  * Reference: https://github.com/aososam/Smartnest/tree/master/Devices/thermostat
  * Documentation: https://www.docu.smartnest.cz/
  */
@@ -72,6 +72,7 @@ void sendToBroker(char* topic, char* message) {
 }
 
 void MqttStart() {
+#ifdef MQTT_ENABLED
     MQTTclient.setServer(MQTT_BROKER, MQTT_PORT);
     MQTTclient.setCallback(callback);
 
@@ -102,6 +103,7 @@ void MqttStart() {
     sendToBroker("report/ip", (char*)WiFi.localIP().toString().c_str());  // Reports the ip
     sendToBroker("report/network", (char*)WiFi.SSID().c_str());  // Reports the network name
     MqttReportWiFiSignal();
+#endif
 }
 
 int splitTopic(char* topic, char* tokens[], int tokensNumber) {
@@ -156,10 +158,12 @@ void callback(char* topic, byte* payload, unsigned int length) {  //A new messag
  }
 
 void MqttLoop(){
+#ifdef MQTT_ENABLED
   MQTTclient.loop(); 
   checkMqtt();
   MqttReportBackOnChange();
   MqttPeriodicReportBack();
+#endif  
 }
 
 void MqttReportBattery() {

@@ -1,7 +1,7 @@
 #ifndef mqtt_client_H_
 #define mqtt_client_H_
 
-#include "global_defines.h"
+#include "GLOBAL_DEFINES.h"
 
 
 // commands from server

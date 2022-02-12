@@ -31,7 +31,7 @@ Tools -> Board -> ESP32 Arduino -> ESP32 Dev Module
 
 The default configs in the Tools menu should be fine. The important ones are:
 * Flash Size: 4MB
-* Partition Scheme: Any that includes at least 1MB for SPIFFS.  I use the "Default 4MB: 1.2MB App, 1.5MB SPIFFS" one.
+* Partition Scheme: No OTA (1 MB app, 3 MB SPIFFS). To fit as many images as possible.
 * Port: Set it to whatever serial port your clock shows up as when plugged in.
 
 ### Install Libraries
@@ -44,6 +44,8 @@ Sketch -> Include Library -> Library Manager
 * `DS1307RTC` by Michael Margolis (developed on v1.4.1)
 * `TFT_eSPI` by Bodmer (developed on v2.3.61)
 * `Time` by Michael Margolis (developed on v1.6.0)
+* PubSubClient  https://www.arduinolibraries.info/libraries/pub-sub-client
+
 
 ### Configure the `TFT_eSPI` library
 **IMPORTANT** You have to do this after every time you install or update the `TFT_eSPI` library!  **IMPORTANT**
@@ -65,7 +67,7 @@ After installing the ESP32 support, all the libraries, and the SPIFFS uploader, 
  
 ## Upload New Firmware
 Make sure you configured everything:
-* Put your wifi credentials in `wifi_creds.h`
+* Put your MQTT credentials in `global_defines.h`
 * Pointed `User_Setup_Select.h` in the TFT_eSPI library to our `User_Setup.h`
 
 Connect the clock to your computer with USB.  You'll see a new serial port pop up.  Make sure that's the serial port selected in Tools.
@@ -80,30 +82,20 @@ Tools -> ESP32 Sketch Data Upload, will upload the files to the SPIFFS filesyste
 
 ### Custom Bitmaps (Optional)
 If you want to change these:
-* Create your own BMP files.  Resolution must be 135x240 pixels, 24bit RGB.
-* Name them `0.bmp` through `9.bmp` and put them in the `data/` directory.
+* Create your own BMP files.  Resolution must be max 135x240 pixels, 24bit RGB.
+Can be smaller, it will be centered on the display.
+
+* Name them `10.bmp` through `19.bmp`; '20.bmp' to '29.bmp', and so on. You can add as many as you can fit into SPIFFS space.
+Put them in the `data/` directory.
+Each set (1x, 2x, etc) can be chosen in the menu.
+Remember to set the parameter NUMBER_OF_CLOCK_FONTS to the correct value (number of image sets that fit into your system).
 
 Then do the "Tools -> ESP32 Sketch Data Upload" dance again.
 
-## Setup the Arduino IDE (CLI)
-
-Install the [arduino-cli](https://arduino.github.io/arduino-cli/latest/installation/).
-
-`$ make setup`
-
-You'll still need to [configure the `TFT_eSPI` library](#configure-the-tft_espi-library).
+## Setup the Arduino IDE
 
 ### Compile and Upload
 
-```
-export SERIAL_DEV=/dev/ttyUSB0
-$ make compile
-$ make upload_bin upload_spiffs
-```
-
-or simply
-
-`$ make SERIAL_DEV=/dev/ttyUSB0`
 
 # Development Process:
 ## Original Firmware
@@ -204,9 +196,3 @@ The DS3231 ([datasheet](https://datasheets.maximintegrated.com/en/ds/DS3231.pdf)
 
 * SCL: ESP32 pin 36, IO22
 * SDA: ESP32 pin 33, IO21
-
-# Contributers
-Mark Smith, aka Smitty
-@SmittyHalibut on GitHub, Twitter, and YouTube.
-
-

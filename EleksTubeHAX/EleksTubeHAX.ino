@@ -7,7 +7,7 @@
  */
 
 #include <stdint.h>
-#include "global_defines.h"
+#include "GLOBAL_DEFINES.h"
 #include "Buttons.h"
 #include "Backlights.h"
 #include "TFTs.h"

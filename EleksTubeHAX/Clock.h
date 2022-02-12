@@ -2,7 +2,7 @@
 #define CLOCK_H
 
 #include <stdint.h>
-#include "global_defines.h"
+#include "GLOBAL_DEFINES.h"
 #include <TimeLib.h>
 
 // For NTP
