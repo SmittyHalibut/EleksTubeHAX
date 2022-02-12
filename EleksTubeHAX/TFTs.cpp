@@ -1,5 +1,6 @@
 #include "TFTs.h"
 #include "WiFi_WPS.h"
+#include "mqtt_client_ips.h"
 
 void TFTs::begin() {
   // Start with all displays selected.
@@ -29,8 +30,16 @@ void TFTs::showNoWifiStatus() {
   chip_select.setSecondsTens();
   setTextColor(TFT_RED, TFT_BLACK);
   fillRect(0, TFT_HEIGHT - 27, 135, 27, TFT_BLACK);
-  setCursor(5, TFT_HEIGHT-29, 4);
+  setCursor(10, TFT_HEIGHT-29, 4);
   println("NO WIFI !");
+  }
+
+void TFTs::showNoMqttStatus() {
+  chip_select.setSecondsOnes();
+  setTextColor(TFT_RED, TFT_BLACK);
+  fillRect(0, TFT_HEIGHT - 27, 135, 27, TFT_BLACK);
+  setCursor(10, TFT_HEIGHT-29, 4);
+  println("NO MQTT !");
   }
 
 
@@ -45,12 +54,20 @@ void TFTs::setDigit(uint8_t digit, uint8_t value, show_t show) {
       if (WifiState != connected) { 
         showNoWifiStatus();
       }    
+
+    if (digit == SECONDS_ONES) 
+      if (!MqttConnected) { 
+        showNoMqttStatus();
+      }          
   }
 }
 
 /* 
- * Where the rubber meets the road.  Displays the bitmap for the value to the given digit. 
+ * Displays the bitmap for the value to the given digit. 
  */
+ uint8_t FileInBuffer=255; // invalid, always load first image
+ uint8_t NextFileRequired = 0; 
+ 
 void TFTs::showDigit(uint8_t digit) {
   chip_select.setDigit(digit);
 
@@ -58,13 +75,23 @@ void TFTs::showDigit(uint8_t digit) {
     fillScreen(TFT_BLACK);
   }
   else {
-    // Filenames are no bigger than "255.bmp\0"
-    char file_name[10];
-    sprintf(file_name, "/%d%d.bmp", current_graphic, digits[digit]);
-    drawBmp(file_name, 0, 0);
+    uint8_t file_index = current_graphic * 10 + digits[digit];
+    drawBmp(file_index, 0, 0);
+    
+    uint8_t NextNumber = digits[SECONDS_ONES] + 1;
+    if (NextNumber > 9) NextNumber = 0; // pre-load only seconds, because they are drawn first
+    NextFileRequired = current_graphic * 10 + NextNumber;
   }
 }
 
+void TFTs::LoadNextImage() {
+  if (NextFileRequired != FileInBuffer) {
+    LoadBmpIntoBuffer(NextFileRequired);
+#ifdef DEBUG_OUTPUT
+    Serial.println("Preoad");
+#endif
+  }
+}
 
 // These BMP functions are stolen directly from the TFT_SPIFFS_BMP example in the TFT_eSPI library.
 // Unfortunately, they aren't part of the library itself, so I had to copy them.
@@ -75,15 +102,15 @@ void TFTs::showDigit(uint8_t digit) {
 // Too big to fit on the stack.
 uint16_t TFTs::output_buffer[TFT_HEIGHT][TFT_WIDTH];
 
-//bool TFTs::drawBmp(const char *filename) {
-  bool TFTs::drawBmp(const char *filename, int16_t xx, int16_t yy) { // ignore x and y; center on the screen
-
-  uint32_t StartTime = millis();
+bool TFTs::LoadBmpIntoBuffer(uint8_t file_index) {
   fs::File bmpFS;
-
+  
+  // Filenames are no bigger than "255.bmp\0"
+  char filename[10];
+  sprintf(filename, "/%d.bmp", file_index);
+  
   // Open requested file on SD card
   bmpFS = SPIFFS.open(filename, "r");
-
   if (!bmpFS)
   {
     Serial.print("File not found: ");
@@ -135,8 +162,6 @@ uint16_t TFTs::output_buffer[TFT_HEIGHT][TFT_WIDTH];
     return(false);
   }
 
-  bool oldSwapBytes = getSwapBytes();
-  setSwapBytes(true);
   bmpFS.seek(seekOffset);
 
   uint16_t padding = (4 - ((w * 3) & 3)) & 3;
@@ -163,23 +188,36 @@ uint16_t TFTs::output_buffer[TFT_HEIGHT][TFT_WIDTH];
       output_buffer[row+y][col+x] = ((r & 0xF8) << 8) | ((g & 0xFC) << 3) | (b >> 3);
     }
   }
+  FileInBuffer = file_index;
+  
+  bmpFS.close();
+  return (true);
+}
 
+void TFTs::drawBmp(uint8_t file_index, int16_t xx, int16_t yy) { // ignore x and y; center on the screen
+
+  uint32_t StartTime = millis();
+  
+  // check if file is already loaded into buffer; skip loading if it is. Saves 50 to 150 msec of time.
+  if (file_index != FileInBuffer) {
+    LoadBmpIntoBuffer(file_index);
+  }
+  
   uint32_t LoadConvertTime = millis();
 
-
+  bool oldSwapBytes = getSwapBytes();
+  setSwapBytes(true);
   pushImage(0,0, TFT_WIDTH, TFT_HEIGHT, (uint16_t *)output_buffer);
   setSwapBytes(oldSwapBytes);
 
   uint32_t TransferTime = millis();
 
-  bmpFS.close();
-/*  
-  Serial.print("image load and transfer (ms): ");
+#ifdef DEBUG_OUTPUT
+  Serial.print("load : ");
   Serial.print(LoadConvertTime - StartTime);  
-  Serial.print(", ");  
+  Serial.print(", transfer: ");  
   Serial.println(TransferTime - LoadConvertTime);  
-*/  
-  return(true);
+#endif
 }
 
 

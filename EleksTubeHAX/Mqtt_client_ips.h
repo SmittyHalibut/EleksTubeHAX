@@ -3,6 +3,7 @@
 
 #include "GLOBAL_DEFINES.h"
 
+extern bool MqttConnected;
 
 // commands from server
 extern bool MqttCommandPower;
