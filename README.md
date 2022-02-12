@@ -1,7 +1,15 @@
 # EleksTubeHAX - An aftermarket custom firmware for the EleksTube IPS clock
-Buy your own clock here: [EleksTube IPS Clock](https://www.banggood.com/Pseudo-glow-Tube-Programmable-Display-IPS-Screen-RGB-Clock-Desktop-Creative-Ornaments-Digital-Clock-Colorful-LED-Picture-Display-p-1789259.html)
+Buy your own clock under the name "EleksTube IPS Clock" on eBay, Banggood, etc. Look for places that offer 30-day guarantee, otherwise it can be a fake product!
 
-[Reddit discussion on the hack is here.](https://www.reddit.com/r/arduino/comments/mq5td9/hacking_the_elekstube_ips_clock_anyone_tried_it/)
+## Differences from original repositiory:
+- WPS connection to the router, without need for entering WiFi credentials into source code
+- Night time mode - dimming of displays and backlights during the night
+- About 4 custom clock faces loaded onto the clock, selectable in the menu
+- Supports smaller image files that are centered onto displays (saving space on SPIFFS)
+- Exit from the menu using Power button (same as original clock)
+- MQTT (IoT) support added - can be controlled with mobile phone (SmartNest, SmartThings, Google assistant, Alexa, etc.)
+
+[Reddit discussion on the original hack is here.](https://www.reddit.com/r/arduino/comments/mq5td9/hacking_the_elekstube_ips_clock_anyone_tried_it/)
 
 [Original documentation and software from EleksMaker.](https://wiki.eleksmaker.com/doku.php?id=ips)
 
@@ -44,7 +52,7 @@ Sketch -> Include Library -> Library Manager
 * `DS1307RTC` by Michael Margolis (developed on v1.4.1)
 * `TFT_eSPI` by Bodmer (developed on v2.3.61)
 * `Time` by Michael Margolis (developed on v1.6.0)
-* PubSubClient  https://www.arduinolibraries.info/libraries/pub-sub-client
+* `PubSubClient`  https://www.arduinolibraries.info/libraries/pub-sub-client
 
 
 ### Configure the `TFT_eSPI` library
