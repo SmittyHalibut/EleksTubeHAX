@@ -94,7 +94,7 @@ void loop() {
   WifiReconnect(); // if not connected attempt to reconnect
 
   MqttStatusPower = tfts.isEnabled();
-  MqttStatusState = uclock.getActiveGraphicIdx() * 10; 
+  MqttStatusState = (uclock.getActiveGraphicIdx()+1) * 5;   // 10 
   MqttLoop();
   if (MqttCommandPowerReceived) {
     MqttCommandPowerReceived = false;
@@ -109,12 +109,23 @@ void loop() {
 
   if (MqttCommandStateReceived) {
     MqttCommandStateReceived = false;
-    uclock.setClockGraphicsIdx(MqttCommandState / 10);
+    randomSeed(millis());
+    uint8_t idx;
+//    if (MqttCommandState = 99) 
+//      { idx = random(1, NUMBER_OF_CLOCK_FONTS+1); } else
+      { idx = (MqttCommandState / 5) -1; }  // 10..40 -> graphic 1..6
+    Serial.print("Graphic change request from MQTT; command: ");
+    Serial.print(MqttCommandState);
+    Serial.print(", index: ");
+    Serial.println(idx);
+    uclock.setClockGraphicsIdx(idx);  
     tfts.current_graphic = uclock.getActiveGraphicIdx();
     updateClockDisplay(TFTs::force);   // redraw everything
+    /* do not save to flash everytime mqtt changes; can be frequent
     Serial.print("Saving config...");
     stored_config.save();
     Serial.println(" Done.");
+    */
   }
 
   buttons.loop();
@@ -302,12 +313,12 @@ void updateClockDisplay(TFTs::show_t show) {
         show = TFTs::force; // update all
       }
     } else {
+      Serial.println("Setting daytime mode (normal brightness)");
       tfts.dimming = 255; // 0..255
       backlights.dimming = false;
       if (menu.getState() == Menu::idle) { // otherwise erases the menu
         show = TFTs::force; // update all
       }
-      Serial.println("Setting daytime mode (normal brightness)");
     }
     hour_old = current_hour;
   } 

@@ -12,10 +12,12 @@
 #include <Arduino.h>
 
 // ************ General config *********************
+//#define DEBUG_OUTPUT
 #define DEVICE_NAME       "IPS-clock"
-#define FIRMWARE_VERSION  "IPS clock v0.1"
-#define NUMBER_OF_CLOCK_FONTS  4  // .BMP FILES 1X, 2X, 4X
+#define FIRMWARE_VERSION  "IPS clock v0.2"
+#define NUMBER_OF_CLOCK_FONTS  6  // Number of .CLK or .BMP file sets 1X, 2X, 4X,...
 #define SAVED_CONFIG_NAMESPACE  "configs"
+#define USE_CLK_FILES   // select between .CLK and .BMP images
 
 // ************ WiFi config *********************
 #define ESP_WPS_MODE      WPS_TYPE_PBC  // push-button
@@ -29,18 +31,19 @@
 
 // ************ MQTT config *********************
 
-//#define MQTT_ENABLED  // enable after creating an account, setting up the device on smartnest.cz and pilling in all the data below:
+#define MQTT_ENABLED  // enable after creating an account, setting up the device on smartnest.cz and pilling in all the data below:
 
 #define MQTT_BROKER "smartnest.cz"             // Broker host
 #define MQTT_PORT 1883                         // Broker port
 #define MQTT_USERNAME " username "             // Username from Smartnest
-#define MQTT_PASSWORD " api key "      // Password from Smartnest or API key (under MY Account)
+#define MQTT_PASSWORD " api key "              // Password from Smartnest or API key (under MY Account)
 #define MQTT_CLIENT "deviceid "                // Device Id from smartnest
-#define MQTT_REPORT_STATUS_EVERY_SEC  60 // How ofter report status to MQTT Broker
+#define MQTT_RECONNECT_WAIT_SEC  30  // how long to wait between retries to connect to broker
+#define MQTT_REPORT_STATUS_EVERY_SEC  71 // How often report status to MQTT Broker
 
 // ************ Night time operation *********************
 #define BACKLIGHT_DIMMED_INTENSITY  1  // 0..7
-#define TFT_DIMMED_INTENSITY  20    // 0..255
+#define TFT_DIMMED_INTENSITY  25    // 0..255
 
 // ************ Hardware definitions *********************
 

@@ -65,11 +65,18 @@ void sendToBroker(char* topic, char* message) {
     char topicArr[100];
     sprintf(topicArr, "%s/%s", MQTT_CLIENT, topic);
     MQTTclient.publish(topicArr, message);
+#ifdef DEBUG_OUTPUT // long output
     Serial.print("Sending to MQTT: ");
     Serial.print(topicArr);
     Serial.print("/");
     Serial.println(message);
-    delay (200);  
+#else
+    Serial.print("TX MQTT: ");
+    Serial.print(topic);
+    Serial.print("/");
+    Serial.println(message);
+#endif    
+    delay (120);  
   }
 }
 
@@ -130,8 +137,10 @@ void checkMqtt() {
 }
 
 void callback(char* topic, byte* payload, unsigned int length) {  //A new message has been received
+#ifdef DEBUG_OUTPUT
     Serial.print("Received MQTT topic: ");
-    Serial.print(topic);
+    Serial.print(topic);                       // long output
+#endif    
     int tokensNumber = 10;
     char* tokens[tokensNumber];
     char message[length + 1];
@@ -140,8 +149,18 @@ void callback(char* topic, byte* payload, unsigned int length) {  //A new messag
     for (int i = 1; i < length; i++) {
         sprintf(message, "%s%c", message, (char)payload[i]);
     }
+#ifdef DEBUG_OUTPUT
     Serial.print("\t     Message: ");
     Serial.println(message);
+#else    
+    Serial.print("MQTT RX: ");
+    Serial.print(tokens[1]);
+    Serial.print("/");
+    Serial.print(tokens[2]);
+    Serial.print("/");
+    Serial.println(message);
+#endif    
+    
     //------------------Decide what to do depending on the topic and message---------------------------------
     if (strcmp(tokens[1], "directive") == 0 && strcmp(tokens[2], "powerState") == 0) {  // Turn On or OFF
         if (strcmp(message, "ON") == 0) {
