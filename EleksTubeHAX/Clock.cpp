@@ -48,6 +48,8 @@ time_t Clock::syncProvider() {
       Serial.print(".");
       ntp_now = ntpTimeClient.getEpochTime();
       Serial.println("NTP query done.");
+      Serial.print("NTP time = ");
+      Serial.println(ntpTimeClient.getFormattedTime());
       if (ntp_now > 1644601505) { //is it valid - reasonable number?
           // Sync the RTC to NTP if needed.
         Serial.println("NTP, RTC, Diff: ");

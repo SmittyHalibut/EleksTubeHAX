@@ -2,12 +2,31 @@
 Buy your own clock under the name "EleksTube IPS Clock" on eBay, Banggood, etc. Look for places that offer 30-day guarantee, otherwise it can be a fake product!
 
 ## Differences from original repositiory:
-- WPS connection to the router, without need for entering WiFi credentials into source code
-- Night time mode - dimming of displays and backlights during the night
-- About 4 custom clock faces loaded onto the clock, selectable in the menu
-- Supports smaller image files that are centered onto displays (saving space on SPIFFS)
-- Exit from the menu using Power button (same as original clock)
-- MQTT (IoT) support added - can be controlled with mobile phone (SmartNest, SmartThings, Google assistant, Alexa, etc.)
+- Partitions changed to 1MB / 3 MB for more space for images
+- Changed menu to add support for changing clock faces in the menu
+- BMP files (24 BPP) converted to 16BPP custom (.CLK) files which only have a header, size and pre-processed pixel data.
+- Added pre-loading of next image into the buffer for faster refresh
+- Loading time is down from original 150 ms to approx 30 ms
+- Supports smaller images which are centered on displays
+- Approx 5-7 clock faces can be loaded onto the clock
+- Catching invalid NTP responses (does not initialize the clock with invalid time)
+- Power button is used to exit the menu (same as on original clock)
+- WPC Button mode is used to connect to the WiFi / router (no need to insert credentials into source code)
+- Night time mode: dims displays and backlight during night time hours
+- MQTT (IoT) support added - clock faces and on/off can be controlled with mobile phone (SmartNest, SmartThings, Google assistant, Alexa, etc.) or included in home automation network
+- WiFi and MQTT errors are displayed below clock faces
+- Updated and cleaned the original clock faces for a better user experience
+- (in works: ) Location detection and automatic TimeZone and DST selection.
+- (in works: ) Integrated web server to input MQTT connection details (or maybe load new clock faces)
+
+My coding does not keep up with objects, it is more "old school" inline style; please don't complain about that. I tried to write it quite clean. And most importantly: it works fine! :) If someone has courage and time to smash new code into boxes and objects, I'm fine with that.
+
+# Hardware modification
+Original EleksTube has a few problems in the hardware design. Most notably it forces 5V signals into ESP32 which is not happy about it. And it is outside of safe operating limits. 
+This will extend the lifetime of ESP32. Mine died because of this...
+## Conversion
+CH340 chip, used for USB-UART conversion can operate both on 5V and 3.3V. On the board it is powered by 5V. Cut one trace on the bottom side of the board that supplies the chip with 5V and route 3.3V over the resistors / capacitors to VDD and VREF.
+See folder "Hardware modification" for the photo.
 
 [Reddit discussion on the original hack is here.](https://www.reddit.com/r/arduino/comments/mq5td9/hacking_the_elekstube_ips_clock_anyone_tried_it/)
 
