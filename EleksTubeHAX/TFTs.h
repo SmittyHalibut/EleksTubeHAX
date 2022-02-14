@@ -22,7 +22,7 @@ public:
   const static uint8_t blanked = 255;
 
   uint8_t dimming = 255; // amount of dimming graphics
-  uint8_t current_graphic = 0;
+  uint8_t current_graphic = 1;
   
   void begin();
   void clear();
@@ -50,8 +50,8 @@ private:
   uint8_t digits[NUM_DIGITS];
   bool enabled;
 
-  bool LoadBmpIntoBuffer(uint8_t file_index);
-  void drawBmp(uint8_t file_index, int16_t x, int16_t y);
+  bool LoadImageIntoBuffer(uint8_t file_index);
+  void DrawImage(uint8_t file_index);
   uint16_t read16(fs::File &f);
   uint32_t read32(fs::File &f);
 

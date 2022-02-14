@@ -27,7 +27,7 @@ void TFTs::clear() {
 }
 
 void TFTs::showNoWifiStatus() {
-  chip_select.setSecondsTens();
+  chip_select.setSecondsOnes();
   setTextColor(TFT_RED, TFT_BLACK);
   fillRect(0, TFT_HEIGHT - 27, 135, 27, TFT_BLACK);
   setCursor(10, TFT_HEIGHT-29, 4);
@@ -35,7 +35,7 @@ void TFTs::showNoWifiStatus() {
   }
 
 void TFTs::showNoMqttStatus() {
-  chip_select.setSecondsOnes();
+  chip_select.setSecondsTens();
   setTextColor(TFT_RED, TFT_BLACK);
   fillRect(0, TFT_HEIGHT - 27, 135, 27, TFT_BLACK);
   setCursor(10, TFT_HEIGHT-29, 4);
@@ -50,12 +50,12 @@ void TFTs::setDigit(uint8_t digit, uint8_t value, show_t show) {
   if (show != no && (old_value != value || show == force)) {
     showDigit(digit);
 
-    if (digit == SECONDS_TENS) 
+    if (digit == SECONDS_ONES) 
       if (WifiState != connected) { 
         showNoWifiStatus();
       }    
 
-    if (digit == SECONDS_ONES) 
+    if (digit == SECONDS_TENS) 
       if (!MqttConnected) { 
         showNoMqttStatus();
       }          
@@ -76,7 +76,7 @@ void TFTs::showDigit(uint8_t digit) {
   }
   else {
     uint8_t file_index = current_graphic * 10 + digits[digit];
-    drawBmp(file_index, 0, 0);
+    DrawImage(file_index);
     
     uint8_t NextNumber = digits[SECONDS_ONES] + 1;
     if (NextNumber > 9) NextNumber = 0; // pre-load only seconds, because they are drawn first
@@ -86,25 +86,26 @@ void TFTs::showDigit(uint8_t digit) {
 
 void TFTs::LoadNextImage() {
   if (NextFileRequired != FileInBuffer) {
-    LoadBmpIntoBuffer(NextFileRequired);
 #ifdef DEBUG_OUTPUT
-    Serial.println("Preoad");
+    Serial.println("Preload img");
 #endif
+    LoadImageIntoBuffer(NextFileRequired);
   }
 }
 
 // These BMP functions are stolen directly from the TFT_SPIFFS_BMP example in the TFT_eSPI library.
 // Unfortunately, they aren't part of the library itself, so I had to copy them.
-// I've modified drawBmp to buffer the whole image at once instead of doing it line-by-line.
+// I've modified DrawImage to buffer the whole image at once instead of doing it line-by-line.
 
-//// BEGIN STOLEN CODE
 
 // Too big to fit on the stack.
 uint16_t TFTs::output_buffer[TFT_HEIGHT][TFT_WIDTH];
 
-bool TFTs::LoadBmpIntoBuffer(uint8_t file_index) {
+#ifndef USE_CLK_FILES
+bool TFTs::LoadImageIntoBuffer(uint8_t file_index) {
+  uint32_t StartTime = millis();
+
   fs::File bmpFS;
-  
   // Filenames are no bigger than "255.bmp\0"
   char filename[10];
   sprintf(filename, "/%d.bmp", file_index);
@@ -146,12 +147,14 @@ bool TFTs::LoadBmpIntoBuffer(uint8_t file_index) {
   read32(bmpFS);
   w = read32(bmpFS);
   h = read32(bmpFS);
-/*
+#ifdef DEBUG_OUTPUT
   Serial.print("image W, H: ");
   Serial.print(w); 
   Serial.print(", "); 
   Serial.println(h);
-*/  
+  Serial.print("dimming: ");
+  Serial.println(dimming);
+#endif
   // center image on the display
   int16_t x = (TFT_WIDTH - w) / 2;
   int16_t y = (TFT_HEIGHT - h) / 2;
@@ -174,7 +177,7 @@ bool TFTs::LoadBmpIntoBuffer(uint8_t file_index) {
     uint8_t*  bptr = lineBuffer;
     
     // Convert 24 to 16 bit colours while copying to output buffer.
-    for (uint16_t col = 0; col < w; col++)
+    for (col = 0; col < w; col++)
     {
       b = *bptr++;
       g = *bptr++;
@@ -191,32 +194,126 @@ bool TFTs::LoadBmpIntoBuffer(uint8_t file_index) {
   FileInBuffer = file_index;
   
   bmpFS.close();
+#ifdef DEBUG_OUTPUT
+  Serial.print("img load : ");
+  Serial.println(millis() - StartTime);  
+#endif
   return (true);
 }
+#endif
 
-void TFTs::drawBmp(uint8_t file_index, int16_t xx, int16_t yy) { // ignore x and y; center on the screen
+
+#ifdef USE_CLK_FILES
+bool TFTs::LoadImageIntoBuffer(uint8_t file_index) {
+  uint32_t StartTime = millis();
+
+  fs::File bmpFS;
+  // Filenames are no bigger than "255.clk\0"
+  char filename[10];
+  sprintf(filename, "/%d.clk", file_index);
+  
+  // Open requested file on SD card
+  bmpFS = SPIFFS.open(filename, "r");
+  if (!bmpFS)
+  {
+    Serial.print("File not found: ");
+    Serial.println(filename);
+    return(false);
+  }
+
+  int16_t w, h, row, col;
+  uint16_t  r, g, b;
+
+  // black background - clear whole buffer
+  memset(output_buffer, '\0', sizeof(output_buffer));
+  
+  uint16_t magic = read16(bmpFS);
+  if (magic == 0xFFFF) {
+    Serial.print("Can't openfile. Make sure you upload the SPIFFs image with images. : ");
+    Serial.println(filename);
+    bmpFS.close();
+    return(false);
+  }
+  
+  if (magic != 0x4B43) { // look for "CK" header
+    Serial.print("File not a CLK. Magic: ");
+    Serial.println(magic);
+    bmpFS.close();
+    return(false);
+  }
+
+  w = read16(bmpFS);
+  h = read16(bmpFS);
+#ifdef DEBUG_OUTPUT
+  Serial.print("image W, H: ");
+  Serial.print(w); 
+  Serial.print(", "); 
+  Serial.println(h);
+  Serial.print("dimming: ");
+  Serial.println(dimming);
+#endif  
+  // center image on the display
+  int16_t x = (TFT_WIDTH - w) / 2;
+  int16_t y = (TFT_HEIGHT - h) / 2;
+  
+  uint8_t lineBuffer[w * 2];
+  
+  // 0,0 coordinates are top left
+  for (row = 0; row < h; row++) {
+
+    bmpFS.read(lineBuffer, sizeof(lineBuffer));
+    uint8_t PixM, PixL;
+    
+    // Colors are already in 16-bit R5, G6, B5 format
+    for (col = 0; col < w; col++)
+    {
+      if (dimming == 255) { // not needed, copy directly
+        output_buffer[row+y][col+x] = (lineBuffer[col*2+1] << 8) | (lineBuffer[col*2]);
+      } else {
+        // 16 BPP pixel format: R5, G6, B5 ; bin: RRRR RGGG GGGB BBBB
+        PixM = lineBuffer[col*2+1];
+        PixL = lineBuffer[col*2];
+        r = (PixM >> 3) & 0x1F;
+        g = ((PixM << 3) | (PixL >> 5)) & 0x3F;
+        b = PixL & 0x1F;
+        r *= dimming;
+        g *= dimming;
+        b *= dimming;
+        r = r >> 8;
+        g = g >> 8;
+        b = b >> 8;
+        output_buffer[row+y][col+x] = ((r & 0xF8) << 8) | ((g & 0xFC) << 3) | (b >> 3);
+      }
+    }
+  }
+  FileInBuffer = file_index;
+  
+  bmpFS.close();
+#ifdef DEBUG_OUTPUT
+  Serial.print("img load : ");
+  Serial.println(millis() - StartTime);  
+#endif
+  return (true);
+}
+#endif 
+
+void TFTs::DrawImage(uint8_t file_index) {
 
   uint32_t StartTime = millis();
   
   // check if file is already loaded into buffer; skip loading if it is. Saves 50 to 150 msec of time.
   if (file_index != FileInBuffer) {
-    LoadBmpIntoBuffer(file_index);
+    LoadImageIntoBuffer(file_index);
   }
   
-  uint32_t LoadConvertTime = millis();
-
   bool oldSwapBytes = getSwapBytes();
   setSwapBytes(true);
   pushImage(0,0, TFT_WIDTH, TFT_HEIGHT, (uint16_t *)output_buffer);
   setSwapBytes(oldSwapBytes);
 
-  uint32_t TransferTime = millis();
-
 #ifdef DEBUG_OUTPUT
-  Serial.print("load : ");
-  Serial.print(LoadConvertTime - StartTime);  
-  Serial.print(", transfer: ");  
-  Serial.println(TransferTime - LoadConvertTime);  
+  Serial.print("img transfer: ");  
+  Serial.println(millis() - StartTime);  
 #endif
 }
 
