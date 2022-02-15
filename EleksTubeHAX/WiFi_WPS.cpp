@@ -1,4 +1,11 @@
+#include <Arduino.h>
+#include <WiFi.h> // ESP32
+#include "StoredConfig.h"
+#include "TFTs.h"
+#include "esp_wps.h"
+
 #include "WiFi_WPS.h"
+#include "IPGeolocation_AO.h"
 
 extern TFTs tfts;
 extern StoredConfig stored_config;
@@ -7,6 +14,8 @@ WifiState_t WifiState = disconnected;
 
 static esp_wps_config_t wps_config;
 uint32_t TimeOfWifiReconnectAttempt = 0;
+double GeoLocTZoffset = 0;
+
 
 void wpsInitConfig(){
   wps_config.crypto_funcs = &g_wifi_default_wps_crypto_funcs;
@@ -235,4 +244,29 @@ bool WiFiStartWps() {
   stored_config.config.wifi.WPS_connected = StoredConfig::valid;
   stored_config.save();
   Serial.println(" WPS finished."); 
+}
+
+
+// Get an API Key by registering on
+// https://ipgeolocation.io
+// OR
+
+
+bool GetGeoLocationTimeZoneOffset() {
+  Serial.println("Starting Geolocation query...");
+// https://app.abstractapi.com/api/ip-geolocation/    // free for 5k loopkups per month.
+// Live test:  https://ipgeolocation.abstractapi.com/v1/?api_key=e11dc0f9bab446bfa9957aad2c4ad064
+  IPGeolocation location(GEOLOCATION_API_KEY,"ABSTRACT");
+  IPGeo IPG;
+  if (location.updateStatus(&IPG)) {
+   
+    Serial.println(String("Geo Time Zone: ") + String(IPG.tz));
+    Serial.println(String("Geo TZ Offset: ") + String(IPG.offset));  // we are interested in this one, type = double
+    Serial.println(String("Geo Current Time: ") + String(IPG.current_time)); // currently not used
+    GeoLocTZoffset = IPG.offset;
+    return true;
+  } else {
+    Serial.println("Geolocation failed.");    
+    return false;
+  }
 }

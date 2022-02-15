@@ -273,9 +273,10 @@ bool TFTs::LoadImageIntoBuffer(uint8_t file_index) {
         // 16 BPP pixel format: R5, G6, B5 ; bin: RRRR RGGG GGGB BBBB
         PixM = lineBuffer[col*2+1];
         PixL = lineBuffer[col*2];
-        r = (PixM >> 3) & 0x1F;
-        g = ((PixM << 3) | (PixL >> 5)) & 0x3F;
-        b = PixL & 0x1F;
+        // align to 8-bit value (MSB left aligned)
+        r = (PixM) & 0xF8;
+        g = ((PixM << 5) | (PixL >> 3)) & 0xFC;
+        b = (PixL << 3) & 0xF8;
         r *= dimming;
         g *= dimming;
         b *= dimming;
