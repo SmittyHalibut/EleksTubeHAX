@@ -28,6 +28,7 @@
 #define WIFI_CONNECT_TIMEOUT_SEC  20
 #define WIFI_RETRY_CONNECTION_SEC  15
 
+#define GEOLOCATION_API_KEY "e11dc0f9bab446bfa9957aad2c4ad064"  // free for 5k loopkups per month. Get yours on https://www.abstractapi.com/ (login) --> https://app.abstractapi.com/api/ip-geolocation/tester (key)
 
 // ************ MQTT config *********************
 

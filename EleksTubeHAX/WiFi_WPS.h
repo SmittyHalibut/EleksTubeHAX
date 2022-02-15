@@ -3,17 +3,14 @@
 
 #include "GLOBAL_DEFINES.h"
 
-#include <Arduino.h>
-#include <WiFi.h> // ESP32
-#include "StoredConfig.h"
-#include "TFTs.h"
-#include "esp_wps.h"
+enum WifiState_t {disconnected, connected, wps_active, wps_success, wps_failed, num_states};
+void WifiBegin();
+bool WiFiStartWps();
+void WifiReconnect();
 
-  enum WifiState_t {disconnected, connected, wps_active, wps_success, wps_failed, num_states};
-  void WifiBegin();
-  bool WiFiStartWps();
-  void WifiReconnect();
+extern WifiState_t WifiState;
 
-  extern WifiState_t WifiState;
+bool GetGeoLocationTimeZoneOffset();
+extern double GeoLocTZoffset;
 
 #endif // WIFI_WPS_H

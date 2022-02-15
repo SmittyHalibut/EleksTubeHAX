@@ -24,11 +24,13 @@ Clock uclock;
 Menu menu;
 StoredConfig stored_config;
 
+bool FullHour = false;
 uint8_t hour_old = 255;
 
 // Helper function, defined below.
 void updateClockDisplay(TFTs::show_t show=TFTs::yes);
 void setupMenu();
+void EveryFullHour();
 
 void setup() {
   Serial.begin(115200);
@@ -57,9 +59,9 @@ void setup() {
   WifiBegin();
   
   // wait for a bit before querying NTP
-  for (uint8_t ndx=0; ndx < 10; ndx++) {
+  for (uint8_t ndx=0; ndx < 5; ndx++) {
     tfts.print(">");
-    delay(200);
+    delay(100);
   }
   tfts.println("");
 
@@ -70,7 +72,21 @@ void setup() {
   // Setup MQTT
   tfts.println("MQTT start");
   MqttStart();
-  
+
+
+  tfts.println("Geoloc query");
+  if (GetGeoLocationTimeZoneOffset()) {
+    tfts.print("TZ: ");
+    tfts.println(GeoLocTZoffset);
+    uclock.setTimeZoneOffset(GeoLocTZoffset * 3600);
+    Serial.print("Saving config...");
+    stored_config.save();
+    Serial.println(" Done.");
+  } else {
+    Serial.println("Geolocation failed.");    
+    tfts.println("Geo FAILED");
+  }
+
   tfts.println("Done with setup.");
 
   // Leave boot up messages on screen for a few seconds.
@@ -139,6 +155,8 @@ void loop() {
   menu.loop(buttons);  // Must be called after buttons.loop()
   backlights.loop();
   uclock.loop();
+
+  EveryFullHour(); // night or daytime
 
   // Update the clock.
   updateClockDisplay();
@@ -275,20 +293,30 @@ void loop() {
   }
 
   uint32_t time_in_loop = millis() - millis_at_top;
-#ifdef DEBUG_OUTPUT
-  if (time_in_loop <= 1) Serial.print(".");
-  else Serial.println(time_in_loop);
-#endif
   if (time_in_loop < 20) {
     // we have free time, spend it for loading next image into buffer
     tfts.LoadNextImage();
 
-  // Sleep for up to 20ms, less if we've spent time doing stuff above.
+    // we still have extra time
     time_in_loop = millis() - millis_at_top;
     if (time_in_loop < 20) {
-      delay(20 - time_in_loop);
+      // run once a day (= 744 times per month which is below the limit of 5k for free account)
+      if (FullHour && (uclock.getHour24() == 3)) { // Daylight savings time changes at 3 in the morning
+        if (GetGeoLocationTimeZoneOffset()) {
+          uclock.setTimeZoneOffset(GeoLocTZoffset * 3600);
+        }
+      }  
+      // Sleep for up to 20ms, less if we've spent time doing stuff above.
+      time_in_loop = millis() - millis_at_top;
+      if (time_in_loop < 20) {
+        delay(20 - time_in_loop);
+      }
     }
   }
+#ifdef DEBUG_OUTPUT
+  if (time_in_loop <= 1) Serial.print(".");
+  else Serial.println(time_in_loop);
+#endif
 }
 
 void setupMenu() {
@@ -298,11 +326,11 @@ void setupMenu() {
   tfts.setCursor(0, 124, 4);
 }
 
-void updateClockDisplay(TFTs::show_t show) {
-
+void EveryFullHour() {
   // dim the clock at night
   uint8_t current_hour = uclock.getHour24();
-  if (current_hour != hour_old) {
+  FullHour = current_hour != hour_old;
+  if (FullHour) {
   Serial.print("current hour = ");
   Serial.println(current_hour);
     if ((current_hour >= 22) || (current_hour < 6)) {
@@ -310,19 +338,22 @@ void updateClockDisplay(TFTs::show_t show) {
       tfts.dimming = TFT_DIMMED_INTENSITY;
       backlights.dimming = true;
       if (menu.getState() == Menu::idle) { // otherwise erases the menu
-        show = TFTs::force; // update all
+        updateClockDisplay(TFTs::force); // update all
       }
     } else {
       Serial.println("Setting daytime mode (normal brightness)");
       tfts.dimming = 255; // 0..255
       backlights.dimming = false;
       if (menu.getState() == Menu::idle) { // otherwise erases the menu
-        show = TFTs::force; // update all
+        updateClockDisplay(TFTs::force); // update all
       }
     }
     hour_old = current_hour;
-  } 
+  }   
+}
 
+
+void updateClockDisplay(TFTs::show_t show) {
   // refresh starting on seconds
   tfts.setDigit(SECONDS_ONES, uclock.getSecondsOnes(), show);
   tfts.setDigit(SECONDS_TENS, uclock.getSecondsTens(), show);
