@@ -18,6 +18,8 @@
 #define NUMBER_OF_CLOCK_FONTS  6  // Number of .CLK or .BMP file sets 1X, 2X, 4X,...
 #define SAVED_CONFIG_NAMESPACE  "configs"
 #define USE_CLK_FILES   // select between .CLK and .BMP images
+#define NIGHT_TIME  22 // dim displays at 10 pm 
+#define DAY_TIME     7 // full brightness after 7 am
 
 // ************ WiFi config *********************
 #define ESP_WPS_MODE      WPS_TYPE_PBC  // push-button
