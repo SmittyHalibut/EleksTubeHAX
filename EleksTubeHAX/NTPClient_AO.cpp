@@ -87,6 +87,7 @@ bool NTPClient::forceUpdate() {
     Serial.println(".");
   #endif
 
+/*
   unsigned char version = this->_packetBuffer[0];
   version = (version >> 3) & 0x07;
   if (version != 4) {
@@ -95,6 +96,53 @@ bool NTPClient::forceUpdate() {
     #endif
     return false;
     }
+*/
+
+  // code from: https://github.com/arduino-libraries/NTPClient/pull/28/commits/bbcc429f68c7624ada4a24f1a103fc34be8d72f8
+	//Perform a few validity checks on the packet
+	if((_packetBuffer[0] & 0b11000000) == 0b11000000)		//Check for LI=UNSYNC
+    {
+    #ifdef DEBUG_NTPClient
+      Serial.println("err: NTP UnSync");
+    #endif
+    return false;
+    }
+  
+	if((_packetBuffer[0] & 0b00111000) >> 3 < 0b100)		//Check for Version >= 4
+    {
+    #ifdef DEBUG_NTPClient
+      Serial.println("err: Incorrect NTP Version");
+    #endif
+    return false;
+    }
+
+	if((_packetBuffer[0] & 0b00000111) != 0b100)			//Check for Mode == Server
+    {
+    #ifdef DEBUG_NTPClient
+      Serial.println("err: NTP mode is not Server");
+    #endif
+    return false;
+    }
+
+	if((_packetBuffer[1] < 1) || (_packetBuffer[1] > 15))		//Check for valid Stratum
+    {
+    #ifdef DEBUG_NTPClient
+      Serial.println("err: Incorrect NTP Stratum");
+    #endif
+    return false;
+    }
+
+	if(	_packetBuffer[16] == 0 && _packetBuffer[17] == 0 && 
+		_packetBuffer[18] == 0 && _packetBuffer[19] == 0 &&
+		_packetBuffer[20] == 0 && _packetBuffer[21] == 0 &&
+		_packetBuffer[22] == 0 && _packetBuffer[22] == 0)		//Check for ReferenceTimestamp != 0
+    {
+    #ifdef DEBUG_NTPClient
+      Serial.println("err: Incorrect NTP Ref Timestamp");
+    #endif
+    return false;
+    }
+
   
   unsigned long highWord = word(this->_packetBuffer[40], this->_packetBuffer[41]);
   unsigned long lowWord = word(this->_packetBuffer[42], this->_packetBuffer[43]);
