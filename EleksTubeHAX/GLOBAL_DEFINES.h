@@ -18,6 +18,8 @@
 #define NUMBER_OF_CLOCK_FONTS  6  // Number of .CLK or .BMP file sets 1X, 2X, 4X,...
 #define SAVED_CONFIG_NAMESPACE  "configs"
 #define USE_CLK_FILES   // select between .CLK and .BMP images
+#define NIGHT_TIME  22 // dim displays at 10 pm 
+#define DAY_TIME     7 // full brightness after 7 am
 
 // ************ WiFi config *********************
 #define ESP_WPS_MODE      WPS_TYPE_PBC  // push-button
@@ -28,7 +30,7 @@
 #define WIFI_CONNECT_TIMEOUT_SEC  20
 #define WIFI_RETRY_CONNECTION_SEC  15
 
-#define GEOLOCATION_API_KEY "e11dc0f9bab446bfa9957aad2c4ad064"  // free for 5k loopkups per month. Get yours on https://www.abstractapi.com/ (login) --> https://app.abstractapi.com/api/ip-geolocation/tester (key)
+#define GEOLOCATION_API_KEY " api key "  // free for 5k loopkups per month. Get yours on https://www.abstractapi.com/ (login) --> https://app.abstractapi.com/api/ip-geolocation/tester (key)
 
 // ************ MQTT config *********************
 

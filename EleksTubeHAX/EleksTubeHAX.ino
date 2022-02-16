@@ -127,8 +127,8 @@ void loop() {
     MqttCommandStateReceived = false;
     randomSeed(millis());
     uint8_t idx;
-//    if (MqttCommandState = 99) 
-//      { idx = random(1, NUMBER_OF_CLOCK_FONTS+1); } else
+    if (MqttCommandState >= 90)
+      { idx = random(1, NUMBER_OF_CLOCK_FONTS+1); } else
       { idx = (MqttCommandState / 5) -1; }  // 10..40 -> graphic 1..6
     Serial.print("Graphic change request from MQTT; command: ");
     Serial.print(MqttCommandState);
@@ -333,7 +333,7 @@ void EveryFullHour() {
   if (FullHour) {
   Serial.print("current hour = ");
   Serial.println(current_hour);
-    if ((current_hour >= 22) || (current_hour < 6)) {
+    if ((current_hour >= NIGHT_TIME) || (current_hour < DAY_TIME)) {
       Serial.println("Setting night mode (dimmed)");
       tfts.dimming = TFT_DIMMED_INTENSITY;
       backlights.dimming = true;

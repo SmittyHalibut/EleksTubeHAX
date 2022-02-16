@@ -7,7 +7,7 @@
 
 // For NTP
 #include <WiFi.h>
-#include <NTPClient.h>
+#include "NTPClient_AO.h"
 
 // For the DS3231 RTC
 #include <DS1307RTC.h>
