@@ -1,13 +1,21 @@
 /**
  * Copyright (c) 2015 by Fabrice Weinberg
  *
- * Library copied from: https://github.com/arduino-libraries/NTPClient and added:
+ * Library copied from: https://github.com/arduino-libraries/NTPClient
+ * additions from: https://github.com/MHotchin/NTPClient/blob/master/NTPClient.cpp
+ * and from: https://github.com/arduino-libraries/NTPClient/pull/28/commits/bbcc429f68c7624ada4a24f1a103fc34be8d72f8
  * - more debug outputs
  * - clearing data buffer before contacting server
  * - checking NTP protocol version
  */
 
 #include "NTPClient_AO.h"
+
+#ifdef DEBUG_NTPClient
+  #define DBG(X) Serial.println(F(X))
+#else
+  #define DBG(X) (void)0
+#endif
 
 NTPClient::NTPClient(UDP& udp) {
   this->_udp            = &udp;
@@ -49,14 +57,16 @@ void NTPClient::begin(int port) {
 }
 
 bool NTPClient::forceUpdate() {
-  #ifdef DEBUG_NTPClient
-    Serial.println("Update from NTP Server");
-  #endif
+  DBG("Update from NTP Server...");
 
-  this->sendNTPPacket();
+  // flush any existing packets
+  while(this->_udp->parsePacket() != 0)
+    this->_udp->flush();
 
-  // clear  buffer before receiving data from server
-  memset(this->_packetBuffer, 0, sizeof(_packetBuffer));
+  if (!this->sendNTPPacket()) {
+    DBG("NTP err: Could not send packet");
+    return false;
+  }
 
   // Wait till data is there or timeout...
   byte timeout = 0;
@@ -65,9 +75,7 @@ bool NTPClient::forceUpdate() {
     delay ( 10 );
     cb = this->_udp->parsePacket();
     if (timeout > 100) {
-      #ifdef DEBUG_NTPClient
-        Serial.println("NTP Timeout!");
-      #endif
+      DBG("NTP Timeout!");
       return false; // timeout after 1000 ms
       }
     timeout++;
@@ -75,8 +83,15 @@ bool NTPClient::forceUpdate() {
 
   this->_lastUpdate = millis() - (10 * (timeout + 1)); // Account for delay in reading the time
 
-  this->_udp->read(this->_packetBuffer, NTP_PACKET_SIZE);
+  byte _packetBuffer[NTP_PACKET_SIZE];
+  // clear  buffer before receiving data from server
+  memset(_packetBuffer, 0, sizeof(_packetBuffer));
 
+  if (this->_udp->read(_packetBuffer, NTP_PACKET_SIZE) != NTP_PACKET_SIZE) {
+    DBG("NTP err: Incorrect data size");
+    return false;
+  }
+  
   #ifdef DEBUG_NTPClient
     Serial.print("NTP Data:");
     char s1[4];
@@ -88,7 +103,7 @@ bool NTPClient::forceUpdate() {
   #endif
 
 /*
-  unsigned char version = this->_packetBuffer[0];
+  unsigned char version = _packetBuffer[0];
   version = (version >> 3) & 0x07;
   if (version != 4) {
     #ifdef DEBUG_NTPClient
@@ -144,8 +159,8 @@ bool NTPClient::forceUpdate() {
     }
 
   
-  unsigned long highWord = word(this->_packetBuffer[40], this->_packetBuffer[41]);
-  unsigned long lowWord = word(this->_packetBuffer[42], this->_packetBuffer[43]);
+  unsigned long highWord = word(_packetBuffer[40], _packetBuffer[41]);
+  unsigned long lowWord = word(_packetBuffer[42], _packetBuffer[43]);
   // combine the four bytes (two words) into a long integer
   // this is NTP time (seconds since Jan 1 1900):
   unsigned long secsSince1900 = highWord << 16 | lowWord;
@@ -215,24 +230,32 @@ void NTPClient::setPoolServerName(const char* poolServerName) {
     this->_poolServerName = poolServerName;
 }
 
-void NTPClient::sendNTPPacket() {
+bool NTPClient::sendNTPPacket() {
+  byte _packetBuffer[NTP_PACKET_SIZE];
   // set all bytes in the buffer to 0
-  memset(this->_packetBuffer, 0, NTP_PACKET_SIZE);
+  memset(_packetBuffer, 0, NTP_PACKET_SIZE);
   // Initialize values needed to form NTP request
   // (see URL above for details on the packets)
-  this->_packetBuffer[0] = 0b11100011;   // LI, Version, Mode
-  this->_packetBuffer[1] = 0;     // Stratum, or type of clock
-  this->_packetBuffer[2] = 6;     // Polling Interval
-  this->_packetBuffer[3] = 0xEC;  // Peer Clock Precision
+  _packetBuffer[0] = 0b11100011;   // LI, Version, Mode
+  _packetBuffer[1] = 0;     // Stratum, or type of clock
+  _packetBuffer[2] = 6;     // Polling Interval
+  _packetBuffer[3] = 0xEC;  // Peer Clock Precision
   // 8 bytes of zero for Root Delay & Root Dispersion
-  this->_packetBuffer[12]  = 49;
-  this->_packetBuffer[13]  = 0x4E;
-  this->_packetBuffer[14]  = 49;
-  this->_packetBuffer[15]  = 52;
+  _packetBuffer[12]  = 49;
+  _packetBuffer[13]  = 0x4E;
+  _packetBuffer[14]  = 49;
+  _packetBuffer[15]  = 52;
 
   // all NTP fields have been given values, now
   // you can send a packet requesting a timestamp:
-  this->_udp->beginPacket(this->_poolServerName, 123); //NTP requests are to port 123
-  this->_udp->write(this->_packetBuffer, NTP_PACKET_SIZE);
-  this->_udp->endPacket();
+  bool returnValue;
+  
+  returnValue = this->_udp->beginPacket(this->_poolServerName, 123); //NTP requests are to port 123
+  
+  if (returnValue) {
+    //  This will always execute both lines, but will return 'false' if *either* fails
+    returnValue = (this->_udp->write(_packetBuffer, NTP_PACKET_SIZE) == NTP_PACKET_SIZE);
+    returnValue = this->_udp->endPacket() && returnValue;
+  }
+  return returnValue;
 }
