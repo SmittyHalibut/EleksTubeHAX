@@ -1,5 +1,7 @@
 # EleksTubeHAX - An aftermarket custom firmware for the EleksTube IPS clock
 Buy your own clock under the name "EleksTube IPS Clock" on eBay, Banggood, etc. Look for places that offer 30-day guarantee, otherwise it can be a fake product!
+[Reddit discussion on the original hack is here.](https://www.reddit.com/r/arduino/comments/mq5td9/hacking_the_elekstube_ips_clock_anyone_tried_it/)
+[Original documentation and software from EleksMaker.](https://wiki.eleksmaker.com/doku.php?id=ips)
 
 ## Differences from original repositiory:
 - Partitions changed to 1MB / 3 MB for more space for images
@@ -11,7 +13,7 @@ Buy your own clock under the name "EleksTube IPS Clock" on eBay, Banggood, etc. 
 - Approx 5-7 clock faces can be loaded onto the clock
 - Catching invalid NTP responses (does not initialize the clock with invalid time)
 - Power button is used to exit the menu (same as on original clock)
-- WPC Button mode is used to connect to the WiFi / router (no need to insert credentials into source code)
+- WPS Button mode is used to connect to the WiFi / router (no need to insert credentials into source code)
 - Night time mode: dims displays and backlight during night time hours
 - MQTT (IoT) support added - clock faces and on/off can be controlled with mobile phone (SmartNest, SmartThings, Google assistant, Alexa, etc.) or included in home automation network
 - WiFi and MQTT errors are displayed below clock faces
@@ -29,10 +31,6 @@ This will extend the lifetime of ESP32. Mine died because of this...
 ## Conversion
 CH340 chip, used for USB-UART conversion can operate both on 5V and 3.3V. On the board it is powered by 5V. Cut one trace on the bottom side of the board that supplies the chip with 5V and route 3.3V over the resistors / capacitors to VDD and VREF.
 See folder "Hardware modification" for the photo.
-
-[Reddit discussion on the original hack is here.](https://www.reddit.com/r/arduino/comments/mq5td9/hacking_the_elekstube_ips_clock_anyone_tried_it/)
-
-[Original documentation and software from EleksMaker.](https://wiki.eleksmaker.com/doku.php?id=ips)
 
 # Backup first!
 If you mess-up your clock, it's only your fault. Backup images from other uses DO NOT WORK as the firmware is locked by MAC address of ESP32.
