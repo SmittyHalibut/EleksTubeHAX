@@ -16,7 +16,9 @@ Buy your own clock under the name "EleksTube IPS Clock" on eBay, Banggood, etc. 
 - MQTT (IoT) support added - clock faces and on/off can be controlled with mobile phone (SmartNest, SmartThings, Google assistant, Alexa, etc.) or included in home automation network
 - WiFi and MQTT errors are displayed below clock faces
 - Updated and cleaned the original clock faces for a better user experience
-- (in works: ) Location detection and automatic TimeZone and DST selection.
+- Location detection and automatic TimeZone and DST selection.
+- Automatic counting number of clock faces loaded onto the clock (no need to rebuild firmware)
+- Added support for original "EleksTube IPS clock" and "SI HAI clock" (chinese cknockoff)
 - (in works: ) Integrated web server to input MQTT connection details (or maybe load new clock faces)
 
 My coding does not keep up with objects, it is more "old school" inline style; please don't complain about that. I tried to write it quite clean. And most importantly: it works fine! :) If someone has courage and time to smash new code into boxes and objects, I'm fine with that.
@@ -32,22 +34,28 @@ See folder "Hardware modification" for the photo.
 
 [Original documentation and software from EleksMaker.](https://wiki.eleksmaker.com/doku.php?id=ips)
 
+# Backup first!
+If you mess-up your clock, it's only your fault. Backup images from other uses DO NOT WORK as the firmware is locked by MAC address of ESP32.
+### Install the USB Serial Port Device Driver
+[EleksTube instructions](https://wiki.eleksmaker.com/doku.php?id=ips) instruct for installing a serial port driver.
+On Windows 10, plug-in the cable and run Windows Update. It will find and install the driver. 
+On Linux it works out of the box.
+### Save your original FW
+* Install ESP32 support (see below)
+* Navigate to folder `\Arduino\..\packages\esp32\tools\esptool_py\3.0.0`
+* Copy file `\original-firmware\_ESP32 save flash 4MB.cmd` and `_ESP32 write flash.cmd` to this folder
+* Change COM port number inside both files
+* Run "save flash" file and wait until it saves the contents of your flash to `backup1.bin`
+* if you want to restore your original firmware run `_ESP32 write flash.cmd`
+
 # How to build this firmware
 Unfortunately, it's not simple plug-and-play.  You need to do some things.  These instructions assume you already know how to use the Arduino IDE, and just need to know WHAT to do.
 
 ## Download this code
 You're either reading this file after downloading it already, or you're reading it on github.  I'll assume you can figure out how to get the code from github and put it somewhere on your local machine.  This is your preference.
 
-### Configure your WiFi network
-In the source code directory (where ever you just installed it), copy `wifi_creds-example.h` to `wifi_creds.h` and edit it for your WiFi SSID and Password.
-
-Note that `wifi_creds.h` is in `.gitignore`, so you can safely put credentials in that file and still submit pull requests, push code, whatever.  git will never store your credentials in a repository.
-
 ## Setup Arduino IDE
 Development was done on Arduino 1.8.13.  It might work on earlier or later versions, I don't know.
-
-### Windows Only: Install the USB Serial Port Device Driver (??)
-I'm not a Windows user, but the [EleksTube instructions](https://wiki.eleksmaker.com/doku.php?id=ips) have you installing a driver to get the serial port to work.  So I assume that's necessary.  It seemed to work out of the box on my Ubuntu 16.04 machine.
 
 ### Install ESP32 board support from Espressif
 File -> Preferences, add `https://dl.espressif.com/dl/package_esp32_index.json` to your Board Manager URLs.  (Comma separated if there's already something there.)
@@ -60,6 +68,7 @@ The default configs in the Tools menu should be fine. The important ones are:
 * Flash Size: 4MB
 * Partition Scheme: No OTA (1 MB app, 3 MB SPIFFS). To fit as many images as possible.
 * Port: Set it to whatever serial port your clock shows up as when plugged in.
+See screenshot here: https://github.com/aly-fly/EleksTubeHAX/blob/main/EleksTubeHAX/_build_settings.png
 
 ### Install Libraries
 All these libraries are in Library Manager.  Several libraries have very similar names, so make sure you select the correct one based on the author.
@@ -71,18 +80,20 @@ Sketch -> Include Library -> Library Manager
 * `DS1307RTC` by Michael Margolis (developed on v1.4.1)
 * `TFT_eSPI` by Bodmer (developed on v2.3.61)
 * `Time` by Michael Margolis (developed on v1.6.0)
-* `PubSubClient`  https://www.arduinolibraries.info/libraries/pub-sub-client
+* `PubSubClient` by Nick O'Leary (developed on v2.8.0)  https://www.arduinolibraries.info/libraries/pub-sub-client
+For "SI HAI clock" also add:
+* RTC by Makuna (developed on 2.3.5) https://github.com/Makuna/Rtc/wiki
 
+IPgeolocation and NTPclient libraries were coped into the project and heavily updated (mostly bug fixes and error-catching)
 
 ### Configure the `TFT_eSPI` library
 **IMPORTANT** You have to do this after every time you install or update the `TFT_eSPI` library!  **IMPORTANT**
 
-The full documentation for this is in the `TFT_eSPI` library, but tl,dr:
-* Edit `Arduino/libraries/TFT_eSPI/User_Setup_Select.h`
+* Edit `Arduino\..\libraries\TFT_eSPI\User_Setup.h`
 * Comment out all `#include` lines.  (The only one that comes from install is `#include <User_Setup.h>`.)
-* Add a `#include` line pointing to `User_Setup.h` in this code.
-  * eg: `#include </home/foo/src/EleksTubeHAX/EleksTubeHAX/User_Setup.h>`
-  * Obviously, update the path to point to where ever you keep your code.  Mac and Windows paths will look very different.
+* Add a `#include` line pointing to `GLOBAL_DEFINES.h` in this code.
+  * eg: `#include "D:\<personal folder>\EleksTubeHAX\GLOBAL_DEFINES.h"`
+  * Obviously, update the path to point to where ever you keep your code.  Mac and Linux paths will look very different.
 
 ### Install SPIFFS uploader
 The code is [here](https://github.com/me-no-dev/arduino-esp32fs-plugin/releases/), and instructions to install it are [here](https://randomnerdtutorials.com/install-esp32-filesystem-uploader-arduino-ide/).
@@ -94,132 +105,40 @@ After installing the ESP32 support, all the libraries, and the SPIFFS uploader, 
  
 ## Upload New Firmware
 Make sure you configured everything:
-* Put your MQTT credentials in `global_defines.h`
-* Pointed `User_Setup_Select.h` in the TFT_eSPI library to our `User_Setup.h`
+* Put your MQTT credentials in `GLOBAL_DEFINES.h`
+* Uncomment MQTT service (if in use)
+* Register for the Geolocation API and inserted your API key into `GLOBAL_DEFINES.h`
+* Select hardware platform (original or chinese knockoff)
+* Pointed `User_Setup_Select.h` in the TFT_eSPI library to `GLOBAL_DEFINES.h`
 
 Connect the clock to your computer with USB.  You'll see a new serial port pop up.  Make sure that's the serial port selected in Tools.
 
 ### Compile and Upload the Code
-Compile (Ctrl-R) and Upload (Ctrl-U) the code.  At this point, it should upload cleanly and successfully.  You'll see the clock boot up and connect to WiFi.  But it doesn't have any bitmaps to display on the screen yet.
+Compile and upload the code.  At this point, it should upload cleanly and successfully.  You'll see the clock boot up and ask for WPS.  But it doesn't have any bitmaps to display on the screen yet.
 
 ### Upload Bitmaps
-The repository comes with a set of BMP files, nixie tubes from the original firmware, in the `data/` directory. See below if you want to make your own.
+The repository comes with a set of CLK and BMP files, modified images from the original firmware, in the `data/` directory. See below if you want to make your own.
 
 Tools -> ESP32 Sketch Data Upload, will upload the files to the SPIFFS filesystem on the micro.  They'll stay there, even if you re-upload the firmware multiple times.
 
 ### Custom Bitmaps (Optional)
 If you want to change these:
-* Create your own BMP files.  Resolution must be max 135x240 pixels, 24bit RGB.
-Can be smaller, it will be centered on the display.
-
+* Create your own BMP files.  Resolution must be max 135x240 pixels, 24bit RGB. Can be smaller, it will be centered on the display. Cut away and black border, this only eats away valuable Flash storage space!
 * Name them `10.bmp` through `19.bmp`; '20.bmp' to '29.bmp', and so on. You can add as many as you can fit into SPIFFS space.
-Put them in the `data/` directory.
+* Run the tool `\Prepare_images\Convert_BMP_to_CLK.exe`
+* Select all prepared BMP files at once. It will create CLK files with smaller size.
+* Put them in the `\data` directory.
+* Then do the "Tools -> ESP32 Sketch Data Upload" dance again.
 Each set (1x, 2x, etc) can be chosen in the menu.
-Remember to set the parameter NUMBER_OF_CLOCK_FONTS to the correct value (number of image sets that fit into your system).
 
-Then do the "Tools -> ESP32 Sketch Data Upload" dance again.
-
-## Setup the Arduino IDE
 
 ### Compile and Upload
 
+### Configure your WiFi network
+When prompted by the clock, press WPS button on your router (or in web-interface of your router). Clock will automatically connect to the WiFi and save data for future use. No need to input your credentials anywhere in the source code.
+It will remember WiFi connection details even if you unplug the clock.
+
 
 # Development Process:
-## Original Firmware
-Check in [original-firmware/](original-firmware/) for a direct dump of the firmware as I received my clock, and instructions for how to restore it to the clock.  This is useful if you're hacking around and get some non-working code, and just want to restore it to original.
-
-## Unpacking BMPs from original firmware
-Download and unpack the original software (link above).  It contains a directory called `IPSimages/` which contains several pre-made SPIFFS images full of the BMPs available in the original software.  You can see what they all look like in the `gallery/` directory, same numbers.
-
-To unpack one of these SPIFFS images into the original BMPs:
-* Make a destination directory, eg: `unpacked/`
-* Run: `mkspiffs -u unpacked/ [image].bin`
-  * This assumes you've already installed ESP32 support in Arduino. `mkspiffs` comes with the ESP32 tools.  On my Linux system, it's in `~/.arduino15/packages/esp32/tools/mkspiffs/0.2.3/mkspiffs`.
-  * If you're on Windows, the IPS software also comes with `mkspiffs.exe` which I assume works the same way, but I haven't confirmed.
-
-This puts 12 files in `unpacked/`:
-* `0.bmp` through `9.bmp` which are 135x240px 24 bit BMPs for the 10 digits
-* `month.bmp` and `date.bmp` another couple BMPs, but I'm not sure where they're ever used.  We won't need these in our firmware, so they can be deleted.
-
-# Documentation
-## Hardware
-* Microcontroller: ESP32-WROOM-32D
-  * [Datasheet](https://www.espressif.com/sites/default/files/documentation/esp32-wroom-32d_esp32-wroom-32u_datasheet_en.pdf)
-  * [Technical Reference Manual](https://www.espressif.com/sites/default/files/documentation/esp32_technical_reference_manual_en.pdf)
-* Displays: [TFT 1.14" 135x240](https://www.aliexpress.com/item/32564432870.html)  (includes pinout of ribbon connector)
-  * ST7789 controller [Datasheet](https://www.rhydolabz.com/documents/33/ST7789.pdf)
-* RGB LED: SK6812 side emmitting
-  * [Datasheet](http://www.ledlightinghut.com/files/SK6812%20side%204020.pdf)
-  * NeoPixel/WS2812 compatible.
-
-## Libraries
-* Talking to displays: [TFT_eSPI](https://github.com/Bodmer/TFT_eSPI)
-* Real Time Clock: [DS3231 RTC](https://circuitdigest.com/microcontroller-projects/esp32-real-time-clock-using-ds3231-module)
-* NeoPixel library for RGB LEDs (link coming)
-
-# Hardware 
-My (SmittyHalibut) notes from reverse engineering the board
-
-## Display boards
-The card edge connector has 13 connection points on each side, but both sides are tied together, so there are only 13 unique pins.
-
-The socket on the board is oriented so that Pin 1 is on the RIGHT SIDE (look for the little arrow on the top of the socket.)  So 
-the documentation below is RIGHT TO LEFT.
-
-1. WS2812 In
-2. WS2812 Out
-3. TFT pin 5, SDA, ESP32 pin 37, IO23, VSPID
-4. TFT pin 6, SCL, ESP32 pin 30, IO18, VSPICLK
-5. TFT pin 4, RS (Register Select, or DC Data Command), ESP32 pin 10, IO25
-6. TFT pin 3, RESET (active low),  ESP32 pin 11, IO26
-7. TFT pin 8, Chip Select, driven by 74HC595
-8. WS2812, GND (Tied to 13)
-9. N/C
-10. TFT pin 1 and 7, Vdd and LEDA (Tied to 12)
-11. TFT pin 2, GND 
-  * Tied to system ground through a MOSFET, controlled by ESP32 pin 12, IO27, so the displays can be completely turned off.
-  * (If I (SmittyHalibut) were doing this, I'd have used a P channel MOSFET and controlled LEDA, which would allow dimming as well as completely shutting it off. Oh well.)
-12. TFT pin 1 and 7, Vdd and LEDA (Tied to 10)
-13. WS2812, GND  (Tied to 8)
-
-## Chip Select Shift Register
-There's a [74HC595](https://www.arduino.cc/en/Tutorial/Foundations/ShiftOut)
-([datasheet](https://www.arduino.cc/en/uploads/Tutorial/595datasheet.pdf))
-that drives the 6 SPI Chip Select lines on the displays.  Chip Select lines are Active Low,
-so write 1s to the displays you do NOT want to update, a 0 to the display you want to update.
-
-Q0 is the most recent bit written to the shift register, Q7 is the oldest bit written.
-
-Outputs:
-* Q0: Hour Tens
-* Q1: Hour Ones
-* Q2: Minute Tens
-* Q3: Minute Ones
-* Q4: Seconds Tens
-* Q5: Seconds Ones
-* Q6 and Q7: Unused, not connected.
-
-Inputs:
-* Ds (Data In): ESP32 pin 13, IO14, GPIO14
-* /OE (Output Enable): Strapped to Ground, always enabled.
-* STcp (Storage Register Clock Input): ESP32 pin 28, IO17, GPIO17
-* SHcp (Shift Register Clock Input): ESP32 pin 27, IO16, GPIO16
-
-## WS2812(?) RGB LEDs
-They only require a single GPIO pin to drive all 6 LEDs.  They are driven in reverse order, right to left.  The first LED is Seconds Ones, the sixth LED is Hours Tens.
-
-* ESP32 pin 14, IO12
-
-## Buttons
-All 4 buttons are externally pulled up (an actual 10k resistor!) and shorted to ground by the button.
-
-* `<<<`: ESP32 pin 9, IO33
-* `MODE`: ESP32 pin 8, IO32
-* `>>>`: ESP pin 7, IO35
-* `POWER`: ESP pin 6, IO34
-
-## RTC DS3231
-The DS3231 ([datasheet](https://datasheets.maximintegrated.com/en/ds/DS3231.pdf)) is an I2C device, and a very common one at that. Lots of good documentation and libraries already.
-
-* SCL: ESP32 pin 36, IO22
-* SDA: ESP32 pin 33, IO21
+See SmittyHalibut on GitHub (original author of this alternative FW) for details.
+My notes are in the document  `Hardware pinout.xlsx`
