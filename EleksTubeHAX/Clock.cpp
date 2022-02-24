@@ -9,13 +9,15 @@
   uint32_t RtcBegin() {
     Rtc.Begin();
     // check if chip is connected and alive
+/*  TCS default value is 0x00 instead of 0x5C, but RTC seems to be working. Let's skip this check.
     Serial.print("Checking DS1302 RTC... ");
     uint8_t TCS = Rtc.GetTrickleChargeSettings();  // 01011100  Initial power-on state
     Serial.print("TCS = ");
-    Serial.print(TCS);
+    Serial.println(TCS);
     if (TCS != 0x5C) {
-      Serial.print("Error communicating with DS1302 !");
-    }    
+      Serial.println("Error communicating with DS1302 !");
+    }
+*/
     if (!Rtc.IsDateTimeValid()) {
         // Common Causes:
         //    1) first time you ran and the device wasn't running yet
