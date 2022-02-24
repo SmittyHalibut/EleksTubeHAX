@@ -42,7 +42,7 @@ On Windows 10, plug-in the cable and run Windows Update. It will find and instal
 On Linux it works out of the box.
 ### Save your original FW
 * Install ESP32 support (see below)
-* Navigate to folder `\Arduino\..\packages\esp32\tools\esptool_py\3.0.0`
+* Navigate to folder `\Arduino\..\packages\esp32\tools\esptool_py\3.0.0` or `\original-firmware\`
 * Copy file `\original-firmware\_ESP32 save flash 4MB.cmd` and `_ESP32 write flash.cmd` to this folder
 * Change COM port number inside both files
 * Run "save flash" file and wait until it saves the contents of your flash to `backup1.bin`
@@ -50,6 +50,10 @@ On Linux it works out of the box.
 
 # How to build this firmware
 Unfortunately, it's not simple plug-and-play.  You need to do some things.  These instructions assume you already know how to use the Arduino IDE, and just need to know WHAT to do.
+
+If you just want to use new firmware without setting up all the tools and libraries and everything, just navigate to folder `\original-firmware\` and modify `_ESP32 write flash.cmd` to upload latest version (BUILD_ELEKSTUBE_xxxxxxx.bin) or (BUILD_SI_HAI_xxxxxxx.bin) to your clock. 
+
+Note that you will use my geolocation API key which has limited usage. If we all together exceed their free plan, it will stop working.
 
 ## Download this code
 You're either reading this file after downloading it already, or you're reading it on github.  I'll assume you can figure out how to get the code from github and put it somewhere on your local machine.  This is your preference.
@@ -145,4 +149,4 @@ See SmittyHalibut on GitHub (original author of this alternative FW) for details
 My notes are in the document  `Hardware pinout.xlsx`
 
 *Happy hacking!*
-- Aljaz
+   - Aljaz
