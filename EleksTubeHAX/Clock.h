@@ -9,9 +9,6 @@
 #include <WiFi.h>
 #include "NTPClient_AO.h"
 
-// For the DS3231 RTC
-#include <DS1307RTC.h>
-
 #include "StoredConfig.h"
 // For TFTs::blanked
 #include "TFTs.h"
@@ -45,12 +42,12 @@ public:
   int8_t getActiveGraphicIdx()          { return config->selected_graphic; }
   void adjustClockGraphicsIdx(int8_t adj) {
     config->selected_graphic += adj;
-    if (config->selected_graphic > NUMBER_OF_CLOCK_FONTS) { config->selected_graphic = NUMBER_OF_CLOCK_FONTS; }
+    if (config->selected_graphic > tfts.NumberOfClockFaces) { config->selected_graphic = tfts.NumberOfClockFaces; }
     if (config->selected_graphic < 1) { config->selected_graphic = 1; }   
   }
   void setClockGraphicsIdx(int8_t set) {
     config->selected_graphic = set;
-    if (config->selected_graphic > NUMBER_OF_CLOCK_FONTS) { config->selected_graphic = NUMBER_OF_CLOCK_FONTS; }
+    if (config->selected_graphic > tfts.NumberOfClockFaces) { config->selected_graphic = tfts.NumberOfClockFaces; }
     if (config->selected_graphic < 1) { config->selected_graphic = 1; }   
   }
 

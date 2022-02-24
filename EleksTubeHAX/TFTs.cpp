@@ -10,6 +10,7 @@ void TFTs::begin() {
   // Turn power on to displays.
   pinMode(TFT_ENABLE_PIN, OUTPUT);
   enableAllDisplays();
+  InvalidateImageInBuffer();
 
   // Initialize the super class.
   init();
@@ -18,6 +19,8 @@ void TFTs::begin() {
   if (!SPIFFS.begin()) {
     Serial.println("SPIFFS initialization failed!");
   }
+
+  NumberOfClockFaces = CountNumberOfClockFaces();
 }
 
 void TFTs::clear() {
@@ -65,8 +68,6 @@ void TFTs::setDigit(uint8_t digit, uint8_t value, show_t show) {
 /* 
  * Displays the bitmap for the value to the given digit. 
  */
- uint8_t FileInBuffer=255; // invalid, always load first image
- uint8_t NextFileRequired = 0; 
  
 void TFTs::showDigit(uint8_t digit) {
   chip_select.setDigit(digit);
@@ -93,6 +94,17 @@ void TFTs::LoadNextImage() {
   }
 }
 
+void TFTs::InvalidateImageInBuffer() { // force reload from Flash with new dimming settings
+  FileInBuffer=255; // invalid, always load first image
+}
+
+bool TFTs::FileExists(const char* path) {
+    fs::File f = SPIFFS.open(path, "r");
+    bool Exists = ((f == true) && !f.isDirectory());
+    f.close();
+    return Exists;
+}
+
 // These BMP functions are stolen directly from the TFT_SPIFFS_BMP example in the TFT_eSPI library.
 // Unfortunately, they aren't part of the library itself, so I had to copy them.
 // I've modified DrawImage to buffer the whole image at once instead of doing it line-by-line.
@@ -102,6 +114,25 @@ void TFTs::LoadNextImage() {
 uint16_t TFTs::output_buffer[TFT_HEIGHT][TFT_WIDTH];
 
 #ifndef USE_CLK_FILES
+
+int8_t TFTs::CountNumberOfClockFaces() {
+  int8_t i, found;
+  char filename[10];
+
+  Serial.print("Searching for BMP clock files... ");
+  found = 0;
+  for (i=1; i < 10; i++) {
+    sprintf(filename, "/%d.bmp", i*10); // search for files 10.bmp, 20.bmp,...
+    if (!FileExists(filename)) {
+      found = i-1;
+      break;
+    }
+  }
+  Serial.print(found);
+  Serial.println(" fonts found.");
+  return found;
+}
+
 bool TFTs::LoadImageIntoBuffer(uint8_t file_index) {
   uint32_t StartTime = millis();
 
@@ -204,6 +235,25 @@ bool TFTs::LoadImageIntoBuffer(uint8_t file_index) {
 
 
 #ifdef USE_CLK_FILES
+
+int8_t TFTs::CountNumberOfClockFaces() {
+  int8_t i, found;
+  char filename[10];
+
+  Serial.print("Searching for CLK clock files... ");
+  found = 0;
+  for (i=1; i < 10; i++) {
+    sprintf(filename, "/%d.clk", i*10); // search for files 10.clk, 20.clk,...
+    if (!FileExists(filename)) {
+      found = i-1;
+      break;
+    }
+  }
+  Serial.print(found);
+  Serial.println(" fonts found.");
+  return found;
+}
+
 bool TFTs::LoadImageIntoBuffer(uint8_t file_index) {
   uint32_t StartTime = millis();
 

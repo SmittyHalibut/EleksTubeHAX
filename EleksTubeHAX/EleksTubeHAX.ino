@@ -36,6 +36,7 @@ void setup() {
   Serial.begin(115200);
   delay(1000);  // Waiting for serial monitor to catch up.
   Serial.println("");
+  Serial.println(FIRMWARE_VERSION);
   Serial.println("In setup().");  
 
   stored_config.begin();
@@ -128,7 +129,7 @@ void loop() {
     randomSeed(millis());
     uint8_t idx;
     if (MqttCommandState >= 90)
-      { idx = random(1, NUMBER_OF_CLOCK_FONTS+1); } else
+      { idx = random(1, tfts.NumberOfClockFaces+1); } else
       { idx = (MqttCommandState / 5) -1; }  // 10..40 -> graphic 1..6
     Serial.print("Graphic change request from MQTT; command: ");
     Serial.print(MqttCommandState);
@@ -336,6 +337,7 @@ void EveryFullHour() {
     if ((current_hour >= NIGHT_TIME) || (current_hour < DAY_TIME)) {
       Serial.println("Setting night mode (dimmed)");
       tfts.dimming = TFT_DIMMED_INTENSITY;
+      tfts.InvalidateImageInBuffer(); // invalidate; reload images with new dimming value
       backlights.dimming = true;
       if (menu.getState() == Menu::idle) { // otherwise erases the menu
         updateClockDisplay(TFTs::force); // update all
@@ -343,6 +345,7 @@ void EveryFullHour() {
     } else {
       Serial.println("Setting daytime mode (normal brightness)");
       tfts.dimming = 255; // 0..255
+      tfts.InvalidateImageInBuffer(); // invalidate; reload images with new dimming value
       backlights.dimming = false;
       if (menu.getState() == Menu::idle) { // otherwise erases the menu
         updateClockDisplay(TFTs::force); // update all

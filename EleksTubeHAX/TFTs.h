@@ -11,6 +11,7 @@
 #include <TFT_eSPI.h>
 #include "ChipSelect.h"
 
+
 class TFTs : public TFT_eSPI {
 public:
   TFTs() : TFT_eSPI(), chip_select(), enabled(false)
@@ -44,19 +45,28 @@ public:
   // Making chip_select public so we don't have to proxy all methods, and the caller can just use it directly.
   ChipSelect chip_select;
 
+
+  uint8_t NumberOfClockFaces = 0;
   void LoadNextImage();
+  void InvalidateImageInBuffer(); // force reload from Flash with new dimming settings
 
 private:
   uint8_t digits[NUM_DIGITS];
   bool enabled;
 
+  bool FileExists(const char* path);
+  int8_t CountNumberOfClockFaces();
   bool LoadImageIntoBuffer(uint8_t file_index);
   void DrawImage(uint8_t file_index);
   uint16_t read16(fs::File &f);
   uint32_t read32(fs::File &f);
 
   static uint16_t output_buffer[TFT_HEIGHT][TFT_WIDTH];
-
+  uint8_t FileInBuffer=255; // invalid, always load first image
+  uint8_t NextFileRequired = 0; 
 };
+
+extern TFTs tfts;
+
 
 #endif // TFTS_H

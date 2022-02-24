@@ -7,7 +7,6 @@
 #include "WiFi_WPS.h"
 #include "IPGeolocation_AO.h"
 
-extern TFTs tfts;
 extern StoredConfig stored_config;
 
 WifiState_t WifiState = disconnected;
