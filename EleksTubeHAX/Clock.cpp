@@ -1,6 +1,58 @@
 #include "Clock.h"
 #include "WiFi_WPS.h"
 
+#ifdef HARDWARE_SI_HAI_CLOCK
+  #include <ThreeWire.h>  
+  #include <RtcDS1302.h>
+  ThreeWire myWire(DS1302_IO, DS1302_SCLK, DS1302_CE); // IO, SCLK, CE
+  RtcDS1302<ThreeWire> Rtc(myWire);
+  uint32_t RtcBegin() {
+    Rtc.Begin();
+    // check if chip is connected and alive
+    Serial.print("Checking DS1302 RTC... ");
+    uint8_t TCS = Rtc.GetTrickleChargeSettings();  // 01011100  Initial power-on state
+    Serial.print("TCS = ");
+    Serial.print(TCS);
+    if (TCS != 0x5C) {
+      Serial.print("Error communicating with DS1302 !");
+    }    
+    if (!Rtc.IsDateTimeValid()) {
+        // Common Causes:
+        //    1) first time you ran and the device wasn't running yet
+        //    2) the battery on the device is low or even missing
+        Serial.println("RTC lost confidence in the DateTime!");
+    }
+    if (Rtc.GetIsWriteProtected()) {
+        Serial.println("RTC was write protected, enabling writing now");
+        Rtc.SetIsWriteProtected(false);
+    }
+
+    if (!Rtc.GetIsRunning()) {
+        Serial.println("RTC was not actively running, starting now");
+        Rtc.SetIsRunning(true);
+        }
+  }
+        
+  uint32_t RtcGet() {
+    return Rtc.GetDateTime();  
+  }
+  void RtcSet(uint32_t tt) {
+    Rtc.SetDateTime(tt);  
+  }
+#else 
+  // For the DS3231 RTC
+  #include <DS1307RTC.h>
+  uint32_t RtcBegin() {}
+  uint32_t RtcGet() {
+    return RTC.get();
+  }
+  void RtcSet(uint32_t tt) {
+    RTC.set(tt);
+  }
+#endif 
+
+
+
 void Clock::begin(StoredConfig::Config::Clock *config_) {
   config = config_;
 
@@ -15,6 +67,7 @@ void Clock::begin(StoredConfig::Config::Clock *config_) {
     config->is_valid = StoredConfig::valid;
   }
   
+  RtcBegin();
   ntpTimeClient.begin();
   ntpTimeClient.update();
   Serial.print("NTP time = ");
@@ -38,7 +91,7 @@ void Clock::loop() {
 time_t Clock::syncProvider() {
   Serial.println("syncProvider()");
   time_t ntp_now, rtc_now;
-  rtc_now = RTC.get();
+  rtc_now = RtcGet();
 
   if (millis() - millis_last_ntp > refresh_ntp_every_ms || millis_last_ntp == 0) {
     if (WifiState == connected) { 
@@ -58,7 +111,7 @@ time_t Clock::syncProvider() {
         Serial.println(rtc_now);
         Serial.println(ntp_now-rtc_now);
         if (ntp_now != rtc_now) {
-          RTC.set(ntp_now);
+          RtcSet(ntp_now);
           Serial.println("Updating RTC");
         }
         millis_last_ntp = millis();
