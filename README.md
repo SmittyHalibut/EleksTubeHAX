@@ -1,6 +1,8 @@
 # EleksTubeHAX - An aftermarket custom firmware for the EleksTube IPS clock
 Buy your own clock under the name "EleksTube IPS Clock" on eBay, Banggood, etc. Look for places that offer 30-day guarantee, otherwise it can be a fake product!
+
 [Reddit discussion on the original hack is here.](https://www.reddit.com/r/arduino/comments/mq5td9/hacking_the_elekstube_ips_clock_anyone_tried_it/)
+
 [Original documentation and software from EleksMaker.](https://wiki.eleksmaker.com/doku.php?id=ips)
 
 ## Differences from original repositiory:
@@ -82,7 +84,7 @@ Sketch -> Include Library -> Library Manager
 For "SI HAI clock" also add:
 * RTC by Makuna (developed on 2.3.5) https://github.com/Makuna/Rtc/wiki
 
-IPgeolocation and NTPclient libraries were coped into the project and heavily updated (mostly bug fixes and error-catching)
+IPgeolocation and NTPclient libraries were coped into the project and heavily updated (mostly bug fixes and error-catching).
 
 ### Configure the `TFT_eSPI` library
 **IMPORTANT** You have to do this after every time you install or update the `TFT_eSPI` library!  **IMPORTANT**
@@ -102,12 +104,12 @@ tl,dr: Download and unzip [this file](https://github.com/lorol/arduino-esp32fs-p
 After installing the ESP32 support, all the libraries, and the SPIFFS uploader, restart Arduino to make sure it knows its all there.
  
 ## Upload New Firmware
-Make sure you configured everything:
-* Put your MQTT credentials in `GLOBAL_DEFINES.h`
+Make sure you configured everything in `GLOBAL_DEFINES.h`.
+* Your MQTT credentials :: Register on [SmartNest.cz](https://www.smartnest.cz/), create a Thermostat device, copy your username, API key and Thermostat Device ID.
 * Uncomment MQTT service (if in use)
-* Register for the Geolocation API and inserted your API key into `GLOBAL_DEFINES.h`
-* Select hardware platform (original or chinese knockoff)
-* Pointed `User_Setup_Select.h` in the TFT_eSPI library to `GLOBAL_DEFINES.h`
+* Your Geolocation API :: Register on [Abstract API](https://www.abstractapi.com/), select Geolocation API and copy your API key.
+* Select hardware platform (original or chinese knockoff) :: comment or un-comment `#define HARDWARE_SI_HAI_CLOCK`
+* Point `User_Setup_Select.h` in the TFT_eSPI library to `GLOBAL_DEFINES.h`
 
 Connect the clock to your computer with USB.  You'll see a new serial port pop up.  Make sure that's the serial port selected in Tools.
 
@@ -122,7 +124,7 @@ Tools -> ESP32 Sketch Data Upload, will upload the files to the SPIFFS filesyste
 ### Custom Bitmaps (Optional)
 If you want to change these:
 * Create your own BMP files.  Resolution must be max 135x240 pixels, 24bit RGB. Can be smaller, it will be centered on the display. Cut away and black border, this only eats away valuable Flash storage space!
-* Name them `10.bmp` through `19.bmp`; '20.bmp' to '29.bmp', and so on. You can add as many as you can fit into SPIFFS space.
+* Name them `10.bmp` through `19.bmp`; `20.bmp` to `29.bmp`, and so on. You can add as many as you can fit into SPIFFS space.
 * Run the tool `\Prepare_images\Convert_BMP_to_CLK.exe`
 * Select all prepared BMP files at once. It will create CLK files with smaller size.
 * Put them in the `\data` directory.
@@ -139,4 +141,8 @@ It will remember WiFi connection details even if you unplug the clock.
 
 # Development Process:
 See SmittyHalibut on GitHub (original author of this alternative FW) for details.
+
 My notes are in the document  `Hardware pinout.xlsx`
+
+*Happy hacking!*
+- Aljaz
