@@ -1,11 +1,15 @@
-# EleksTubeHAX - An aftermarket custom firmware for the EleksTube IPS clock
+# EleksTubeHAX - An aftermarket custom firmware for the "EleksTube IPS clock" and "SI HAI IPS clock"
 Buy your own clock under the name "EleksTube IPS Clock" on eBay, Banggood, etc. Look for places that offer 30-day guarantee, otherwise it can be a fake product!
 
 [Reddit discussion on the original hack is here.](https://www.reddit.com/r/arduino/comments/mq5td9/hacking_the_elekstube_ips_clock_anyone_tried_it/)
 
 [Original documentation and software from EleksMaker.](https://wiki.eleksmaker.com/doku.php?id=ips)
 
-## Differences from original repositiory:
+Firmware supports and was tested on those two clock versions:
+![EleksTube IPS clock](/Photos/EleksTube_original_PCB.jpg)
+![SI HAI IPS clock](/Photos/SI_HAI_ips_clock.jpg)
+
+## Updates from original SmittyHalibut's version:
 - Partitions changed to 1MB / 3 MB for more space for images
 - Changed menu to add support for changing clock faces in the menu
 - BMP files (24 BPP) converted to 16BPP custom (.CLK) files which only have a header, size and pre-processed pixel data.
@@ -72,7 +76,7 @@ The default configs in the Tools menu should be fine. The important ones are:
 * Flash Size: 4MB
 * Partition Scheme: No OTA (1 MB app, 3 MB SPIFFS). To fit as many images as possible.
 * Port: Set it to whatever serial port your clock shows up as when plugged in.
-See screenshot here: https://github.com/aly-fly/EleksTubeHAX/blob/main/EleksTubeHAX/_build_settings.png
+See screenshot here: [link](/EleksTubeHAX/_build_settings.png)
 
 ### Install Libraries
 All these libraries are in Library Manager.  Several libraries have very similar names, so make sure you select the correct one based on the author.
@@ -144,9 +148,9 @@ It will remember WiFi connection details even if you unplug the clock.
 
 
 # Development Process:
-See SmittyHalibut on GitHub (original author of this alternative FW) for details.
+See [SmittyHalibut's readme](/README_SmittyHalibut.md) for details.
 
-My notes are in the document  `Hardware pinout.xlsx`
+Hardware pinout and notes are in the document  `Hardware pinout.xlsx`
 
 *Happy hacking!*
    - Aljaz
