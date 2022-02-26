@@ -32,11 +32,12 @@
 #define WIFI_CONNECT_TIMEOUT_SEC  20
 #define WIFI_RETRY_CONNECTION_SEC  15
 
+//#define GEOLOCATION_ENABLED    // enable after creating an account and copying Geolocation API below:
 #define GEOLOCATION_API_KEY " api key "  // free for 5k loopkups per month. Get yours on https://www.abstractapi.com/ (login) --> https://app.abstractapi.com/api/ip-geolocation/tester (key)
 
 // ************ MQTT config *********************
 
-//#define MQTT_ENABLED  // enable after creating an account, setting up the device on smartnest.cz and pilling in all the data below:
+//#define MQTT_ENABLED  // enable after creating an account, setting up the Thermostat device on www.smartnest.cz and filling in all the data below:
 
 #define MQTT_BROKER "smartnest.cz"             // Broker host
 #define MQTT_PORT 1883                         // Broker port

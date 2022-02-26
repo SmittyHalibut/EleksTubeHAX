@@ -57,7 +57,7 @@ Unfortunately, it's not simple plug-and-play.  You need to do some things.  Thes
 
 If you just want to use new firmware without setting up all the tools and libraries and everything, just navigate to folder `\original-firmware\` and modify `_ESP32 write flash.cmd` to upload latest version (BUILD_ELEKSTUBE_xxxxxxx.bin) or (BUILD_SI_HAI_xxxxxxx.bin) to your clock. 
 
-Note that you will use my geolocation API key which has limited usage. If we all together exceed their free plan, it will stop working.
+***Note:*** Pre-built firmware does NOT have Geolocation function (automatic timezone and DST adjust) and IoT / MQTT connectivity (support for Google, Alexa, Siri, and other types of remote control).
 
 ## Download this code
 You're either reading this file after downloading it already, or you're reading it on github.  I'll assume you can figure out how to get the code from github and put it somewhere on your local machine.  This is your preference.
@@ -89,8 +89,9 @@ Sketch -> Include Library -> Library Manager
 * `TFT_eSPI` by Bodmer (developed on v2.3.61)
 * `Time` by Michael Margolis (developed on v1.6.0)
 * `PubSubClient` by Nick O'Leary (developed on v2.8.0)  https://www.arduinolibraries.info/libraries/pub-sub-client
+* `Arduino_JSON` by Arduino (developed on v0.1.0)
 For "SI HAI clock" also add:
-* RTC by Makuna (developed on 2.3.5) https://github.com/Makuna/Rtc/wiki
+* `RTC by Makuna` (developed on 2.3.5) https://github.com/Makuna/Rtc/wiki
 
 IPgeolocation and NTPclient libraries were coped into the project and heavily updated (mostly bug fixes and error-catching).
 
@@ -140,8 +141,6 @@ If you want to change these:
 Each set (1x, 2x, etc) can be chosen in the menu.
 
 
-### Compile and Upload
-
 ### Configure your WiFi network
 When prompted by the clock, press WPS button on your router (or in web-interface of your router). Clock will automatically connect to the WiFi and save data for future use. No need to input your credentials anywhere in the source code.
 It will remember WiFi connection details even if you unplug the clock.
@@ -152,5 +151,8 @@ See [SmittyHalibut's readme](/README_SmittyHalibut.md) for details.
 
 Hardware pinout and notes are in the document  `Hardware pinout.xlsx`
 
+# Contributors
+- Mark Smith, aka Smitty ... @SmittyHalibut on GitHub, Twitter, and YouTube.
+- Aljaz Ogrin, aka aly-fly ... @aly-fly on GitHub and Instagram
+
 *Happy hacking!*
-   - Aljaz

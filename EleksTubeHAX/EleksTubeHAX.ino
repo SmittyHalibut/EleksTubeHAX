@@ -74,7 +74,7 @@ void setup() {
   tfts.println("MQTT start");
   MqttStart();
 
-
+#ifdef GEOLOCATION_ENABLED
   tfts.println("Geoloc query");
   if (GetGeoLocationTimeZoneOffset()) {
     tfts.print("TZ: ");
@@ -87,6 +87,7 @@ void setup() {
     Serial.println("Geolocation failed.");    
     tfts.println("Geo FAILED");
   }
+#endif
 
   tfts.println("Done with setup.");
 

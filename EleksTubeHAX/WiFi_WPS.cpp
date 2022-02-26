@@ -261,8 +261,12 @@ bool GetGeoLocationTimeZoneOffset() {
    
     Serial.println(String("Geo Time Zone: ") + String(IPG.tz));
     Serial.println(String("Geo TZ Offset: ") + String(IPG.offset));  // we are interested in this one, type = double
+    Serial.println(String("Geo DST: ") + String(IPG.is_dst));  // we are interested in this one, type = boolean
     Serial.println(String("Geo Current Time: ") + String(IPG.current_time)); // currently not used
-    GeoLocTZoffset = IPG.offset;
+    if (IPG.is_dst)
+      GeoLocTZoffset = IPG.offset + 1; // add +1 hour
+    else
+      GeoLocTZoffset = IPG.offset;
     return true;
   } else {
     Serial.println("Geolocation failed.");    
