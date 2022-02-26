@@ -267,6 +267,7 @@ bool GetGeoLocationTimeZoneOffset() {
       GeoLocTZoffset = IPG.offset + 1; // add +1 hour
     else
       GeoLocTZoffset = IPG.offset;
+
     return true;
   } else {
     Serial.println("Geolocation failed.");    
