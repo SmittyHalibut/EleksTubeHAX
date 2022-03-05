@@ -150,9 +150,9 @@ bool TFTs::LoadImageIntoBuffer(uint8_t file_index) {
     return(false);
   }
 
-  uint32_t seekOffset;
+  uint32_t seekOffset, headerSize, paletteSize = 0;
   int16_t w, h, row, col;
-  uint16_t  r, g, b;
+  uint16_t  r, g, b, bitDepth;
 
   // black background - clear whole buffer
   memset(output_buffer, '\0', sizeof(output_buffer));
@@ -172,17 +172,21 @@ bool TFTs::LoadImageIntoBuffer(uint8_t file_index) {
     return(false);
   }
 
-  read32(bmpFS);
-  read32(bmpFS);
-  seekOffset = read32(bmpFS);
-  read32(bmpFS);
-  w = read32(bmpFS);
-  h = read32(bmpFS);
+  read32(bmpFS); // filesize in bytes
+  read32(bmpFS); // reserved
+  seekOffset = read32(bmpFS); // start of bitmap
+  headerSize = read32(bmpFS); // header size
+  w = read32(bmpFS); // width
+  h = read32(bmpFS); // height
+  read16(bmpFS); // color planes (must be 1)
+  bitDepth = read16(bmpFS);
 #ifdef DEBUG_OUTPUT
-  Serial.print("image W, H: ");
+  Serial.print("image W, H, BPP: ");
   Serial.print(w); 
   Serial.print(", "); 
-  Serial.println(h);
+  Serial.print(h);
+  Serial.print(", "); 
+  Serial.println(bitDepth);
   Serial.print("dimming: ");
   Serial.println(dimming);
 #endif
@@ -190,16 +194,28 @@ bool TFTs::LoadImageIntoBuffer(uint8_t file_index) {
   int16_t x = (TFT_WIDTH - w) / 2;
   int16_t y = (TFT_HEIGHT - h) / 2;
   
-  if ((read16(bmpFS) != 1) || (read16(bmpFS) != 24) || (read32(bmpFS) != 0)) {
+  if (read32(bmpFS) != 0 || (bitDepth != 24 && bitDepth != 1 && bitDepth != 4 && bitDepth != 8)) {
     Serial.println("BMP format not recognized.");
     bmpFS.close();
     return(false);
   }
 
+  uint32_t palette[256];
+  if (bitDepth <= 8) // 1,4,8 bit bitmap: read color palette
+  {
+    read32(bmpFS); read32(bmpFS); read32(bmpFS); // size, w resolution, h resolution
+    paletteSize = read32(bmpFS);
+    if (paletteSize == 0) paletteSize = bitDepth * bitDepth; // if 0, size is 2^bitDepth
+    bmpFS.seek(14 + headerSize); // start of color palette
+    for (uint16_t i = 0; i < paletteSize; i++) {
+      palette[i] = read32(bmpFS);
+    }
+  }
+
   bmpFS.seek(seekOffset);
 
-  uint16_t padding = (4 - ((w * 3) & 3)) & 3;
-  uint8_t lineBuffer[w * 3 + padding];
+  uint32_t lineSize = ((bitDepth * w +31) >> 5) * 4;
+  uint8_t lineBuffer[lineSize];
   
   // row is decremented as the BMP image is drawn bottom up
   for (row = h-1; row >= 0; row--) {
@@ -210,16 +226,35 @@ bool TFTs::LoadImageIntoBuffer(uint8_t file_index) {
     // Convert 24 to 16 bit colours while copying to output buffer.
     for (col = 0; col < w; col++)
     {
-      b = *bptr++;
-      g = *bptr++;
-      r = *bptr++;
-      b *= dimming;
-      g *= dimming;
-      r *= dimming;
-      b = b >> 8;
-      g = g >> 8;
-      r = r >> 8;
-      output_buffer[row+y][col+x] = ((r & 0xF8) << 8) | ((g & 0xFC) << 3) | (b >> 3);
+      if (bitDepth == 24) {
+          b = *bptr++;
+          g = *bptr++;
+          r = *bptr++;
+        } else {
+          uint32_t c = 0;
+          if (bitDepth == 8) {
+            c = palette[*bptr++];
+          }
+          else if (bitDepth == 4) {
+            c = palette[(*bptr >> ((col & 0x01)?0:4)) & 0x0F];
+            if (col & 0x01) bptr++;
+          }
+          else { // bitDepth == 1
+            c = palette[(*bptr >> (7 - (col & 0x07))) & 0x01];
+            if ((col & 0x07) == 0x07) bptr++;
+          }
+          b = c; g = c >> 8; r = c >> 16;
+        }
+        if (dimming < 255) { // only dim when needed
+          b *= dimming;
+          g *= dimming;
+          r *= dimming;
+          b = b >> 8;
+          g = g >> 8;
+          r = r >> 8;
+        }
+        output_buffer[row][col] = ((r & 0xF8) << 8) | ((g & 0xFC) << 3) | ((b & 0xFF) >> 3);
+      }
     }
   }
   FileInBuffer = file_index;
