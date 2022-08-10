@@ -1,6 +1,6 @@
 #include "TFTs.h"
 #include "WiFi_WPS.h"
-#include "mqtt_client_ips.h"
+#include "Mqtt_client_ips.h"
 
 void TFTs::begin() {
   // Start with all displays selected.

@@ -10,7 +10,7 @@
  * Documentation: https://www.docu.smartnest.cz/
  */
 
-#include "mqtt_client_ips.h"
+#include "Mqtt_client_ips.h"
 #include "WiFi.h"       // for ESP32
 #include <PubSubClient.h>  // Download and install this library first from: https://www.arduinolibraries.info/libraries/pub-sub-client
 

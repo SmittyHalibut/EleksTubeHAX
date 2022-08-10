@@ -15,7 +15,7 @@
 #include "Menu.h"
 #include "StoredConfig.h"
 #include "WiFi_WPS.h"
-#include "mqtt_client_ips.h"
+#include "Mqtt_client_ips.h"
 
 Backlights backlights;
 Buttons buttons;
