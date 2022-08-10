@@ -85,6 +85,8 @@ Sketch -> Include Library -> Library Manager
 * `TFT_eSPI` by Bodmer (developed on v2.3.61)
 * `Time` by Michael Margolis (developed on v1.6.0)
 * `PubSubClient` by Nick O'Leary (developed on v2.8.0)  https://www.arduinolibraries.info/libraries/pub-sub-client
+* `ArduinoJson` by Benoit Blanchon (worked on 6.19.4)
+
 For "SI HAI clock" also add:
 * RTC by Makuna (developed on 2.3.5) https://github.com/Makuna/Rtc/wiki
 
