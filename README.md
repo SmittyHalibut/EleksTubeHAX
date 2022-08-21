@@ -95,7 +95,7 @@ IPgeolocation and NTPclient libraries were coped into the project and heavily up
 ### Configure the `TFT_eSPI` library
 **IMPORTANT** You have to do this after every time you install or update the `TFT_eSPI` library!  **IMPORTANT**
 
-* Edit `Arduino\..\libraries\TFT_eSPI\User_Setup.h`
+* Edit `Arduino\..\libraries\TFT_eSPI\User_Setup_Select.h`
 * Comment out all `#include` lines.  (The only one that comes from install is `#include <User_Setup.h>`.)
 * Add a `#include` line pointing to `GLOBAL_DEFINES.h` in this code.
   * eg: `#include "D:\<personal folder>\EleksTubeHAX\GLOBAL_DEFINES.h"`
