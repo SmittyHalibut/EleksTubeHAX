@@ -274,6 +274,8 @@ void loop() {
         tfts.printf("    %d\n", uclock.getActiveGraphicIdx());
       }
       // connect to WiFi using wps pushbutton mode
+
+#ifndef HARDWARE_NO_WPS   ////  WPS code
       else if (menu_state == Menu::start_wps) {
         if (menu_change != 0) { // button was pressed
           if (menu_change < 0) { // left button
@@ -284,12 +286,14 @@ void loop() {
             tfts.setCursor(0, 0, 4);
             WiFiStartWps();
           }
+          
         }
         
         setupMenu();
         tfts.println("Connect to WiFi?");
         tfts.println("Left=WPS");
       }
+#endif   
     }
   }
 
