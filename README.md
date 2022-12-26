@@ -23,6 +23,7 @@ Buy your own clock under the name "EleksTube IPS Clock" on eBay, Banggood, etc. 
 - Location detection and automatic TimeZone and DST selection.
 - Automatic counting number of clock faces loaded onto the clock (no need to rebuild firmware)
 - Added support for original "EleksTube IPS clock" and "SI HAI clock" (chinese cknockoff)
+- added support for NovelLife SE clock -- without gesture sensor
 - (in works: ) Integrated web server to input MQTT connection details (or maybe load new clock faces)
 
 My coding does not keep up with objects, it is more "old school" inline style; please don't complain about that. I tried to write it quite clean. And most importantly: it works fine! :) If someone has courage and time to smash new code into boxes and objects, I'm fine with that.
@@ -114,7 +115,9 @@ Make sure you configured everything in `GLOBAL_DEFINES.h`.
 * Your MQTT credentials :: Register on [SmartNest.cz](https://www.smartnest.cz/), create a Thermostat device, copy your username, API key and Thermostat Device ID.
 * Uncomment MQTT service (if in use)
 * Your Geolocation API :: Register on [Abstract API](https://www.abstractapi.com/), select Geolocation API and copy your API key.
-* Select hardware platform (original or chinese knockoff) :: comment or un-comment `#define HARDWARE_SI_HAI_CLOCK`
+* Select hardware platform (Elekstube, Novell or SI_HAI) :: un-comment appropriate hardware define 
+* Select if you prefer WPS or hardcoded credentials for WIFI
+* Create SECRETS.h file for WIFI, MQTT, and Geolocation API keys (see example file secretsexample.h)
 * Point `User_Setup_Select.h` in the TFT_eSPI library to `GLOBAL_DEFINES.h`
 
 Connect the clock to your computer with USB.  You'll see a new serial port pop up.  Make sure that's the serial port selected in Tools.
