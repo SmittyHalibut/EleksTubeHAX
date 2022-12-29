@@ -13,7 +13,8 @@
 
 
 #include "SECRETS.h"
-//// SECRETS.h must be created ---- see secretsexample_.h
+//// SECRETS.h must be created ---- see SECRETESexample.h
+
 
 
 
