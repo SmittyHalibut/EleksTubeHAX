@@ -117,7 +117,7 @@ Make sure you configured everything in `GLOBAL_DEFINES.h`.
 * Your Geolocation API :: Register on [Abstract API](https://www.abstractapi.com/), select Geolocation API and copy your API key.
 * Select hardware platform (Elekstube, Novell or SI_HAI) :: un-comment appropriate hardware define 
 * Select if you prefer WPS or hardcoded credentials for WIFI
-* Create SECRETS.h file for WIFI, MQTT, and Geolocation API keys (see example file secretsexample.h)
+* Create SECRETS.h file for WIFI, MQTT, and Geolocation API keys (see example file SECRETSexample.h)
 * Point `User_Setup_Select.h` in the TFT_eSPI library to `GLOBAL_DEFINES.h`
 
 Connect the clock to your computer with USB.  You'll see a new serial port pop up.  Make sure that's the serial port selected in Tools.
