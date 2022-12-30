@@ -2,7 +2,9 @@
  * Author: Aljaz Ogrin
  * Project: Alternative firmware for EleksTube IPS clock
  * Hardware: ESP32
- * File description: Global configuration for the complete project
+ * File description: Hardware Global configuration for the complete project
+ * Should only need editing for a new version of the clock
+ * User defines are located in "USER_DEFINES.h"
  */
  
 #ifndef GLOBAL_DEFINES_H_
@@ -11,59 +13,10 @@
 #include <stdint.h>
 #include <Arduino.h>
 
-
-#include "SECRETS.h"
-//// SECRETS.h must be created ---- see SECRETESexample.h
+#include "USER_DEFINES.h"    ///// User defines
 
 
-
-
-//#define HARDWARE_Elekstube_CLOCK  // uncomment only for the original Elekstube clock
-//#define HARDWARE_SI_HAI_CLOCK  // uncomment only for the fake chinese copy of the clock
-#define HARDWARE_NovelLife_SE_CLOCK  // uncomment for the NovelLife SE version; non-SE not tested
-
-
-//#define DEBUG_OUTPUT
-
-#define DEVICE_NAME       "IPS-clock"
-#define FIRMWARE_VERSION  "aly-fly IPS clock v0.3"
 #define SAVED_CONFIG_NAMESPACE  "configs"
-#define USE_CLK_FILES   // select between .CLK and .BMP images
-#define NIGHT_TIME  22 // dim displays at 10 pm 
-#define DAY_TIME     7 // full brightness after 7 am
-
-// ************ WiFi config *********************
-#define ESP_WPS_MODE      WPS_TYPE_PBC  // push-button
-#define ESP_MANUFACTURER  "ESPRESSIF"
-#define ESP_MODEL_NUMBER  "ESP32"
-#define ESP_MODEL_NAME    "IPS clock"
-
-#define WIFI_CONNECT_TIMEOUT_SEC  20
-#define WIFI_RETRY_CONNECTION_SEC  15
-
-
-#define HARDWARE_NO_WPS  ////comment to use WPS 
-////#define SECRET_WIFI_SSID  define in the secrets.h file
-////#define SECRET_WIFI_PASSWD  define in the secrets.h file
-
-
-
-////GEOLOCATION API Get yours on https://www.abstractapi.com/ (login) --> https://app.abstractapi.com/api/ip-geolocation/tester (key) and define in the secrets.h file
-/////GEOLOCATION_API_KEY define in the secrets.h file
-
-// ************ MQTT config *********************
-//#define MQTT_ENABLED  // enable after creating an account, setting up the device on smartnest.cz and pilling in all the data below:
-///username and api key in the secrets.h file
-///#define MQTT_BROKER "smartnest.cz"             // in the secrets.h file
-///#define MQTT_CLIENT "deviceid "                // in the secrets.h file
-
-#define MQTT_PORT 1883                         // Broker port
-#define MQTT_RECONNECT_WAIT_SEC  30  // how long to wait between retries to connect to broker
-#define MQTT_REPORT_STATUS_EVERY_SEC  71 // How often report status to MQTT Broker
-
-// ************ Night time operation *********************
-#define BACKLIGHT_DIMMED_INTENSITY  1  // 0..7
-#define TFT_DIMMED_INTENSITY  20    // 0..255
 
 // ************ Hardware definitions *********************
 

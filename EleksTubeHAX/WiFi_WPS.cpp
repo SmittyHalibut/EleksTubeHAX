@@ -17,7 +17,7 @@ uint32_t TimeOfWifiReconnectAttempt = 0;
 double GeoLocTZoffset = 0;
 
 
-#ifndef HARDWARE_NO_WPS   ////  WPS code
+#ifdef WIFI_USE_WPS   ////  WPS code
 
 static esp_wps_config_t wps_config;
 void wpsInitConfig(){
@@ -118,7 +118,7 @@ That is, assuming cred[0].ssid is defined as an array... you may be better off u
       WiFi.begin();
       break;
 
-#ifndef HARDWARE_NO_WPS   ////  WPS code      
+#ifdef WIFI_USE_WPS   ////  WPS code      
     case SYSTEM_EVENT_STA_WPS_ER_FAILED:
       WifiState = wps_failed;
       Serial.println("WPS Failed, retrying");
@@ -153,7 +153,7 @@ void WifiBegin()  {
   WiFi.config(INADDR_NONE, INADDR_NONE, INADDR_NONE, INADDR_NONE);  
   WiFi.setHostname(DEVICE_NAME);  
 
-#ifndef HARDWARE_NO_WPS   ////  WPS code
+#ifdef WIFI_USE_WPS   ////  WPS code
   // no data is saved, start WPS imediatelly
   if (stored_config.config.wifi.WPS_connected != StoredConfig::valid) {
     // Config is invalid, probably a new device never had its config written.
@@ -227,7 +227,7 @@ void WifiReconnect() {
   }    
 }
 
-#ifndef HARDWARE_NO_WPS   ////  WPS code
+#ifdef WIFI_USE_WPS   ////  WPS code
 bool WiFiStartWps() {
   // erase settings
   sprintf(stored_config.config.wifi.ssid, ""); 

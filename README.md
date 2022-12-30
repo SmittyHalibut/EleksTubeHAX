@@ -23,8 +23,10 @@ Buy your own clock under the name "EleksTube IPS Clock" on eBay, Banggood, etc. 
 - Location detection and automatic TimeZone and DST selection.
 - Automatic counting number of clock faces loaded onto the clock (no need to rebuild firmware)
 - Added support for original "EleksTube IPS clock" and "SI HAI clock" (chinese cknockoff)
-- added support for NovelLife SE clock -- without gesture sensor
+- Added support for NovelLife SE clock -- without gesture sensor thus far
+- Added option to use hard-coded WIFI credentials instead of WPS
 - (in works: ) Integrated web server to input MQTT connection details (or maybe load new clock faces)
+
 
 My coding does not keep up with objects, it is more "old school" inline style; please don't complain about that. I tried to write it quite clean. And most importantly: it works fine! :) If someone has courage and time to smash new code into boxes and objects, I'm fine with that.
 
@@ -111,13 +113,12 @@ tl,dr: Download and unzip [this file](https://github.com/lorol/arduino-esp32fs-p
 After installing the ESP32 support, all the libraries, and the SPIFFS uploader, restart Arduino to make sure it knows its all there.
  
 ## Upload New Firmware
-Make sure you configured everything in `GLOBAL_DEFINES.h`.
+Make sure you configured everything in `USER_DEFINES.h`.
 * Your MQTT credentials :: Register on [SmartNest.cz](https://www.smartnest.cz/), create a Thermostat device, copy your username, API key and Thermostat Device ID.
 * Uncomment MQTT service (if in use)
 * Your Geolocation API :: Register on [Abstract API](https://www.abstractapi.com/), select Geolocation API and copy your API key.
-* Select hardware platform (Elekstube, Novell or SI_HAI) :: un-comment appropriate hardware define 
-* Select if you prefer WPS or hardcoded credentials for WIFI
-* Create SECRETS.h file for WIFI, MQTT, and Geolocation API keys (see example file SECRETSexample.h)
+* Select hardware platform (Elekstube, NovelLife, or SI_HAI) :: un-comment appropriate hardware define 
+* Select if you prefer WPS or hardcoded credentials for WIFI (comment 'WIFI_USE_WPS' line and add credentials if desired)
 * Point `User_Setup_Select.h` in the TFT_eSPI library to `GLOBAL_DEFINES.h`
 
 Connect the clock to your computer with USB.  You'll see a new serial port pop up.  Make sure that's the serial port selected in Tools.
@@ -140,13 +141,8 @@ If you want to change these:
 * Then do the "Tools -> ESP32 Sketch Data Upload" dance again.
 Each set (1x, 2x, etc) can be chosen in the menu.
 
-
-### Compile and Upload
-
 ### Configure your WiFi network
-When prompted by the clock, press WPS button on your router (or in web-interface of your router). Clock will automatically connect to the WiFi and save data for future use. No need to input your credentials anywhere in the source code.
-It will remember WiFi connection details even if you unplug the clock.
-
+For WPS:  When prompted by the clock, press WPS button on your router (or in web-interface of your router). Clock will automatically connect to the WiFi and save data for future use. No need to input your credentials anywhere in the source code.  THe clock will remember WiFi connection details even if you unplug the clock.
 
 # Development Process:
 See SmittyHalibut on GitHub (original author of this alternative FW) for details.
