@@ -273,9 +273,10 @@ void loop() {
         tfts.println(" graphic:");
         tfts.printf("    %d\n", uclock.getActiveGraphicIdx());
       }
-      // connect to WiFi using wps pushbutton mode
+     
 
-#ifndef HARDWARE_NO_WPS   ////  WPS code
+#ifdef WIFI_USE_WPS   ////  WPS code
+  // connect to WiFi using wps pushbutton mode
       else if (menu_state == Menu::start_wps) {
         if (menu_change != 0) { // button was pressed
           if (menu_change < 0) { // left button
