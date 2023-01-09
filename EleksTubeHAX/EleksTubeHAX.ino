@@ -332,11 +332,15 @@ void setupMenu() {
   tfts.setCursor(0, 124, 4);
 }
 
-bool isDimmingTime(uint8_t current_hour) {
-    if (DAY_TIME < NIGHT_TIME)
-      return (current_hour >= NIGHT_TIME) || (current_hour < DAY_TIME);
-    else
-      return (NIGHT_TIME <= current_hour) && (current_hour < DAY_TIME);  
+bool isNightTime(uint8_t current_hour) {
+    if (DAY_TIME < NIGHT_TIME) {
+      // "Night" spans across midnight
+      return (current_hour < DAY_TIME) || (current_hour >= NIGHT_TIME);
+    }
+    else {
+      // "Night" starts after midnight, entirely contained within the day
+      return (current_hour >= NIGHT_TIME) && (current_hour < DAY_TIME);  
+    }
 }
 
 void EveryFullHour() {
