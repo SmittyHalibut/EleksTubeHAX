@@ -350,7 +350,7 @@ void EveryFullHour() {
   if (FullHour) {
   Serial.print("current hour = ");
   Serial.println(current_hour);
-    if (isDimmingTime(current_hour)) {
+    if (isNightTime(current_hour)) {
       Serial.println("Setting night mode (dimmed)");
       tfts.dimming = TFT_DIMMED_INTENSITY;
       tfts.InvalidateImageInBuffer(); // invalidate; reload images with new dimming value
