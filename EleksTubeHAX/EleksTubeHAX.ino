@@ -333,7 +333,7 @@ void setupMenu() {
 }
 
 bool isDimmingTime(uint8_t current_hour) {
-    if (DAY_TIME < N  IGHT_TIME)
+    if (DAY_TIME < NIGHT_TIME)
       return (current_hour >= NIGHT_TIME) || (current_hour < DAY_TIME);
     else
       return (NIGHT_TIME <= current_hour) && (current_hour < DAY_TIME);  
