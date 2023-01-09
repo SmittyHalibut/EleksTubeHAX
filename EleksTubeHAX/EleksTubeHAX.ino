@@ -332,6 +332,13 @@ void setupMenu() {
   tfts.setCursor(0, 124, 4);
 }
 
+bool isDimmingTime(uint8_t current_hour) {
+    if (DAY_TIME < N  IGHT_TIME)
+      return (current_hour >= NIGHT_TIME) || (current_hour < DAY_TIME);
+    else
+      return (NIGHT_TIME <= current_hour) && (current_hour < DAY_TIME);  
+}
+
 void EveryFullHour() {
   // dim the clock at night
   uint8_t current_hour = uclock.getHour24();
@@ -339,7 +346,7 @@ void EveryFullHour() {
   if (FullHour) {
   Serial.print("current hour = ");
   Serial.println(current_hour);
-    if ((current_hour >= NIGHT_TIME) || (current_hour < DAY_TIME)) {
+    if (isDimmingTime(current_hour)) {
       Serial.println("Setting night mode (dimmed)");
       tfts.dimming = TFT_DIMMED_INTENSITY;
       tfts.InvalidateImageInBuffer(); // invalidate; reload images with new dimming value
