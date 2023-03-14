@@ -6,7 +6,7 @@
   #include <RtcDS1302.h>
   ThreeWire myWire(DS1302_IO, DS1302_SCLK, DS1302_CE); // IO, SCLK, CE
   RtcDS1302<ThreeWire> Rtc(myWire);
-  uint32_t RtcBegin() {
+  void RtcBegin() {
     Rtc.Begin();
     // check if chip is connected and alive
 /*  TCS default value is 0x00 instead of 0x5C, but RTC seems to be working. Let's skip this check.
