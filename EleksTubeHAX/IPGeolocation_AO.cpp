@@ -146,6 +146,7 @@ bool IPGeolocation::updateStatus(IPGeo *I){
     DEBUGPRINT(I->tz);
     DEBUGPRINT("Geo Current Time: ");
     DEBUGPRINT(I->current_time);
+    return true;
   }
   else {
     /*  UNIFINISHED BUGGY CODE
@@ -212,4 +213,6 @@ bool IPGeolocation::updateStatus(IPGeo *I){
     DEBUGPRINT(dst_savings);
   */
   }
+  return false;
+
 }
