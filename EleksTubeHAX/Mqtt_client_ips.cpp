@@ -144,7 +144,7 @@ void callback(char* topic, byte* payload, unsigned int length) {  //A new messag
     int tokensNumber = 10;
     char* tokens[tokensNumber];
     char message[length + 1];
-    splitTopic(topic, tokens, tokensNumber);
+    tokensNumber = splitTopic(topic, tokens, tokensNumber);
     sprintf(message, "%c", (char)payload[0]);
     for (int i = 1; i < length; i++) {
         sprintf(message, "%s%c", message, (char)payload[i]);
@@ -160,7 +160,9 @@ void callback(char* topic, byte* payload, unsigned int length) {  //A new messag
     Serial.print("/");
     Serial.println(message);
 #endif    
-    
+  
+    if (tokensNumber < 3) return; // otherwise code below crashes on the strmp on non-initialized pointers in tokens[] array
+  
     //------------------Decide what to do depending on the topic and message---------------------------------
     if (strcmp(tokens[1], "directive") == 0 && strcmp(tokens[2], "powerState") == 0) {  // Turn On or OFF
         if (strcmp(message, "ON") == 0) {
