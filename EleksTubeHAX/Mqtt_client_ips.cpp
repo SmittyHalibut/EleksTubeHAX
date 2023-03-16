@@ -161,7 +161,10 @@ void callback(char* topic, byte* payload, unsigned int length) {  //A new messag
     Serial.println(message);
 #endif    
   
-    if (tokensNumber < 3) return; // otherwise code below crashes on the strmp on non-initialized pointers in tokens[] array
+    if (tokensNumber < 3) {
+        // otherwise code below crashes on the strmp on non-initialized pointers in tokens[] array
+        return; 
+    }
   
     //------------------Decide what to do depending on the topic and message---------------------------------
     if (strcmp(tokens[1], "directive") == 0 && strcmp(tokens[2], "powerState") == 0) {  // Turn On or OFF
