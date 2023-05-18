@@ -18,10 +18,10 @@ double GeoLocTZoffset = 0;
 
 
 #ifdef WIFI_USE_WPS   ////  WPS code
-
+//https://github.com/espressif/arduino-esp32/blob/master/libraries/WiFi/examples/WPS/WPS.ino
 static esp_wps_config_t wps_config;
 void wpsInitConfig(){
-  wps_config.crypto_funcs = &g_wifi_default_wps_crypto_funcs;
+  //wps_config.crypto_funcs = &g_wifi_default_wps_crypto_funcs;
   wps_config.wps_type = ESP_WPS_MODE;
   strcpy(wps_config.factory_info.manufacturer, ESP_MANUFACTURER);
   strcpy(wps_config.factory_info.model_number, ESP_MODEL_NUMBER);
@@ -30,91 +30,31 @@ void wpsInitConfig(){
 }
 #endif
 
-void WiFiEvent(WiFiEvent_t event, system_event_info_t info){
+void WiFiEvent(WiFiEvent_t event, WiFiEventInfo_t info){
   switch(event){
     case SYSTEM_EVENT_STA_START:
       WifiState = disconnected;
       Serial.println("Station Mode Started");
       break;
     case SYSTEM_EVENT_STA_CONNECTED:
-//      WifiState = connected;  // IP not yet assigned
       Serial.println("Connected to AP: " + String(WiFi.SSID()));
-      
-/* https://github.com/espressif/arduino-esp32/blob/04963009eedfbc1e0ea2e1378ae69e7cebda6fd6/tools/sdk/include/esp32/esp_event_legacy.h#L80
-typedef struct {
-    uint8_t ssid[32];         // < SSID of connected AP 
-    uint8_t ssid_len;         // < SSID length of connected AP 
-    uint8_t bssid[6];         // < BSSID of connected AP
-    uint8_t channel;          // < channel of connected AP
-    wifi_auth_mode_t authmode;
-} system_event_sta_connected_t;
-*/
-
-  /*
-//      Serial.println(String(info.connected.ssid));
-  //    Serial.println(String(info.connected.bssid));
-    //  Serial.println(String(info.connected.channel));
-
-   memset(dest, '\0', sizeof(dest));
-   strcpy(src, "This is tutorialspoint.com");
-   strcpy(dest, src);      
-*/
       break;     
     case SYSTEM_EVENT_STA_GOT_IP:
       Serial.print("Got IP: ");
-//      IPAddress ip = IPAddress(WiFi.localIP());
-  //    Serial.println(ip);
       Serial.println(WiFi.localIP());
-  
-      /*
-      if (ip[0] == 0) {
-        WifiState = disconnected; // invalid IP
-      } else {  */
         WifiState = connected;
-//      }
       break;
     case SYSTEM_EVENT_STA_DISCONNECTED:
       WifiState = disconnected;
       Serial.print("WiFi lost connection. Reason: ");
-      Serial.println(info.disconnected.reason);
+      Serial.println(info.wifi_sta_disconnected.reason);
       WifiReconnect();
       break;
     case SYSTEM_EVENT_STA_WPS_ER_SUCCESS:
-      WifiState = wps_success;
-/*
- * https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/network/esp_wifi.html#_CPPv431wifi_event_sta_wps_er_success_t
-  structwifi_event_sta_wps_er_success_t
-  Argument structure for WIFI_EVENT_STA_WPS_ER_SUCCESS event
-  
-  Public Members
-  
-  uint8_t ap_cred_cnt
-  Number of AP credentials received
-  
-  uint8_t ssid[MAX_SSID_LEN]
-  SSID of AP
-  
-  uint8_t passphrase[MAX_PASSPHRASE_LEN]
-  Passphrase for the AP
-  
-  structwifi_event_sta_wps_er_success_t::[anonymous]ap_cred[MAX_WPS_AP_CRED]
-  All AP credentials received from WPS handshake
-
-
-    sprintf(stored_config.config.wifi.ssid, info.ssid); 
-    sprintf(stored_config.config.wifi.password, info.passphrase); 
-
-
-
-memcpy(someBuffer, evt->ap_cred[0].ssid, sizeof(*evt->ap_cred[0].ssid));
-That is, assuming cred[0].ssid is defined as an array... you may be better off using strncpy() if it's not.
-*/
-
-                  
+      WifiState = wps_success;                  
       Serial.println("WPS Successful, stopping WPS and connecting to: " + String(WiFi.SSID()));
       esp_wifi_wps_disable();
-      delay(10);
-// https://stackoverflow.com/questions/48024780/esp32-wps-reconnect-on-power-on      
+      delay(10);  
       WiFi.begin();
       break;
 

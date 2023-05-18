@@ -42,7 +42,7 @@ void setup() {
   stored_config.begin();
   stored_config.load();
 
-  backlights.begin(&stored_config.config.backlights);
+  //backlights.begin(&stored_config.config.backlights);
   buttons.begin();
   menu.begin();
 
@@ -108,8 +108,14 @@ void setup() {
 void loop() {
   uint32_t millis_at_top = millis();
   // Do all the maintenance work
+  #ifdef DEBUG_OUTPUT
+  Serial.println("WifiReconnect()");
+  #endif
   WifiReconnect(); // if not connected attempt to reconnect
 
+  #ifdef DEBUG_OUTPUT
+  Serial.println("Mqtt stuff");
+  #endif
   MqttStatusPower = tfts.isEnabled();
   MqttStatusState = (uclock.getActiveGraphicIdx()+1) * 5;   // 10 
   MqttLoop();
@@ -145,6 +151,9 @@ void loop() {
     */
   }
 
+  #ifdef DEBUG_OUTPUT
+  Serial.println("buttons.loop()");
+  #endif
   buttons.loop();
 
   // Power button: If in menu, exit menu. Else turn off displays and backlight.
@@ -152,13 +161,28 @@ void loop() {
     tfts.toggleAllDisplays();
     backlights.togglePower();
   }
- 
+
+  #ifdef DEBUG_OUTPUT
+  Serial.println("menu.loop()");
+  #endif
   menu.loop(buttons);  // Must be called after buttons.loop()
+  #ifdef DEBUG_OUTPUT
+  Serial.println("backlights.loop()");
+  #endif
   backlights.loop();
+  #ifdef DEBUG_OUTPUT
+  Serial.println("uclock.loop()");
+  #endif
   uclock.loop();
 
+  #ifdef DEBUG_OUTPUT
+  Serial.println("EveryFullHour()");
+  #endif
   EveryFullHour(); // night or daytime
 
+  #ifdef DEBUG_OUTPUT
+  Serial.println("updateClockDisplay()");
+  #endif
   // Update the clock.
   updateClockDisplay();
   
