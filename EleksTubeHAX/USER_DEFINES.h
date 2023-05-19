@@ -21,41 +21,46 @@
 
 // ************* Version Infomation  *************
 #define DEVICE_NAME       "IPS-clock"
-#define FIRMWARE_VERSION  "aly-fly IPS clock v0.3"
+#define FIRMWARE_VERSION  "IPS clock v0.4"
 #define USE_CLK_FILES   // select between .CLK and .BMP images
 #define ESP_MANUFACTURER  "ESPRESSIF"
 #define ESP_MODEL_NUMBER  "ESP32"
 #define ESP_MODEL_NAME    "IPS clock"
 
 // ************* Display Dimming  *************
-#define NIGHT_TIME  21 // dim displays at 9 pm 
-#define DAY_TIME     7 // full brightness after 7 am
-#define BACKLIGHT_DIMMED_INTENSITY  0  // 0..7
-#define TFT_DIMMED_INTENSITY  30    // 0..255
+#define NIGHT_TIME  21                  // dim displays at 9 pm 
+#define DAY_TIME     7                  // full brightness after 7 am
+#define BACKLIGHT_DIMMED_INTENSITY  0   // 0..7
+#define TFT_DIMMED_INTENSITY  30        // 0..255
 
 // ************* WiFi config *************
 #define WIFI_CONNECT_TIMEOUT_SEC  20
 #define WIFI_RETRY_CONNECTION_SEC  15
-#define ESP_WPS_MODE      WPS_TYPE_PBC  // push-button; uncomment to use WPS
-#define WIFI_USE_WPS  //uncomment to use WPS 
-//#define SECRET_WIFI_SSID    "YOUR-SSID"            //not needed for WPS
-//#define SECRET_WIFI_PASSWD  "yourPassword"        //not needed for WPS.  Caution - Hard coded password stored clear text in BIN file
+// WPS Mode (use EITHER this or SSID and Password)
+#define ESP_WPS_MODE      WPS_TYPE_PBC
+#define WIFI_USE_WPS
+// SSID and Password Mode
+// CAUTION - Hard coded password stored clear text in BIN file
+//#define SECRET_WIFI_SSID    "YOUR-SSID"
+//#define SECRET_WIFI_PASSWD  "yourPassword"
 
 
 //  *************  Geolocation  *************
-// Get your API Key on https://www.abstractapi.com/ (login) --> https://app.abstractapi.com/api/ip-geolocation/tester (key) *************
+// Get your API Key on https://www.abstractapi.com/ (login) 
+// --> https://app.abstractapi.com/api/ip-geolocation/tester (key)
 #define GEOLOCATION_API_KEY "keykeykey"
 
 
 // ************* MQTT config *************
-//#define MQTT_ENABLED  // enable after creating an account, setting up the device on smartnest.cz and pilling in all the data below:
+// Easy mode: Setup an account at smartnest.cz and make a new thermostat device
+//#define MQTT_ENABLED
 #define MQTT_BROKER "smartnest.cz"         
 #define MQTT_CLIENT "clientid" 
 #define MQTT_USERNAME "username"             
 #define MQTT_PASSWORD "apikey"
-#define MQTT_PORT 1883                         // Broker port
-#define MQTT_RECONNECT_WAIT_SEC  33   // how long to wait between retries to connect to broker
-#define MQTT_REPORT_STATUS_EVERY_SEC  317 // How often report status to MQTT Broker
+#define MQTT_PORT 1883                          // Broker port
+#define MQTT_RECONNECT_WAIT_SEC  33             // how long to wait between retries to connect to broker
+#define MQTT_REPORT_STATUS_EVERY_SEC  317       // How often report status to MQTT Broker
 
       
 #endif

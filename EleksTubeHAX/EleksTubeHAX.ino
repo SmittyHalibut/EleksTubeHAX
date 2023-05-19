@@ -42,7 +42,7 @@ void setup() {
   stored_config.begin();
   stored_config.load();
 
-  //backlights.begin(&stored_config.config.backlights);
+  backlights.begin(&stored_config.config.backlights);
   buttons.begin();
   menu.begin();
 

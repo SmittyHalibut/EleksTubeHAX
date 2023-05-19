@@ -1,5 +1,4 @@
 #include "Backlights.h"
-#include <math.h>
 
 void Backlights::begin(StoredConfig::Config::Backlights *config_)  {
   config=config_;
@@ -21,9 +20,9 @@ void Backlights::begin(StoredConfig::Config::Backlights *config_)  {
 
 
 // These feel like they should be generalizable into a helper function.
+// https://stackoverflow.com/questions/11720656/modulo-operation-with-negative-numbers
 void Backlights::setNextPattern(int8_t i) {
   int8_t next_pattern = (config->pattern + i) % num_patterns;
-  // https://stackoverflow.com/questions/11720656/modulo-operation-with-negative-numbers
   while (next_pattern < 0) {
     next_pattern += num_patterns;
   }
@@ -31,7 +30,7 @@ void Backlights::setNextPattern(int8_t i) {
 }
 
 void Backlights::adjustColorPhase(int16_t adj) {
-  int16_t new_phase = (int16_t(config->color_phase%max_phase) + adj) % max_phase;
+  int16_t new_phase = (int16_t(config->color_phase % max_phase) + adj) % max_phase;
   while (new_phase < 0) {
     new_phase += max_phase;
   }
