@@ -62,12 +62,12 @@ Note that you will use my geolocation API key which has limited usage. If we all
 You're either reading this file after downloading it already, or you're reading it on github.  I'll assume you can figure out how to get the code from github and put it somewhere on your local machine.  This is your preference.
 
 ## Setup Arduino IDE
-Development was done on Arduino 1.8.13.  It might work on earlier or later versions, I don't know.
+The last version of the Arduino IDE to support the SPIFFS uploader plugin is 1.8.19.
 
 ### Install ESP32 board support from Espressif
-File -> Preferences, add `https://dl.espressif.com/dl/package_esp32_index.json` to your Board Manager URLs.  (Comma separated if there's already something there.)
+File -> Preferences, add `https://espressif.github.io/arduino-esp32/package_esp32_index.json` to your Board Manager URLs.  (Comma separated if there's already something there.)
 
-Tools -> Board -> Board Manager, add the `esp32` boards by `Espressif Systems`.  Development was done on v1.0.6.
+Tools -> Board -> Board Manager, add the `esp32` boards by `Espressif Systems`.  Development was done on v2.0.9.
 
 Tools -> Board -> ESP32 Arduino -> ESP32 Dev Module
 
@@ -83,7 +83,7 @@ The listed "developed on" versions are just the versions I had installed while d
 
 Sketch -> Include Library -> Library Manager
 * `NTPClient` by Fabrice Weinberg (developed on v3.2.0)
-* `Adafruit NeoPixel` by Adafruit (developed on v1.8.0)
+* `Adafruit NeoPixel` by Adafruit (developed on v1.11.0)
 * `DS1307RTC` by Michael Margolis (developed on v1.4.1)
 * `TFT_eSPI` by Bodmer (developed on v2.3.61)
 * `Time` by Michael Margolis (developed on v1.6.0)
