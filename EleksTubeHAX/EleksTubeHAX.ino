@@ -108,12 +108,12 @@ void setup() {
 void loop() {
   uint32_t millis_at_top = millis();
   // Do all the maintenance work
-  #ifdef DEBUG_OUTPUT
+  #ifdef DEBUG_OUTPUT_EXTENDED
   Serial.println("WifiReconnect()");
   #endif
   WifiReconnect(); // if not connected attempt to reconnect
 
-  #ifdef DEBUG_OUTPUT
+  #ifdef DEBUG_OUTPUT_EXTENDED
   Serial.println("Mqtt stuff");
   #endif
   MqttStatusPower = tfts.isEnabled();
@@ -151,7 +151,7 @@ void loop() {
     */
   }
 
-  #ifdef DEBUG_OUTPUT
+  #ifdef DEBUG_OUTPUT_EXTENDED
   Serial.println("buttons.loop()");
   #endif
   buttons.loop();
@@ -162,25 +162,25 @@ void loop() {
     backlights.togglePower();
   }
 
-  #ifdef DEBUG_OUTPUT
+  #ifdef DEBUG_OUTPUT_EXTENDED
   Serial.println("menu.loop()");
   #endif
   menu.loop(buttons);  // Must be called after buttons.loop()
-  #ifdef DEBUG_OUTPUT
+  #ifdef DEBUG_OUTPUT_EXTENDED
   Serial.println("backlights.loop()");
   #endif
   backlights.loop();
-  #ifdef DEBUG_OUTPUT
+  #ifdef DEBUG_OUTPUT_EXTENDED
   Serial.println("uclock.loop()");
   #endif
   uclock.loop();
 
-  #ifdef DEBUG_OUTPUT
+  #ifdef DEBUG_OUTPUT_EXTENDED
   Serial.println("EveryFullHour()");
   #endif
   EveryFullHour(); // night or daytime
 
-  #ifdef DEBUG_OUTPUT
+  #ifdef DEBUG_OUTPUT_EXTENDED
   Serial.println("updateClockDisplay()");
   #endif
   // Update the clock.

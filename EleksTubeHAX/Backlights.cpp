@@ -52,7 +52,7 @@ void Backlights::setIntensity(uint8_t intensity) {
 }
 
 void Backlights::loop() {
-  #ifdef DEBUG_OUTPUT
+  #ifdef DEBUG_OUTPUT_EXTENDED
   Serial.println("In Backlights::loop()");
   #endif
   //   enum patterns { dark, test, constant, rainbow, pulse, breath, num_patterns };
