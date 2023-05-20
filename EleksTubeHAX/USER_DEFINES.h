@@ -51,11 +51,11 @@
 
 // ************* MQTT config *************
 // Easy mode: Setup an account at smartnest.cz and make a new thermostat device
-#define MQTT_ENABLED
-#define MQTT_BROKER   "smartnest.cz"         
-#define MQTT_CLIENT   "clientid" 
-#define MQTT_USERNAME "username"             
-#define MQTT_PASSWORD "apikey"
+//#define MQTT_ENABLED
+//#define MQTT_BROKER   "smartnest.cz"
+//#define MQTT_CLIENT   "clientid"
+//#define MQTT_USERNAME "username"
+//#define MQTT_PASSWORD "apikey"
 #define MQTT_PORT 1883                          // Broker port
 #define MQTT_RECONNECT_WAIT_SEC  33             // how long to wait between retries to connect to broker
 #define MQTT_REPORT_STATUS_EVERY_SEC  317       // How often to report status to MQTT Broker
