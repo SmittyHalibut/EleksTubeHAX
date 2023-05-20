@@ -82,13 +82,13 @@ All these libraries are in Library Manager.  Several libraries have very similar
 The listed "developed on" versions are just the versions I had installed while developing this code.  Newer (or possibly older) versions should be fine too.
 
 Sketch -> Include Library -> Library Manager
-* `NTPClient` by Fabrice Weinberg (developed on v3.2.0)
-* `Adafruit NeoPixel` by Adafruit (developed on v1.11.0)
+* `NTPClient` by Fabrice Weinberg (developed on v3.2.0) - **3.2.1 OK**
+* `Adafruit NeoPixel` by Adafruit (~~developed on v1.8.0~~) - **Now on 1.11.0**
 * `DS1307RTC` by Michael Margolis (developed on v1.4.1)
-* `TFT_eSPI` by Bodmer (developed on v2.3.61)
-* `Time` by Michael Margolis (developed on v1.6.0)
+* `TFT_eSPI` by Bodmer (developed on v2.3.61) - **2.5.0 OK**
+* `Time` by Michael Margolis (developed on v1.6.0) - **1.6.1 OK**
 * `PubSubClient` by Nick O'Leary (developed on v2.8.0)  https://www.arduinolibraries.info/libraries/pub-sub-client
-* `ArduinoJson` by Benoit Blanchon (worked on 6.19.4)
+* `ArduinoJson` by Benoit Blanchon (worked on 6.19.4) - **6.21.2 OK**
 
 For "SI HAI clock" also add:
 * RTC by Makuna (developed on 2.3.5) https://github.com/Makuna/Rtc/wiki
