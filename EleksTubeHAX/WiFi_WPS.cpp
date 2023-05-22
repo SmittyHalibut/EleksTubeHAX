@@ -32,41 +32,40 @@ void wpsInitConfig(){
 
 void WiFiEvent(WiFiEvent_t event, WiFiEventInfo_t info){
   switch(event){
-    case SYSTEM_EVENT_STA_START:
+    case ARDUINO_EVENT_WIFI_STA_START:
       WifiState = disconnected;
       Serial.println("Station Mode Started");
       break;
-    case SYSTEM_EVENT_STA_CONNECTED:
+    case ARDUINO_EVENT_WIFI_STA_CONNECTED:
       Serial.println("Connected to AP: " + String(WiFi.SSID()));
       break;     
-    case SYSTEM_EVENT_STA_GOT_IP:
+    case ARDUINO_EVENT_WIFI_STA_GOT_IP:
       Serial.print("Got IP: ");
       Serial.println(WiFi.localIP());
         WifiState = connected;
       break;
-    case SYSTEM_EVENT_STA_DISCONNECTED:
+    case ARDUINO_EVENT_WIFI_STA_DISCONNECTED:
       WifiState = disconnected;
       Serial.print("WiFi lost connection. Reason: ");
       Serial.println(info.wifi_sta_disconnected.reason);
       WifiReconnect();
       break;
-    case SYSTEM_EVENT_STA_WPS_ER_SUCCESS:
+  #ifdef WIFI_USE_WPS   ////  WPS code         
+    case ARDUINO_EVENT_WPS_ER_SUCCESS:
       WifiState = wps_success;                  
       Serial.println("WPS Successful, stopping WPS and connecting to: " + String(WiFi.SSID()));
       esp_wifi_wps_disable();
       delay(10);  
       WiFi.begin();
-      break;
-
-#ifdef WIFI_USE_WPS   ////  WPS code      
-    case SYSTEM_EVENT_STA_WPS_ER_FAILED:
+      break;   
+    case ARDUINO_EVENT_WPS_ER_FAILED:
       WifiState = wps_failed;
       Serial.println("WPS Failed, retrying");
       esp_wifi_wps_disable();
       esp_wifi_wps_enable(&wps_config);
       esp_wifi_wps_start(0);
       break;
-    case SYSTEM_EVENT_STA_WPS_ER_TIMEOUT:
+    case ARDUINO_EVENT_WPS_ER_TIMEOUT:
 //      WifiState = wps_failed;
       Serial.println("WPS Timeout, retrying");
       tfts.setTextColor(TFT_RED, TFT_BLACK);      
@@ -77,9 +76,7 @@ void WiFiEvent(WiFiEvent_t event, WiFiEventInfo_t info){
       esp_wifi_wps_start(0);
       WifiState = wps_active;
       break;
- #endif     
-    default:
-      break;
+ #endif
   }
 }
 
@@ -89,7 +86,6 @@ void WifiBegin()  {
   WifiState = disconnected;
 
   WiFi.mode(WIFI_STA);
-  WiFi.onEvent(WiFiEvent);
   WiFi.config(INADDR_NONE, INADDR_NONE, INADDR_NONE, INADDR_NONE);  
   WiFi.setHostname(DEVICE_NAME);  
 
@@ -127,6 +123,7 @@ void WifiBegin()  {
   }
 #else   ////NO WPS -- Hard coded credentials
 
+  WiFi.onEvent(WiFiEvent);
   WiFi.begin(SECRET_WIFI_SSID, SECRET_WIFI_PASSWD); 
   unsigned long StartTime = millis();
   while ((WiFi.status() != WL_CONNECTED)) {
@@ -164,7 +161,7 @@ void WifiReconnect() {
     Serial.println("Attempting WiFi reconnection...");
     WiFi.reconnect();
     TimeOfWifiReconnectAttempt = millis();
-  }    
+  }
 }
 
 #ifdef WIFI_USE_WPS   ////  WPS code
@@ -182,6 +179,8 @@ bool WiFiStartWps() {
   tfts.setTextColor(TFT_RED, TFT_BLACK);
   tfts.println("PRESS WPS BUTTON ON THE ROUTER");
 
+  //disconnect from wifi first if we were connected
+  WiFi.disconnect(true, true);
   
   WifiState = wps_active;
   WiFi.onEvent(WiFiEvent);
