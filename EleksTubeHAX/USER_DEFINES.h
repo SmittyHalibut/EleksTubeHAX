@@ -26,10 +26,10 @@
 #define ESP_MODEL_NAME    "IPS clock"
 
 // ************* Display Dimming  *************
-#define NIGHT_TIME  21                  // dim displays at 9 pm 
+#define NIGHT_TIME  22                  // dim displays at 10 pm 
 #define DAY_TIME     7                  // full brightness after 7 am
 #define BACKLIGHT_DIMMED_INTENSITY  0   // 0..7
-#define TFT_DIMMED_INTENSITY  30        // 0..255
+#define TFT_DIMMED_INTENSITY  48        // 0..255
 
 // ************* WiFi config *************
 #define WIFI_CONNECT_TIMEOUT_SEC  20

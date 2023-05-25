@@ -165,7 +165,7 @@ void WifiReconnect() {
 }
 
 #ifdef WIFI_USE_WPS   ////  WPS code
-bool WiFiStartWps() {
+void WiFiStartWps() {
   // erase settings
   sprintf(stored_config.config.wifi.ssid, ""); 
   sprintf(stored_config.config.wifi.password, ""); 
