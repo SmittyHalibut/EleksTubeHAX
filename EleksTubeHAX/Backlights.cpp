@@ -67,14 +67,15 @@ void Backlights::loop() {
   }
   else if (config->pattern == constant) {
     if (pattern_needs_init) {
-      if (dimming) {
-        setBrightness(0xFF >> max_intensity - (BACKLIGHT_DIMMED_INTENSITY) - 1);
-        } else {
-        setBrightness(0xFF >> max_intensity - config->intensity - 1);
-        }
       fill(phaseToColor(config->color_phase));
-      show();
     }
+    if (dimming) {
+    setBrightness(0xFF >> max_intensity - BACKLIGHT_DIMMED_INTENSITY - 1);
+    } else {
+    setBrightness(0xFF >> max_intensity - config->intensity - 1);
+    }
+    
+    show();
   }
   else if (config->pattern == rainbow) {
     rainbowPattern();
