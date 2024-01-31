@@ -141,6 +141,13 @@ If you want to change these:
 * Then do the "Tools -> ESP32 Sketch Data Upload" dance again.
 Each set (1x, 2x, etc) can be chosen in the menu.
 
+If you don't want to make your own bitmaps, there are some good 3rd party sets out there:
+* https://github.com/upiir/ips_clock_100x_themes
+* https://github.com/upiir/elekstube_ips_custom_theme
+* https://github.com/upiir/rgb_glow_tube_clock
+
+If you have your own "font" that'll work and want it listed here, please file an Issue and/or Pull Request.
+
 ### Configure your WiFi network
 For WPS:  When prompted by the clock, press WPS button on your router (or in web-interface of your router). Clock will automatically connect to the WiFi and save data for future use. No need to input your credentials anywhere in the source code.  THe clock will remember WiFi connection details even if you unplug the clock.
 
