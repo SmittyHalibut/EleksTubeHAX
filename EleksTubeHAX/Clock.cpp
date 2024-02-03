@@ -44,7 +44,7 @@
 #else 
   // For the DS3231 RTC
   #include <DS1307RTC.h>
-  uint32_t RtcBegin() {}
+  void RtcBegin() {}
   uint32_t RtcGet() {
     return RTC.get();
   }

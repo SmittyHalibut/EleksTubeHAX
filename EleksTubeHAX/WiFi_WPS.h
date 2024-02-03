@@ -5,7 +5,7 @@
 
 enum WifiState_t {disconnected, connected, wps_active, wps_success, wps_failed, num_states};
 void WifiBegin();
-bool WiFiStartWps();
+void WiFiStartWps();
 void WifiReconnect();
 
 extern WifiState_t WifiState;

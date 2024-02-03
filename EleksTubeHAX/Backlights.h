@@ -14,6 +14,7 @@
  * Otherwise, class Backlights behaves exactly as Adafruit_NeoPixel does.
  */
 #include <stdint.h>
+#include <math.h>
 #include "StoredConfig.h"
 #include <Adafruit_NeoPixel.h>
 
