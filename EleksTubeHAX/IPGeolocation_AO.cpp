@@ -28,9 +28,8 @@ String IPGeolocation::getResponse(){
 bool IPGeolocation::updateStatus(IPGeo *I){
   if(_API == "ABSTRACT"){
 
-// https://ipgeolocation.abstractapi.com/v1/?api_key=e11dc0f9bab446bfa9957aad2c4ad064
+// https://ipgeolocation.abstractapi.com/v1/?api_key=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
     
-//    const char *host = "app.abstractapi.com";
     const char *host = "ipgeolocation.abstractapi.com";
     const int httpsPort = 443;  //HTTPS= 443 and HTTP = 80
     WiFiClientSecure httpsClient;
@@ -107,8 +106,18 @@ bool IPGeolocation::updateStatus(IPGeo *I){
     
     DynamicJsonDocument doc(capacity);
     deserializeJson(doc, _Response);
-    JsonObject timezone = doc["timezone"];
-/* SAMPLE:
+
+    // catch errors:
+    if (_Response.indexOf("error") > 0) {    
+      DEBUGPRINT("IP Geoloc ERROR!");
+      return false;
+    }
+    
+/* SAMPLES:
+failure:
+{"error":{"message":"Invalid API key provided.","code":"unauthorized","details":null}}
+
+winter time:
 {"ip_address":"93.103.xxx.xxx",
 "city":"Kranj",
 "city_geoname_id":3197378,
@@ -130,7 +139,32 @@ bool IPGeolocation::updateStatus(IPGeo *I){
 "flag":{"emoji":"đź‡¸đź‡®","unicode":"U+1F1F8 U+1F1EE","png":"https://static.abstractapi.com/country-flags/SI_flag.png","svg":"https://static.abstractapi.com/country-flags/SI_flag.svg"},
 "currency":{"currency_name":"Euros","currency_code":"EUR"},
 "connection":{"autonomous_system_number":34779,"autonomous_system_organization":"xxxxxxxx","connection_type":"Cellular","isp_name":"xxxxxxxxxx","organization_name":null}}
+
+summer time:
+{"ip_address":"93.103.xxx.xxx",
+"city":"Kranj",
+"city_geoname_id":3197378,
+"region":"Kranj",
+"region_iso_code":"052",
+"region_geoname_id":3197377,
+"postal_code":"4000",
+"country":"Slovenia",
+"country_code":"SI",
+"country_geoname_id":3190538,
+"country_is_eu":true,
+"continent":"Europe",
+"continent_code":"EU",
+"continent_geoname_id":6255148,
+"longitude":14.3556,
+"latitude":46.2389,
+"security":{"is_vpn":false},
+"timezone":{"name":"Europe/Ljubljana","abbreviation":"CEST","gmt_offset":2,"current_time":"23:39:52","is_dst":true},
+"flag":{"emoji":"đź‡¸đź‡®","unicode":"U+1F1F8 U+1F1EE","png":"https://static.abstractapi.com/country-flags/SI_flag.png","svg":"https://static.abstractapi.com/country-flags/SI_flag.svg"},
+"currency":{"currency_name":"Euros","currency_code":"EUR"},
+"connection":{"autonomous_system_number":34779,"autonomous_system_organization":"xxxx","connection_type":"Cellular","isp_name":"xxxxx","organization_name":null}}
 */
+
+    JsonObject timezone = doc["timezone"];
     
     I->tz = timezone["name"].as<String>();
     I->is_dst = timezone["is_dst"];

@@ -13,8 +13,7 @@
 #include "Mqtt_client_ips.h"
 #include "WiFi.h"       // for ESP32
 #include <PubSubClient.h>  // Download and install this library first from: https://www.arduinolibraries.info/libraries/pub-sub-client
-
-
+#include "TempSensor.h"
 
 WiFiClient espClient;
 PubSubClient MQTTclient(espClient);
@@ -34,11 +33,9 @@ void MqttReportBackOnChange();
 void MqttReportBackEverything();
 void MqttPeriodicReportBack();
 
-
-
 char topic[100];
 char msg[5];
-uint32_t lastTimeSent = -20000;
+uint32_t lastTimeSent = (uint32_t)(MQTT_REPORT_STATUS_EVERY_SEC * -1000);
 uint8_t LastNotificationChecksum = 0;
 uint32_t LastTimeTriedToConnect = 0;
 
@@ -53,7 +50,6 @@ bool MqttCommandStateReceived = false;
 bool MqttStatusPower = true;
 int MqttStatusState = 0;
 int MqttStatusBattery = 7;
-int MqttStatusTemperature = 5;
 
 int LastSentSignalLevel = 999;
 int LastSentPowerState = -1;
@@ -102,9 +98,9 @@ void MqttStart() {
             Serial.print("Not possible to connect to Broker Error code:");
             Serial.println(MQTTclient.state());
         }
-        // delay(0x7530);
+        return;  // do not continue if not connected
       }
-
+      
     char subscibeTopic[100];
     sprintf(subscibeTopic, "%s/#", MQTT_CLIENT);
     MQTTclient.subscribe(subscibeTopic);  //Subscribes to all messages send to the device
@@ -160,12 +156,13 @@ void callback(char* topic, byte* payload, unsigned int length) {  //A new messag
     Serial.print("/");
     Serial.println(message);
 #endif    
-  
+
     if (tokensNumber < 3) {
         // otherwise code below crashes on the strmp on non-initialized pointers in tokens[] array
+        Serial.println("Number of tokens in MQTT message < 3!");
         return; 
     }
-  
+    
     //------------------Decide what to do depending on the topic and message---------------------------------
     if (strcmp(tokens[1], "directive") == 0 && strcmp(tokens[2], "powerState") == 0) {  // Turn On or OFF
         if (strcmp(message, "ON") == 0) {
@@ -187,10 +184,15 @@ void callback(char* topic, byte* payload, unsigned int length) {  //A new messag
       }
  }
 
-void MqttLoop(){
+void MqttLoopFrequently(){
 #ifdef MQTT_ENABLED
   MQTTclient.loop(); 
   checkMqtt();
+#endif  
+}
+
+void MqttLoopInFreeTime(){
+#ifdef MQTT_ENABLED
   MqttReportBackOnChange();
   MqttPeriodicReportBack();
 #endif  
@@ -212,10 +214,11 @@ void MqttReportStatus() {
 }    
 
 void MqttReportTemperature() {
-  char message2[5];
-  sprintf(message2, "%d", MqttStatusTemperature);
-//  sendToBroker("report/value", message2);
-  sendToBroker("report/temperature", message2);
+  #ifdef ONE_WIRE_BUS_PIN
+  if (fTemperature > -30) { // transmit data to MQTT only if data is valid
+    sendToBroker("report/temperature", sTemperatureTxt);
+  }
+  #endif  
 }    
 
 void MqttReportPowerState() {
@@ -272,6 +275,5 @@ void MqttReportBackOnChange() {
 void MqttPeriodicReportBack() {
   if (((millis() - lastTimeSent) > (MQTT_REPORT_STATUS_EVERY_SEC * 1000)) && MQTTclient.connected()) {
     MqttReportBackEverything();
-    lastTimeSent = millis();
     }
 }

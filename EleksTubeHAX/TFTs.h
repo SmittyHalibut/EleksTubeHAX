@@ -26,9 +26,11 @@ public:
   uint8_t current_graphic = 1;
   
   void begin();
+  void reinit();
   void clear();
   void showNoWifiStatus();
   void showNoMqttStatus();
+  void showTemperature();
 
   void setDigit(uint8_t digit, uint8_t value, show_t show=yes);
   uint8_t getDigit(uint8_t digit)                 { return digits[digit]; }
@@ -61,7 +63,7 @@ private:
   uint16_t read16(fs::File &f);
   uint32_t read32(fs::File &f);
 
-  static uint16_t output_buffer[TFT_HEIGHT][TFT_WIDTH];
+  static uint16_t UnpackedImageBuffer[TFT_HEIGHT][TFT_WIDTH];
   uint8_t FileInBuffer=255; // invalid, always load first image
   uint8_t NextFileRequired = 0; 
 };

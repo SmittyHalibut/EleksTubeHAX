@@ -16,6 +16,7 @@
 #include "StoredConfig.h"
 #include "WiFi_WPS.h"
 #include "Mqtt_client_ips.h"
+#include "TempSensor_inc.h"
 
 Backlights backlights;
 Buttons buttons;
@@ -26,6 +27,8 @@ StoredConfig stored_config;
 
 bool FullHour = false;
 uint8_t hour_old = 255;
+bool DstNeedsUpdate = false;
+uint8_t yesterday = 0;
 
 // Helper function, defined below.
 void updateClockDisplay(TFTs::show_t show=TFTs::yes);
@@ -47,10 +50,10 @@ void setup() {
   menu.begin();
 
   // Setup TFTs
-  tfts.begin();
+  tfts.begin();  // and count number of clock faces available
   tfts.fillScreen(TFT_BLACK);
   tfts.setTextColor(TFT_WHITE, TFT_BLACK);
-  tfts.setCursor(0, 0, 2);
+  tfts.setCursor(0, 0, 2);  // Font 2. 16 pixel high
   tfts.println("setup...");
 
   // Setup WiFi connection. Must be done before setting up Clock.
@@ -74,7 +77,7 @@ void setup() {
   tfts.println("MQTT start");
   MqttStart();
 
-
+#ifdef GEOLOCATION_ENABLED
   tfts.println("Geoloc query");
   if (GetGeoLocationTimeZoneOffset()) {
     tfts.print("TZ: ");
@@ -87,6 +90,13 @@ void setup() {
     Serial.println("Geolocation failed.");    
     tfts.println("Geo FAILED");
   }
+#endif
+
+  if (uclock.getActiveGraphicIdx() > tfts.NumberOfClockFaces) {
+    uclock.setActiveGraphicIdx(tfts.NumberOfClockFaces);
+    Serial.println("Last selected index of clock face is larger than currently available number of image sets.");
+  }
+  tfts.current_graphic = uclock.getActiveGraphicIdx();
 
   tfts.println("Done with setup.");
 
@@ -95,8 +105,6 @@ void setup() {
     tfts.print(">");
     delay(200);
   }
-
-  tfts.current_graphic = uclock.getActiveGraphicIdx();
 
   // Start up the clock displays.
   tfts.fillScreen(TFT_BLACK);
@@ -108,20 +116,20 @@ void setup() {
 void loop() {
   uint32_t millis_at_top = millis();
   // Do all the maintenance work
-  #ifdef DEBUG_OUTPUT_EXTENDED
-  Serial.println("WifiReconnect()");
-  #endif
   WifiReconnect(); // if not connected attempt to reconnect
 
-  #ifdef DEBUG_OUTPUT_EXTENDED
-  Serial.println("Mqtt stuff");
-  #endif
   MqttStatusPower = tfts.isEnabled();
   MqttStatusState = (uclock.getActiveGraphicIdx()+1) * 5;   // 10 
-  MqttLoop();
+  MqttLoopFrequently();
   if (MqttCommandPowerReceived) {
     MqttCommandPowerReceived = false;
     if (MqttCommandPower) {
+#ifndef HARDWARE_SI_HAI_CLOCK
+      if (!tfts.isEnabled()) {
+        tfts.reinit();  // reinit (original EleksTube HW: after a few hours in OFF state the displays do not wake up properly)
+        updateClockDisplay(TFTs::force);
+      }
+#endif
       tfts.enableAllDisplays();
       backlights.PowerOn();
     } else {
@@ -151,41 +159,31 @@ void loop() {
     */
   }
 
-  #ifdef DEBUG_OUTPUT_EXTENDED
-  Serial.println("buttons.loop()");
-  #endif
   buttons.loop();
 
   // Power button: If in menu, exit menu. Else turn off displays and backlight.
   if (buttons.power.isDownEdge() && (menu.getState() == Menu::idle)) {
     tfts.toggleAllDisplays();
+#ifndef HARDWARE_SI_HAI_CLOCK
+    if (tfts.isEnabled()) {
+      tfts.reinit();  // reinit (original EleksTube HW: after a few hours in OFF state the displays do not wake up properly)
+      updateClockDisplay(TFTs::force);
+    }
+#endif
     backlights.togglePower();
   }
-
-  #ifdef DEBUG_OUTPUT_EXTENDED
-  Serial.println("menu.loop()");
-  #endif
+ 
   menu.loop(buttons);  // Must be called after buttons.loop()
-  #ifdef DEBUG_OUTPUT_EXTENDED
-  Serial.println("backlights.loop()");
-  #endif
   backlights.loop();
-  #ifdef DEBUG_OUTPUT_EXTENDED
-  Serial.println("uclock.loop()");
-  #endif
   uclock.loop();
 
-  #ifdef DEBUG_OUTPUT_EXTENDED
-  Serial.println("EveryFullHour()");
-  #endif
   EveryFullHour(); // night or daytime
 
-  #ifdef DEBUG_OUTPUT_EXTENDED
-  Serial.println("updateClockDisplay()");
-  #endif
   // Update the clock.
   updateClockDisplay();
   
+  UpdateDstEveryNight();
+
   // Menu
   if (menu.stateChanged() && tfts.isEnabled()) {
     Menu::states menu_state = menu.getState();
@@ -300,7 +298,7 @@ void loop() {
      
 
 #ifdef WIFI_USE_WPS   ////  WPS code
-  // connect to WiFi using wps pushbutton mode
+      // connect to WiFi using wps pushbutton mode
       else if (menu_state == Menu::start_wps) {
         if (menu_change != 0) { // button was pressed
           if (menu_change < 0) { // left button
@@ -308,10 +306,9 @@ void loop() {
             tfts.clear();
             tfts.fillScreen(TFT_BLACK);
             tfts.setTextColor(TFT_WHITE, TFT_BLACK);
-            tfts.setCursor(0, 0, 4);
+            tfts.setCursor(0, 0, 4);  // Font 4. 26 pixel high
             WiFiStartWps();
           }
-          
         }
         
         setupMenu();
@@ -330,10 +327,18 @@ void loop() {
     // we still have extra time
     time_in_loop = millis() - millis_at_top;
     if (time_in_loop < 20) {
+      MqttLoopInFreeTime();
+      PeriodicReadTemperature();
+      if (bTemperatureUpdated) {
+        tfts.setDigit(HOURS_ONES, uclock.getHoursOnes(), TFTs::force);  // show latest clock digit and temperature readout together
+        bTemperatureUpdated = false;
+      }
+      
       // run once a day (= 744 times per month which is below the limit of 5k for free account)
-      if (FullHour && (uclock.getHour24() == 3)) { // Daylight savings time changes at 3 in the morning
+      if (DstNeedsUpdate) { // Daylight savings time changes at 3 in the morning
         if (GetGeoLocationTimeZoneOffset()) {
           uclock.setTimeZoneOffset(GeoLocTZoffset * 3600);
+          DstNeedsUpdate = false;  // done for this night; retry if not sucessfull
         }
       }  
       // Sleep for up to 20ms, less if we've spent time doing stuff above.
@@ -345,7 +350,10 @@ void loop() {
   }
 #ifdef DEBUG_OUTPUT
   if (time_in_loop <= 1) Serial.print(".");
-  else Serial.println(time_in_loop);
+  else {
+    Serial.print("time spent in loop (ms): ");
+    Serial.println(time_in_loop);
+  }
 #endif
 }
 
@@ -353,7 +361,7 @@ void setupMenu() {
   tfts.chip_select.setHoursTens();
   tfts.setTextColor(TFT_WHITE, TFT_BLACK);
   tfts.fillRect(0, 120, 135, 120, TFT_BLACK);
-  tfts.setCursor(0, 124, 4);
+  tfts.setCursor(0, 124, 4);  // Font 4. 26 pixel high
 }
 
 bool isNightTime(uint8_t current_hour) {
@@ -395,6 +403,17 @@ void EveryFullHour() {
   }   
 }
 
+void UpdateDstEveryNight() {
+  uint8_t currentDay = uclock.getDay();
+  // This `DstNeedsUpdate` is True between 3:00:05 and 3:00:59. Has almost one minute of time slot to fetch updates, incl. eventual retries.
+  DstNeedsUpdate = (currentDay != yesterday) && (uclock.getHour24() == 3) && (uclock.getMinute() == 0) && (uclock.getSecond() > 5);
+  if (DstNeedsUpdate) {
+  Serial.print("DST needs update...");
+
+  // Update day after geoloc was sucesfully updated. Otherwise this will immediatelly disable the failed update retry.
+  yesterday = currentDay;
+  }
+}
 
 void updateClockDisplay(TFTs::show_t show) {
   // refresh starting on seconds

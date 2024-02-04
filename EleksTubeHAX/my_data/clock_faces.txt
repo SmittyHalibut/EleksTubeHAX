@@ -1,7 +1,0 @@
-The clock faces bitrot-alpha uses
-(All of these are just pre-converted clk files made from the png/bmp already in this repo)
-
-10-19: Nixie tube
-20-29: default face of another Eleksmaker product
-30-39: 3D effect
-

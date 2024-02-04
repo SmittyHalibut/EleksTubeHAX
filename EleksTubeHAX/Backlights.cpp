@@ -52,9 +52,6 @@ void Backlights::setIntensity(uint8_t intensity) {
 }
 
 void Backlights::loop() {
-  #ifdef DEBUG_OUTPUT_EXTENDED
-  Serial.println("In Backlights::loop()");
-  #endif
   //   enum patterns { dark, test, constant, rainbow, pulse, breath, num_patterns };
   if (off || config->pattern == dark) {
     if (pattern_needs_init) {
@@ -74,7 +71,6 @@ void Backlights::loop() {
     } else {
     setBrightness(0xFF >> max_intensity - config->intensity - 1);
     }
-    
     show();
   }
   else if (config->pattern == rainbow) {

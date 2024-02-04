@@ -2,9 +2,9 @@
  * Author: Aljaz Ogrin
  * Project: Alternative firmware for EleksTube IPS clock
  * Hardware: ESP32
- * File description: Hardware Global configuration for the complete project
- * Should only need editing for a new version of the clock
- * User defines are located in "USER_DEFINES.h"
+ * File description: Global configuration for the complete project
+ *   Should only need editing to add a new harware version of the clock
+ *   User configuration is located in "_USER_DEFINES.h"
  */
  
 #ifndef GLOBAL_DEFINES_H_
@@ -12,22 +12,55 @@
 
 #include <stdint.h>
 #include <Arduino.h>
+#include "_USER_DEFINES.h" ///// User defines
 
-#include "USER_DEFINES.h"    ///// User defines
+#ifdef HARDWARE_PunkCyber_CLOCK
+  // everything else is the same, except digits are swapped from left to right
+  #define HARDWARE_Elekstube_CLOCK
+#endif
 
-
+// ************* Version Infomation  *************
+#define DEVICE_NAME       "IPS-clock"
+#define FIRMWARE_VERSION  "SmittyHalibut & aly-fly IPS clock v0.8"
 #define SAVED_CONFIG_NAMESPACE  "configs"
+
+
+// ************ WiFi advanced config *********************
+#define ESP_WPS_MODE      WPS_TYPE_PBC  // push-button
+#define ESP_MANUFACTURER  "ESPRESSIF"
+#define ESP_MODEL_NUMBER  "ESP32"
+#define ESP_MODEL_NAME    "IPS clock"
+
+
+// ************ MQTT config *********************
+#define MQTT_RECONNECT_WAIT_SEC  30  // how long to wait between retries to connect to broker
+#define MQTT_REPORT_STATUS_EVERY_SEC  71 // How often report status to MQTT Broker
+
+
+// ************ Temperature config *********************
+#define TEMPERATURE_READ_EVERY_SEC 60  // how often to read the temperature sensor (if present)
+
 
 // ************ Hardware definitions *********************
 
 // Common indexing scheme, used to identify the digit
-#define SECONDS_ONES (0)
-#define SECONDS_TENS (1)
-#define MINUTES_ONES (2)
-#define MINUTES_TENS (3)
-#define HOURS_ONES   (4)
-#define HOURS_TENS   (5)
 #define NUM_DIGITS   (6)
+#ifdef HARDWARE_PunkCyber_CLOCK
+  #define SECONDS_ONES (5)
+  #define SECONDS_TENS (4)
+  #define MINUTES_ONES (3)
+  #define MINUTES_TENS (2)
+  #define HOURS_ONES   (1)
+  #define HOURS_TENS   (0)
+#else
+  #define SECONDS_ONES (0)
+  #define SECONDS_TENS (1)
+  #define MINUTES_ONES (2)
+  #define MINUTES_TENS (3)
+  #define HOURS_ONES   (4)
+  #define HOURS_TENS   (5)
+#endif
+
 
 #define SECONDS_ONES_MAP (0x01 << SECONDS_ONES)
 #define SECONDS_TENS_MAP (0x01 << SECONDS_TENS)
@@ -36,8 +69,9 @@
 #define HOURS_ONES_MAP   (0x01 << HOURS_ONES)
 #define HOURS_TENS_MAP   (0x01 << HOURS_TENS)
 
-
 #ifdef HARDWARE_SI_HAI_CLOCK  // fake chinese clock pinout XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+
+//  #define ONE_WIRE_BUS_PIN (xx)  // DS18B20 connected to GPIOxx; comment this line if sensor is not connected
 
   // WS2812 (or compatible) LEDs on the back of the display modules.
   #define BACKLIGHTS_PIN (32)
@@ -90,7 +124,7 @@
   //#define LOAD_FONT8N // Font 8. Alternative to Font 8 above, slightly narrower, so 3 digits fit a 160 pixel TFT
   //#define LOAD_GFXFF  // FreeFonts. Include access to the 48 Adafruit_GFX free fonts FF1 to FF48 and custom fonts
 
-  #define SMOOTH_FONT
+  #define SMOOTH_FONT     // MUST REMAIN ACTIVE OTHERWISE BUTTON CONFIG IS CORRUPTED for some reason....
   //#define SPI_FREQUENCY  27000000
   #define SPI_FREQUENCY  40000000
   /*
@@ -98,7 +132,7 @@
    */
   #define USER_SETUP_LOADED
 #endif
-  
+
 
 #ifdef HARDWARE_NovelLife_SE_CLOCK // NovelLife_SE Clone XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
@@ -164,7 +198,8 @@
   #define USER_SETUP_LOADED
 #endif
 
-#ifdef HARDWARE_Elekstube_CLOCK  //  original EleksTube IPS clock XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+
+#ifdef HARDWARE_Elekstube_CLOCK // original EleksTube IPS clock XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
   // WS2812 (or compatible) LEDs on the back of the display modules.
   #define BACKLIGHTS_PIN (12)
@@ -219,14 +254,15 @@
   //#define LOAD_FONT8N // Font 8. Alternative to Font 8 above, slightly narrower, so 3 digits fit a 160 pixel TFT
   //#define LOAD_GFXFF  // FreeFonts. Include access to the 48 Adafruit_GFX free fonts FF1 to FF48 and custom fonts
 
-  #define SMOOTH_FONT
+  #define SMOOTH_FONT     // MUST REMAIN ACTIVE OTHERWISE BUTTON CONFIG IS CORRUPTED for some reason....
   //#define SPI_FREQUENCY  27000000
   #define SPI_FREQUENCY  40000000
   /*
    * To make the Library not over-write all this:
    */
   #define USER_SETUP_LOADED
-
 #endif
+
+
 
 #endif /* GLOBAL_DEFINES_H_ */

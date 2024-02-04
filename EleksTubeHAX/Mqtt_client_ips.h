@@ -15,12 +15,11 @@ extern bool MqttCommandStateReceived;
 extern bool MqttStatusPower;
 extern int MqttStatusState;
 extern int MqttStatusBattery;
-extern int MqttStatusTemperature;
 
 // functions
-
 void MqttStart();
-void MqttLoop();
+void MqttLoopFrequently();
+void MqttLoopInFreeTime();
 
 
 #endif /* mqtt_client_H_ */

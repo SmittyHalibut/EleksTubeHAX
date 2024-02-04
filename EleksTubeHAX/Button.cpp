@@ -4,7 +4,12 @@ void Button::begin() {
   millis_at_last_transition = millis();
   millis_at_last_loop = millis_at_last_transition;
 
-  pinMode(pin, INPUT);
+#ifdef DEBUG_OUTPUT
+    Serial.print("init button ");
+    Serial.println(bpin);
+#endif
+
+  pinMode(bpin, INPUT);
   
   down_last_time = isButtonDown();
   if (down_last_time) {
@@ -17,6 +22,14 @@ void Button::begin() {
 void Button::loop() {
   millis_at_last_loop = millis();
   bool down_now = isButtonDown();
+
+#ifdef DEBUG_OUTPUT
+  if (down_now) {
+    Serial.print("[B ");
+    Serial.print(bpin);
+    Serial.print("]");
+  }  
+#endif
 
   state previous_state = button_state;
   

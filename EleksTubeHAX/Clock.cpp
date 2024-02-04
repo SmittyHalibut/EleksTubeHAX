@@ -36,7 +36,7 @@
   }
         
   uint32_t RtcGet() {
-    return Rtc.GetDateTime();  
+    return Rtc.GetDateTime();    // if compilation fails here; check library version of "RTC by Makuna" !!! 
   }
   void RtcSet(uint32_t tt) {
     Rtc.SetDateTime(tt);  

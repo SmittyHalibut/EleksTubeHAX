@@ -21,7 +21,6 @@ double GeoLocTZoffset = 0;
 //https://github.com/espressif/arduino-esp32/blob/master/libraries/WiFi/examples/WPS/WPS.ino
 static esp_wps_config_t wps_config;
 void wpsInitConfig(){
-  //wps_config.crypto_funcs = &g_wifi_default_wps_crypto_funcs;
   wps_config.wps_type = ESP_WPS_MODE;
   strcpy(wps_config.factory_info.manufacturer, ESP_MANUFACTURER);
   strcpy(wps_config.factory_info.model_number, ESP_MODEL_NUMBER);
@@ -36,13 +35,13 @@ void WiFiEvent(WiFiEvent_t event, WiFiEventInfo_t info){
       WifiState = disconnected;
       Serial.println("Station Mode Started");
       break;
-    case ARDUINO_EVENT_WIFI_STA_CONNECTED:
+    case ARDUINO_EVENT_WIFI_STA_CONNECTED: // IP not yet assigned
       Serial.println("Connected to AP: " + String(WiFi.SSID()));
       break;     
     case ARDUINO_EVENT_WIFI_STA_GOT_IP:
       Serial.print("Got IP: ");
       Serial.println(WiFi.localIP());
-        WifiState = connected;
+      WifiState = connected;
       break;
     case ARDUINO_EVENT_WIFI_STA_DISCONNECTED:
       WifiState = disconnected;
@@ -50,14 +49,14 @@ void WiFiEvent(WiFiEvent_t event, WiFiEventInfo_t info){
       Serial.println(info.wifi_sta_disconnected.reason);
       WifiReconnect();
       break;
-  #ifdef WIFI_USE_WPS   ////  WPS code         
+#ifdef WIFI_USE_WPS   ////  WPS code      
     case ARDUINO_EVENT_WPS_ER_SUCCESS:
-      WifiState = wps_success;                  
+      WifiState = wps_success;
       Serial.println("WPS Successful, stopping WPS and connecting to: " + String(WiFi.SSID()));
       esp_wifi_wps_disable();
-      delay(10);  
+      delay(10);
       WiFi.begin();
-      break;   
+      break;
     case ARDUINO_EVENT_WPS_ER_FAILED:
       WifiState = wps_failed;
       Serial.println("WPS Failed, retrying");
@@ -66,7 +65,6 @@ void WiFiEvent(WiFiEvent_t event, WiFiEventInfo_t info){
       esp_wifi_wps_start(0);
       break;
     case ARDUINO_EVENT_WPS_ER_TIMEOUT:
-//      WifiState = wps_failed;
       Serial.println("WPS Timeout, retrying");
       tfts.setTextColor(TFT_RED, TFT_BLACK);      
       tfts.print("/");  // retry
@@ -76,7 +74,9 @@ void WiFiEvent(WiFiEvent_t event, WiFiEventInfo_t info){
       esp_wifi_wps_start(0);
       WifiState = wps_active;
       break;
- #endif
+ #endif     
+    default:
+      break;
   }
 }
 
@@ -105,6 +105,7 @@ void WifiBegin()  {
   
     // https://stackoverflow.com/questions/48024780/esp32-wps-reconnect-on-power-on
     WiFi.begin();  // use internally saved data
+    WiFi.onEvent(WiFiEvent);
 
     unsigned long StartTime = millis();
 
@@ -117,14 +118,13 @@ void WifiBegin()  {
         tfts.println("\nTIMEOUT!");
         WifiState = disconnected;
         return; // exit loop, exit procedure, continue clock startup
-//        WiFiStartWps(); // infinite loop until connected
       }
     }
   }
 #else   ////NO WPS -- Hard coded credentials
 
+  WiFi.begin(WIFI_SSID, WIFI_PASSWD); 
   WiFi.onEvent(WiFiEvent);
-  WiFi.begin(SECRET_WIFI_SSID, SECRET_WIFI_PASSWD); 
   unsigned long StartTime = millis();
   while ((WiFi.status() != WL_CONNECTED)) {
     delay(500);
@@ -135,8 +135,6 @@ void WifiBegin()  {
       tfts.println("\nTIMEOUT!");
       WifiState = disconnected;
       return; // exit loop, exit procedure, continue clock startup
-      //        WiFiStartWps(); // infinite loop until connected
-      //}
     }
   }
   
@@ -161,7 +159,7 @@ void WifiReconnect() {
     Serial.println("Attempting WiFi reconnection...");
     WiFi.reconnect();
     TimeOfWifiReconnectAttempt = millis();
-  }
+  }    
 }
 
 #ifdef WIFI_USE_WPS   ////  WPS code

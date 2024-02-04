@@ -14,8 +14,8 @@
 
 class Button {
 public:
-  Button(uint8_t pin, uint8_t active_state=LOW, uint32_t long_press_ms=500)
-    : pin(pin), active_state(active_state), long_press_ms(long_press_ms), 
+  Button(uint8_t bpin, uint8_t active_state=LOW, uint32_t long_press_ms=500)
+    : bpin(bpin), active_state(active_state), long_press_ms(long_press_ms), 
       down_last_time(false), state_changed(false), millis_at_last_transition(0), button_state(idle) {}
 
   /*
@@ -56,7 +56,7 @@ public:
   
 private:
   // Config
-  const uint8_t pin;
+  const uint8_t bpin;
   const uint8_t active_state;
   const uint32_t long_press_ms;
 
@@ -67,7 +67,7 @@ private:
   uint32_t millis_at_last_loop;
   state button_state;
 
-  bool isButtonDown() { return digitalRead(pin) == active_state; }
+  bool isButtonDown() { return digitalRead(bpin) == active_state; }
 };
 
 
