@@ -15,6 +15,7 @@
 
 // ************* Type of the clock hardware  *************
 #define HARDWARE_Elekstube_CLOCK  // uncomment for the original Elekstube clock
+//#define HARDWARE_Elekstube_CLOCK_Gen2  // uncomment for the original Elekstube clock Gen2.1 (ESP32 Pico D4 Chip)
 //#define HARDWARE_SI_HAI_CLOCK  // uncomment for the SI HAI copy of the clock
 //#define HARDWARE_NovelLife_SE_CLOCK  // uncomment for the NovelLife SE version; non-SE not tested
 //#define HARDWARE_PunkCyber_CLOCK  // uncomment for the PunkCyber / RGB Glow tube / PCBway clock
