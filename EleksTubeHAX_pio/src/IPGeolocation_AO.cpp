@@ -33,7 +33,6 @@ bool IPGeolocation::updateStatus(IPGeo *I){
     const char *host = "ipgeolocation.abstractapi.com";
     const int httpsPort = 443;  //HTTPS= 443 and HTTP = 80
     WiFiClientSecure httpsClient;
-    const size_t capacity = 2048;
     httpsClient.setInsecure(); //skip verification
     httpsClient.setTimeout(GEO_CONN_TIMEOUT_SEC * 1000); // 15 Seconds
 
@@ -104,7 +103,7 @@ bool IPGeolocation::updateStatus(IPGeo *I){
 
 
     
-    DynamicJsonDocument doc(capacity);
+    JsonDocument doc;
     deserializeJson(doc, _Response);
 
     // catch errors:
