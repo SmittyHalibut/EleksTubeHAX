@@ -57,36 +57,32 @@ Windows users:
 * Open Device Manager and find out which COM port represents your clock.
 * Modify file `_ESP32 save flash 4MB.cmd` with your COM port number.
 * Run this file. It will generate `backup1.bin`. Save it to a safe place. This is your precious backup.
-* 
+
 Linux users:
 * You probably already know where to get Esptool and how to use it. :)
 
 # How to build this firmware
-Unfortunately, it's not simple plug-and-play.  You need to do some things.  These instructions assume you already know how to use the Arduino IDE, and just need to know WHAT to do.
+Unfortunately, it's not simple plug-and-play.  You need to do some things.  These instructions assume you already know how to use the Visual Studio Code & PlatformIO plugin, and just need to know WHAT to do.
 
 ## Download this code
 You're either reading this file after downloading it already, or you're reading it on github.  I'll assume you can figure out how to get the code from github and put it somewhere on your local machine.  This is your preference.
 
-## Setup Arduino IDE
-Development was done on Arduino 1.8.13.  It might work on slightly earlier or later versions. **It does NOT work on Arduino IDE 2.x or later.**
+## Setup Visual Studio Code & PlatformIO plugin
+Follow guide here: https://platformio.org/install/ide?install=vscode
+* Download, install and run VSCode
+* Go to Extensions, Search for Platformio IDE and install it (it will take a while - observe status messages in the bottom right corner).
+If you don't have Python already installed it will be automatically added by Platformio. In case of issues, install it manually.
 
-### Install ESP32 board support from Espressif
-File -> Preferences, add `https://dl.espressif.com/dl/package_esp32_index.json` to your Board Manager URLs.  (Comma separated if there's already something there.)
-Tools -> Board -> Board Manager, add the `esp32` boards by `Espressif Systems`.  Working on version 2.0.11.
-Tools -> Board -> ESP32 Arduino -> ESP32 Dev Module
-The default configs in the Tools menu should be fine. The important ones are:
-* Flash Size: 4MB
-* Partition Scheme: No OTA (1 MB app, 3 MB SPIFFS). To fit as many images as possible.
-* Port: Set it to whatever serial port your clock shows up as when plugged in.
+### Development board support
+ESP32 environment from Espressif is required. It will be installed automatically when this project is opened in VSCode & Platformio. Or before first compilation. It will take a while - observe status messages in the bottom right corner.
+Developed and tested on version 2.0.11.
+Flash size settings that are already configured in `partition_noOta_1Mapp_3Mspiffs.csv`: Flash Size: 4MB; Partition Scheme: No OTA (1 MB app, 3 MB SPIFFS). To fit as many images as possible.
+Upload port is set to 921600 baud in the `platformio.ini` file Some clocks do not support such high speed, if you have issues, reduce this to 512000 baud.
 
-See screenshot here: [link](/EleksTubeHAX/_build_settings.png)
+### Libraries in use
+All these libraries are in use. The most recent versions are automatically installed from the Platformio servers as soon as the project is opened or before first compilation. It will take a while - observe status messages in build log screen.
+Compiles and works fine with listed library versions, as of 2024-02-03. Newer (or possibly older) versions should be fine too. If you have issues with automatic install, here are locations of the originals.
 
-
-### Install Libraries
-All these libraries are in Library Manager.  Several libraries have very similar names, so make sure you select the correct one based on the author.
-Compiles and works fine with listed library versions, as of 2024-02-03. Newer (or possibly older) versions should be fine too.
-
-Sketch -> Include Library -> Library Manager
 | Library | Author | Version | Link |
 | ------ | ------ | ------ | ------ |
 | NTPClient | Fabrice Weinberg | 3.2.1 | https://github.com/arduino-libraries/NTPClient |
@@ -102,29 +98,15 @@ Note: `RTC by Makuna` is only required for "SI HAI clock".
 IPgeolocation and NTPclient libraries were coped into the project and heavily updated (mostly bug fixes and error-catching).
 
 ### Configure the `TFT_eSPI` library
-**IMPORTANT** You have to do this after every time you install or update the `TFT_eSPI` library!  **IMPORTANT**
+Supplied `script_configure_tft_lib.py` takes care for library configuration. Copies both files `_USER_DEFINES.h` and `GLOBAL_DEFINES.h` into the library folder before building. Tested on Windows.
+If for some reason you have issues, manually fopy the files every time the `TFT_eSPI` library is updated.
 
-* Edit `Arduino\..\libraries\TFT_eSPI\User_Setup_Select.h`
-* Comment out all `#include` lines.  Alternatively, you can clear the whole file and just keep one line in it:
-* Add a `#include` line pointing to `GLOBAL_DEFINES.h` in this code.
-  * eg: `#include "<drive>:\<personal folder>\EleksTubeHAX\GLOBAL_DEFINES.h"`
-  * Obviously, update the path to point to where ever you keep your code.  Mac and Linux paths will look very different.
-* If display shows garbled data, mismatched images, rotated, or deformed in any way, check TFT_eSPI library version and revert to the version that is listed above!
-
-### Install SPIFFS uploader
-The code is [here](https://github.com/me-no-dev/arduino-esp32fs-plugin/releases/), and instructions to install it are [here](https://randomnerdtutorials.com/install-esp32-filesystem-uploader-arduino-ide/).
-
-tl,dr: Download and unzip [this file](https://github.com/lorol/arduino-esp32fs-plugin/releases/download/2.0.7/esp32fs.zip) ([old file, reportedly not working](https://github.com/me-no-dev/arduino-esp32fs-plugin/releases/download/1.0/ESP32FS-1.0.zip)) into your `Arduino/tools/` directory.  There might not be a `tools/` subdirectory yet, but if you see `Arduino/libraries/` that's the right place.
-
-### Restart Arduino
-After installing the ESP32 support, all the libraries, and the SPIFFS uploader, restart Arduino to make sure it knows its all there.
- 
 ## Configure, Build and Upload New Firmware
 Make sure you configured everything in `_USER_DEFINES.h`:
 * Rename `_USER_DEFINES - empty.h` to `_USER_DEFINES.h`
 * Select hardware platform (Elekstube, NovelLife, SI_HAI, PunkCyber/RGB Glow tube) :: un-comment appropriate hardware define 
 * Select if you prefer WPS or hardcoded credentials for WIFI (comment 'WIFI_USE_WPS' line and add credentials if desired)
-* Point `User_Setup_Select.h` in the TFT_eSPI library to `GLOBAL_DEFINES.h`
+* Select image type: .BMP files (default) or .CLK files
 
 Optionally:
 * Uncomment MQTT service (if in use)
@@ -133,16 +115,15 @@ Optionally:
 * Your Geolocation API :: Register on [Abstract API](https://www.abstractapi.com/), select Geolocation API and copy your API key.
 * Uncomment and define pin for external DS18B20 temperature sensor (if connected)
 
-Connect the clock to your computer with USB.  You'll see a new serial port pop up.  Make sure that's the serial port selected in Tools.
+Connect the clock to your computer with USB.  You'll see a new serial port pop up.  Platformio will automatically select the port. If you have Bluetooth virtal ports on your machine, it might hang and you must manually select the COM port in the `platformio.ini`.
 
 ### Compile and Upload the Code
-Select Partition size with 1 MB code, 3 MB SPIFFS and No OTA.
-Compile and upload the code.  At this point, it should upload cleanly and successfully.  You'll see the clock boot up and ask for WPS.  But it doesn't have any bitmaps to display on the screen yet.
+Compile and upload the code.  At this point, it should build cleanly and upload successfully.  You'll see the clock boot up and ask for WPS.  But it doesn't have any bitmaps to display on the screen yet.
 
 ### Upload Bitmaps
 The repository comes with a set of CLK and BMP files in the `data/` directory. See below if you want to make your own.
-
-Tools -> ESP32 Sketch Data Upload, will upload the files to the SPIFFS filesystem on the micro.  They'll stay there, even if you re-upload the firmware multiple times.
+In Platformio extension go to Project tasks and expand: Esp32 -> Platform -> Build Filesystem image & Upload filesystem image.
+This will upload the files to the SPIFFS filesystem on the micro.  They'll stay there, even if you re-upload the firmware multiple times.
 
 ### Custom Bitmaps
 If you want to change clock faces / fonts:
@@ -155,10 +136,10 @@ Alternatively:
 * Select all prepared BMP files at once. It will create CLK files with smaller size. Size reduction is approx 30%.
 
 * Put files in the `\data` directory.
-* Then do the "Tools -> ESP32 Sketch Data Upload" dance.
-Each set (1x, 2x, etc) can be chosen in the menu or via the MQTT "set temperature".
+* Then do the "Build Filesystem image & Upload filesystem image" dance again.
+Each set of images can be chosen in the menu or via the MQTT "set temperature".
 
-If you don't want to make your own bitmaps, there are some good 3rd party sets out there:
+Here are links to some good 3rd party sets out there:
 * https://github.com/upiir/ips_clock_100x_themes
 * https://github.com/upiir/elekstube_ips_custom_theme
 * https://github.com/upiir/rgb_glow_tube_clock
@@ -179,7 +160,7 @@ Hardware pinout and notes are in the document  `Hardware pinout.xlsx`
 - Mark Smith, aka Smitty ... @SmittyHalibut on GitHub, Twitter, and YouTube.
 - Aljaz Ogrin, aka aly-fly ... @aly-fly on GitHub and Instagram
 - Misc code snips either commited by or copied from: @icebreaker-ch, @meddle99, @OggyP, @bitrot-alpha
-- in future (on to-do list) also from: @RedNax67, @wfdudley, @judge2005, @hallard
+- in future (on to-do list) also from: @RedNax67, @wfdudley, @judge2005
 
 *Happy hacking!*
 

@@ -1,4 +1,4 @@
-Import("env")
+# Import("env")  # should not be required; un-comment if you have issues
 import shutil
 
 # print("Current CLI targets", COMMAND_LINE_TARGETS)
