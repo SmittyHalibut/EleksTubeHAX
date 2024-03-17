@@ -69,9 +69,9 @@
 #define HOURS_ONES_MAP   (0x01 << HOURS_ONES)
 #define HOURS_TENS_MAP   (0x01 << HOURS_TENS)
 
-#ifdef HARDWARE_SI_HAI_CLOCK  // fake chinese clock pinout XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+#ifdef HARDWARE_SI_HAI_CLOCK // SI HAI IPS Clock XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
-//  #define ONE_WIRE_BUS_PIN (xx)  // DS18B20 connected to GPIOxx; comment this line if sensor is not connected
+  //#define ONE_WIRE_BUS_PIN (xx)  // DS18B20 connected to GPIOxx; comment this line if sensor is not connected
 
   // WS2812 (or compatible) LEDs on the back of the display modules.
   #define BACKLIGHTS_PIN (32)
@@ -127,19 +127,23 @@
    * To make the Library not over-write all this:
    */
   #define USER_SETUP_LOADED
-#endif
+#endif // SI HAI IPS Clock XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
 
 #ifdef HARDWARE_NovelLife_SE_CLOCK // NovelLife_SE Clone XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
   // WS2812 (or compatible) LEDs on the back of the display modules.
-  #define BACKLIGHTS_PIN (12)
+  #define BACKLIGHTS_PIN (GPIO_NUM_12)
 
-  // No Buttons on SE verion -- gesture sensor not included in code 
- #define BUTTON_LEFT_PIN (33)
- #define BUTTON_MODE_PIN (32)
- #define BUTTON_RIGHT_PIN (35)
- #define BUTTON_POWER_PIN (34)
+  // No Buttons on SE verion!!!
+  // Set to pins, which should always be HIGH!
+  #define BUTTON_LEFT_PIN (GPIO_NUM_3)
+  #define BUTTON_MODE_PIN (GPIO_NUM_3)
+  #define BUTTON_RIGHT_PIN (GPIO_NUM_3)
+  #define BUTTON_POWER_PIN (GPIO_NUM_3)
+  
+  // Pins ADPS interupt
+  #define GESTURE_SENSOR_INPUT_PIN (GPIO_NUM_5) // -> INTERRUPT
 
   // I2C to DS3231 RTC.
   #define RTC_SCL_PIN (22)
@@ -148,7 +152,7 @@
   // Chip Select shift register, to select the display
   #define CSSR_DATA_PIN (14)  
   #define CSSR_CLOCK_PIN (13) // SHcp changed from IO16 in original Elekstube
-  #define CSSR_LATCH_PIN (15) //STcp was IO17 in original Elekstube
+  #define CSSR_LATCH_PIN (15) // STcp was IO17 in original Elekstube
 
   // SPI to displays
   // DEFINED IN User_Setup.h
@@ -187,10 +191,10 @@
    * To make the Library not over-write all this:
    */
   #define USER_SETUP_LOADED
-#endif
+#endif // NovelLife_SE Clone XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
 
-#ifdef HARDWARE_Elekstube_CLOCK // original EleksTube IPS clock XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+#ifdef HARDWARE_Elekstube_CLOCK // original EleksTube IPS clock XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
   // WS2812 (or compatible) LEDs on the back of the display modules.
   #define BACKLIGHTS_PIN (12)
@@ -247,9 +251,9 @@
    * To make the Library not over-write all this:
    */
   #define USER_SETUP_LOADED
-#endif
+#endif // original EleksTube IPS clock XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
-#ifdef HARDWARE_Elekstube_CLOCK_Gen2 // original EleksTube IPS clock Gen2 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+#ifdef HARDWARE_Elekstube_CLOCK_Gen2 // original EleksTube IPS clock Gen2 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
   // WS2812 (or compatible) LEDs on the back of the display modules.
   #define BACKLIGHTS_PIN (12)
@@ -306,7 +310,7 @@
    * To make the Library not over-write all this:
    */
   #define USER_SETUP_LOADED
-#endif
+#endif // original EleksTube IPS clock Gen2 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
 
 

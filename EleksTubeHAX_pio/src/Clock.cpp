@@ -1,7 +1,8 @@
 #include "Clock.h"
 #include "WiFi_WPS.h"
 
-#ifdef HARDWARE_SI_HAI_CLOCK
+#ifdef HARDWARE_SI_HAI_CLOCK // SI HAI IPS Clock XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+  // If it is a SI HAI Clock, use differnt RTC chip drivers
   #include <ThreeWire.h>  
   #include <RtcDS1302.h>
   ThreeWire myWire(DS1302_IO, DS1302_SCLK, DS1302_CE); // IO, SCLK, CE
