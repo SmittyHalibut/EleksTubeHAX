@@ -80,5 +80,12 @@ void Button::loop() {
 }
 
 const String Button::state_str[Button::num_states] = 
-  {"idle", "down_edge", "down", "down_long_edge", "down_long", "up_edge", "up_long_edge"};
+  { "idle", 
+    "down_edge", 
+    "down", 
+    "down_long_edge", 
+    "down_long", 
+    "up_edge", 
+    "up_long_edge"
+  };
   

@@ -31,7 +31,16 @@ public:
    * Note: There is no up_long state, that's just idle and it goes into idle immediately
    * after up_edge.
    */
-  enum state {idle, down_edge, down, down_long_edge, down_long, up_edge, up_long_edge, num_states};
+  enum state {  idle, 
+                down_edge, 
+                down, 
+                down_long_edge, 
+                down_long, 
+                up_edge, 
+                up_long_edge, 
+                num_states
+             };
+
   const static String state_str[num_states];
 
   void begin();
@@ -41,6 +50,7 @@ public:
   state getState() { return button_state; }
   String getStateStr() { return state_str[button_state]; }
   bool stateChanged() { return state_changed; }
+  void setDownEdgeState() { button_state = down_edge; }
   uint32_t millisInState() { return millis_at_last_loop-millis_at_last_transition; }
 
   bool isIdle()         { return button_state == idle; }
