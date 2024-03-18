@@ -43,6 +43,9 @@
 
 // ************ Hardware definitions *********************
 
+// Disable all warnings from the TFT_eSPI lib
+#define DISABLE_ALL_LIBRARY_WARNINGS
+
 // Common indexing scheme, used to identify the digit
 #define NUM_DIGITS   (6)
 #ifdef HARDWARE_PunkCyber_CLOCK
@@ -311,7 +314,6 @@
    */
   #define USER_SETUP_LOADED
 #endif // original EleksTube IPS clock Gen2 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-
 
 
 #endif /* GLOBAL_DEFINES_H_ */

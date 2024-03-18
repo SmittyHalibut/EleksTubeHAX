@@ -56,7 +56,7 @@ int LastSentPowerState = -1;
 int LastSentStatus = -1;
 
 
-void sendToBroker(char* topic, char* message) {
+void sendToBroker(const char* topic, const char* message) {
   if (MQTTclient.connected()) {
     char topicArr[100];
     sprintf(topicArr, "%s/%s", MQTT_CLIENT, topic);
