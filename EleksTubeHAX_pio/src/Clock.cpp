@@ -1,56 +1,64 @@
 #include "Clock.h"
 #include "WiFi_WPS.h"
 
-#ifdef HARDWARE_SI_HAI_CLOCK
+#ifdef HARDWARE_SI_HAI_CLOCK // SI HAI IPS Clock XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+  // If it is a SI HAI Clock, use differnt RTC chip drivers
   #include <ThreeWire.h>  
   #include <RtcDS1302.h>
-  ThreeWire myWire(DS1302_IO, DS1302_SCLK, DS1302_CE); // IO, SCLK, CE
-  RtcDS1302<ThreeWire> Rtc(myWire);
-  void RtcBegin() {
-    Rtc.Begin();
-    // check if chip is connected and alive
-/*  TCS default value is 0x00 instead of 0x5C, but RTC seems to be working. Let's skip this check.
-    Serial.print("Checking DS1302 RTC... ");
-    uint8_t TCS = Rtc.GetTrickleChargeSettings();  // 01011100  Initial power-on state
-    Serial.print("TCS = ");
-    Serial.println(TCS);
-    if (TCS != 0x5C) {
-      Serial.println("Error communicating with DS1302 !");
+    ThreeWire myWire(DS1302_IO, DS1302_SCLK, DS1302_CE); // IO, SCLK, CE
+    RtcDS1302<ThreeWire> Rtc(myWire);
+    void RtcBegin() {
+      Rtc.Begin();
+      // check if chip is connected and alive
+  /*  TCS default value is 0x00 instead of 0x5C, but RTC seems to be working. Let's skip this check.
+      Serial.print("Checking DS1302 RTC... ");
+      uint8_t TCS = Rtc.GetTrickleChargeSettings();  // 01011100  Initial power-on state
+      Serial.print("TCS = ");
+      Serial.println(TCS);
+      if (TCS != 0x5C) {
+        Serial.println("Error communicating with DS1302 !");
+      }
+  */
+      if (!Rtc.IsDateTimeValid()) {
+          // Common Causes:
+          //    1) first time you ran and the device wasn't running yet
+          //    2) the battery on the device is low or even missing
+          Serial.println("RTC lost confidence in the DateTime!");
+      }
+      if (Rtc.GetIsWriteProtected()) {
+          Serial.println("RTC was write protected, enabling writing now");
+          Rtc.SetIsWriteProtected(false);
+      }
+
+      if (!Rtc.GetIsRunning()) {
+          Serial.println("RTC was not actively running, starting now");
+          Rtc.SetIsRunning(true);
+          }
     }
-*/
-    if (!Rtc.IsDateTimeValid()) {
-        // Common Causes:
-        //    1) first time you ran and the device wasn't running yet
-        //    2) the battery on the device is low or even missing
-        Serial.println("RTC lost confidence in the DateTime!");
-    }
-    if (Rtc.GetIsWriteProtected()) {
-        Serial.println("RTC was write protected, enabling writing now");
-        Rtc.SetIsWriteProtected(false);
+          
+    uint32_t RtcGet() {
+      RtcDateTime temptime;
+      temptime = Rtc.GetDateTime();
+      uint32_t returnvalue = temptime.Unix32Time();
+      Serial.println(returnvalue);
+      return returnvalue;
     }
 
-    if (!Rtc.GetIsRunning()) {
-        Serial.println("RTC was not actively running, starting now");
-        Rtc.SetIsRunning(true);
-        }
-  }
-        
-  uint32_t RtcGet() {
-    return Rtc.GetDateTime();    // if compilation fails here; check library version of "RTC by Makuna" !!! 
-  }
-  void RtcSet(uint32_t tt) {
-    Rtc.SetDateTime(tt);  
-  }
+    void RtcSet(uint32_t tt) {
+      RtcDateTime temptime;
+      temptime.InitWithUnix32Time(tt);
+      Rtc.SetDateTime(temptime);
+    }
 #else 
-  // For the DS3231 RTC
+  // For the DS1307 RTC
   #include <DS1307RTC.h>
-  void RtcBegin() {}
-  uint32_t RtcGet() {
-    return RTC.get();
-  }
-  void RtcSet(uint32_t tt) {
-    RTC.set(tt);
-  }
+    void RtcBegin() {}
+    uint32_t RtcGet() {
+      return RTC.get();
+    }
+    void RtcSet(uint32_t tt) {
+      RTC.set(tt);
+    }
 #endif 
 
 

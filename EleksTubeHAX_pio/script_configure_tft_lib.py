@@ -14,12 +14,14 @@ print("===== copying TFT config files ===== ")
 # copy using Python libraries
 # "copy" changes file timestamp -> lib is always recompiled.
 # "copy2" keeps file timestamp -> lib is compiled once
-shutil.copy2('./src/_USER_DEFINES.h', './.pio/libdeps/esp32dev/TFT_eSPI')
-shutil.copy2('./src/GLOBAL_DEFINES.h', './.pio/libdeps/esp32dev/TFT_eSPI/User_Setup.h')
+ret = shutil.copy2('./src/_USER_DEFINES.h', './.pio/libdeps/esp32dev/TFT_eSPI')
+print("Copied {ret}".format(**locals()))
+ret2 = shutil.copy2('./src/GLOBAL_DEFINES.h', './.pio/libdeps/esp32dev/TFT_eSPI/User_Setup.h')
+print("Copied {ret2}".format(**locals()))
 
 # copy using Windows command line
 # native "copy" command keeps file timestamp -> lib is compiled once
 # env.Execute("copy .\\src\\_USER_DEFINES.h .\\.pio\\libdeps\\esp32dev\\TFT_eSPI")
 # env.Execute("copy .\\src\\GLOBAL_DEFINES.h .\\.pio\\libdeps\\esp32dev\\TFT_eSPI\\User_Setup.h")
 
-print("Done.")
+print("Done copying TFT config files!")
