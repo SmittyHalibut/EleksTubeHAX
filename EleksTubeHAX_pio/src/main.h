@@ -2,4 +2,4 @@
 
 void updateClockDisplay(TFTs::show_t show=TFTs::yes);
 void setupMenu();
-void EveryFullHour();
+void EveryFullHour(bool loopUpdate=false);
