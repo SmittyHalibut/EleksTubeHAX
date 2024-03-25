@@ -13,10 +13,20 @@
 #include "Mqtt_client_ips.h"
 #include "WiFi.h"       // for ESP32
 #include <PubSubClient.h>  // Download and install this library first from: https://www.arduinolibraries.info/libraries/pub-sub-client
+#include <ArduinoJson.h>
 #include "TempSensor.h"
 
 WiFiClient espClient;
 PubSubClient MQTTclient(espClient);
+
+#define MQTT_STATE_ON "ON"
+#define MQTT_STATE_OFF "OFF"
+
+#define MQTT_BRIGHTNESS_MIN 0
+#define MQTT_BRIGHTNESS_MAX 255
+
+#define MQTT_ITENSITY_MIN 0
+#define MQTT_ITENSITY_MAX 7
 
 // private:
 int splitTopic(char* topic, char* tokens[], int tokensNumber);
@@ -42,19 +52,24 @@ uint32_t LastTimeTriedToConnect = 0;
 bool MqttConnected = true; // skip error meggase if disabled
 // commands from server    // = "directive/status"
 bool MqttCommandPower = true;
-int  MqttCommandState = 1;  
 bool MqttCommandPowerReceived = false;
+
+int  MqttCommandState = 1;  
 bool MqttCommandStateReceived = false;
+
+uint8_t  MqttCommandBrightness = -1;  
+bool MqttCommandBrightnessReceived = false;
 
 // status to server
 bool MqttStatusPower = true;
 int MqttStatusState = 0;
 int MqttStatusBattery = 7;
+int MqttStatusBrightness = 0;
 
 int LastSentSignalLevel = 999;
 int LastSentPowerState = -1;
 int LastSentStatus = -1;
-
+int LastSentBrightness = -1;
 
 void sendToBroker(const char* topic, const char* message) {
   if (MQTTclient.connected()) {
@@ -76,6 +91,26 @@ void sendToBroker(const char* topic, const char* message) {
   }
 }
 
+void sendStateToBroker() {
+#ifdef MQTT_HOME_ASSISTANT
+  if(!MQTTclient.connected()) {
+    return;
+  }
+  JsonDocument state;
+  state["state"] =  MqttStatusPower == 0 ? MQTT_STATE_OFF : MQTT_STATE_ON;
+  state["brightness"] = map(MqttStatusBrightness, MQTT_ITENSITY_MIN, MQTT_ITENSITY_MAX, MQTT_BRIGHTNESS_MIN, MQTT_BRIGHTNESS_MAX);
+
+  char buffer[256];
+  size_t n = serializeJson(state, buffer);
+  MQTTclient.publish(MQTT_CLIENT, buffer, true);
+
+  Serial.print("TX MQTT: ");
+  Serial.print(MQTT_CLIENT);
+  Serial.print("/");
+  Serial.println(buffer);
+#endif
+}
+
 void MqttStart() {
 #ifdef MQTT_ENABLED
   MqttConnected = false;
@@ -89,18 +124,19 @@ void MqttStart() {
         Serial.println("MQTT connected");
         MqttConnected = true;
     } else {
-        if (MQTTclient.state() == 5) {
-            Serial.println("Connection not allowed by broker, possible reasons:");
-            Serial.println("- Device is already online. Wait some seconds until it appears offline");
-            Serial.println("- Wrong Username or password. Check credentials");
-            Serial.println("- Client Id does not belong to this username, verify ClientId");
-        } else {
-            Serial.print("Not possible to connect to Broker Error code:");
-            Serial.println(MQTTclient.state());
-        }
-        return;  // do not continue if not connected
+      if (MQTTclient.state() == 5) {
+          Serial.println("Connection not allowed by broker, possible reasons:");
+          Serial.println("- Device is already online. Wait some seconds until it appears offline");
+          Serial.println("- Wrong Username or password. Check credentials");
+          Serial.println("- Client Id does not belong to this username, verify ClientId");
+      } else {
+          Serial.print("Not possible to connect to Broker Error code:");
+          Serial.println(MQTTclient.state());
       }
+      return;  // do not continue if not connected
+    }
       
+  #ifndef MQTT_HOME_ASSISTANT
     char subscibeTopic[100];
     sprintf(subscibeTopic, "%s/#", MQTT_CLIENT);
     MQTTclient.subscribe(subscibeTopic);  //Subscribes to all messages send to the device
@@ -110,6 +146,13 @@ void MqttStart() {
     sendToBroker("report/ip", (char*)WiFi.localIP().toString().c_str());  // Reports the ip
     sendToBroker("report/network", (char*)WiFi.SSID().c_str());  // Reports the network name
     MqttReportWiFiSignal();
+  #endif
+
+  #ifdef MQTT_HOME_ASSISTANT
+    char subscibeTopic[100];
+    sprintf(subscibeTopic, "%s/set", MQTT_CLIENT);
+    MQTTclient.subscribe(subscibeTopic);
+  #endif
   }
 #endif
 }
@@ -137,6 +180,8 @@ void callback(char* topic, byte* payload, unsigned int length) {  //A new messag
     Serial.print("Received MQTT topic: ");
     Serial.print(topic);                       // long output
 #endif    
+
+  #ifndef MQTT_HOME_ASSISTANT
     int tokensNumber = 10;
     char* tokens[tokensNumber];
     char message[length + 1];
@@ -168,20 +213,33 @@ void callback(char* topic, byte* payload, unsigned int length) {  //A new messag
         if (strcmp(message, "ON") == 0) {
             MqttCommandPower = true;
             MqttCommandPowerReceived = true;
-            MqttReportBackEverything();
         } else if (strcmp(message, "OFF") == 0) {
             MqttCommandPower = false;
             MqttCommandPowerReceived = true;
-            MqttReportBackEverything();
         }                                                       //      SmartNest:                         // SmartThings
     } else if (strcmp(tokens[1], "directive") == 0 && (strcmp(tokens[2], "setpoint") == 0) || (strcmp(tokens[2], "percentage") == 0)) {
             double valueD = atof(message);
             if (!isnan(valueD)) {
               MqttCommandState = (int) valueD;
               MqttCommandStateReceived = true;
-              MqttReportBackEverything();
             }
       }
+    #endif
+
+    #ifdef MQTT_HOME_ASSISTANT
+      JsonDocument doc;
+      deserializeJson(doc, payload, length);
+      
+      if(doc.containsKey("state")) {
+        MqttCommandPower = doc["state"] == MQTT_STATE_ON;
+        MqttCommandPowerReceived = true;
+      }
+      if(doc.containsKey("brightness")) {
+        MqttCommandBrightness = map(doc["brightness"], MQTT_BRIGHTNESS_MIN, MQTT_BRIGHTNESS_MAX, MQTT_ITENSITY_MIN, MQTT_ITENSITY_MAX);
+        MqttCommandBrightnessReceived = true;
+      }
+      doc.clear();
+    #endif
  }
 
 void MqttLoopFrequently(){
@@ -201,7 +259,7 @@ void MqttLoopInFreeTime(){
 void MqttReportBattery() {
   char message2[5];
   sprintf(message2, "%d", MqttStatusBattery);
-  sendToBroker("report/battery", message2);
+  sendToBroker("report/battery", message2); 
 } 
 
 void MqttReportStatus() {
@@ -222,12 +280,9 @@ void MqttReportTemperature() {
 }    
 
 void MqttReportPowerState() {
-  if (MqttStatusPower != LastSentPowerState) {
-    if (MqttStatusPower != 0) {
-      sendToBroker("report/powerState", "ON");
-    } else {
-      sendToBroker("report/powerState", "OFF");
-    }
+  if (MqttStatusPower != LastSentPowerState) {  
+    sendToBroker("report/powerState", MqttStatusPower == 0 ? MQTT_STATE_OFF : MQTT_STATE_ON);
+
     LastSentPowerState = MqttStatusPower;
   }
 }
@@ -259,17 +314,34 @@ void MqttReportNotification(String message) {
 }
 
 void MqttReportBackEverything() {
-    MqttReportPowerState();
-    MqttReportStatus();
+  if(!MQTTclient.connected()) {
+    return;
+  }
+
+  #ifndef MQTT_HOME_ASSISTANT
+  MqttReportPowerState();
+  MqttReportStatus();
 //    MqttReportBattery();
-    MqttReportWiFiSignal();
-    MqttReportTemperature();
-    lastTimeSent = millis();
+  MqttReportWiFiSignal();
+  MqttReportTemperature();
+  #endif
+
+  #ifdef MQTT_HOME_ASSISTANT
+  sendStateToBroker();
+  #endif
+  
+  lastTimeSent = millis();
 }
 
 void MqttReportBackOnChange() {
-    MqttReportPowerState();
-    MqttReportStatus();
+  if(!MQTTclient.connected()) {
+    return;
+  }
+
+  #ifndef MQTT_HOME_ASSISTANT
+  MqttReportPowerState();
+  MqttReportStatus();
+  #endif
 }
   
 void MqttPeriodicReportBack() {

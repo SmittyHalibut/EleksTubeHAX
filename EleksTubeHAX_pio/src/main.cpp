@@ -146,10 +146,14 @@ void loop() {
   uint32_t millis_at_top = millis();
   // Do all the maintenance work
   WifiReconnect(); // if not connected attempt to reconnect
-
-  MqttStatusPower = tfts.isEnabled();
-  MqttStatusState = (uclock.getActiveGraphicIdx()+1) * 5;   // 10 
+  
   MqttLoopFrequently();
+
+  bool MqttCommandReceived = 
+    MqttCommandPowerReceived || 
+    MqttCommandStateReceived ||
+    MqttCommandBrightnessReceived;
+  
   if (MqttCommandPowerReceived) {
     MqttCommandPowerReceived = false;
     if (MqttCommandPower) {
@@ -186,6 +190,20 @@ void loop() {
     stored_config.save();
     Serial.println(" Done.");
     */
+  }
+
+  if(MqttCommandBrightnessReceived) {
+    MqttCommandBrightnessReceived = false;
+    
+    backlights.setIntensity(MqttCommandBrightness);
+  }
+
+  MqttStatusPower = tfts.isEnabled();
+  MqttStatusState = (uclock.getActiveGraphicIdx()+1) * 5;   // 10 
+  MqttStatusBrightness = backlights.getIntensity();
+
+  if(MqttCommandReceived) {
+    MqttReportBackEverything();
   }
 
   buttons.loop();
