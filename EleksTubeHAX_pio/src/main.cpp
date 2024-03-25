@@ -267,7 +267,7 @@ void loop() {
         }
         
         setupMenu();
-        tfts.println("12 Hour?");
+        tfts.println("Hour format");
         tfts.println(uclock.getTwelveHour() ? "12 hour" : "24 hour"); 
       }
       // Blank leading zeros on the hours?
@@ -319,8 +319,11 @@ void loop() {
       else if (menu_state == Menu::selected_graphic) {
         if (menu_change != 0) {
           uclock.adjustClockGraphicsIdx(menu_change);
-          tfts.current_graphic = uclock.getActiveGraphicIdx();
-          updateClockDisplay(TFTs::force);   // redraw everything
+
+          if(tfts.current_graphic != uclock.getActiveGraphicIdx()) {
+            tfts.current_graphic = uclock.getActiveGraphicIdx();
+            updateClockDisplay(TFTs::force);   // redraw everything
+          }
         }
 
         setupMenu();
