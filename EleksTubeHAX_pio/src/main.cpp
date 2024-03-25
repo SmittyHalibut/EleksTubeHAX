@@ -295,6 +295,9 @@ void loop() {
         time_t offset = uclock.getTimeZoneOffset();
         int8_t offset_hour = offset/3600;
         int8_t offset_min = (offset%3600)/60;
+        if(offset_min < 0) {
+          offset_min = -offset_min;
+        }
         tfts.printf("%d:%02d\n", offset_hour, offset_min);
       }
       // UTC Offset, 15 minutes
@@ -313,6 +316,9 @@ void loop() {
         time_t offset = uclock.getTimeZoneOffset();
         int8_t offset_hour = offset/3600;
         int8_t offset_min = (offset%3600)/60;
+        if(offset_min < 0) {
+          offset_min = -offset_min;
+        }
         tfts.printf("%d:%02d\n", offset_hour, offset_min);
       }
       // select clock "font"
