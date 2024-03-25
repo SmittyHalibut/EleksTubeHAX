@@ -60,11 +60,15 @@ bool MqttCommandStateReceived = false;
 uint8_t  MqttCommandBrightness = -1;  
 bool MqttCommandBrightnessReceived = false;
 
+char MqttCommandPattern[24] = "";
+bool MqttCommandPatternReceived = false;
+
 // status to server
 bool MqttStatusPower = true;
 int MqttStatusState = 0;
 int MqttStatusBattery = 7;
 int MqttStatusBrightness = 0;
+char MqttStatusPattern[24] = "";
 
 int LastSentSignalLevel = 999;
 int LastSentPowerState = -1;
@@ -99,6 +103,7 @@ void sendStateToBroker() {
   JsonDocument state;
   state["state"] =  MqttStatusPower == 0 ? MQTT_STATE_OFF : MQTT_STATE_ON;
   state["brightness"] = map(MqttStatusBrightness, MQTT_ITENSITY_MIN, MQTT_ITENSITY_MAX, MQTT_BRIGHTNESS_MIN, MQTT_BRIGHTNESS_MAX);
+  state["effect"] = MqttStatusPattern;
 
   char buffer[256];
   size_t n = serializeJson(state, buffer);
@@ -237,6 +242,10 @@ void callback(char* topic, byte* payload, unsigned int length) {  //A new messag
       if(doc.containsKey("brightness")) {
         MqttCommandBrightness = map(doc["brightness"], MQTT_BRIGHTNESS_MIN, MQTT_BRIGHTNESS_MAX, MQTT_ITENSITY_MIN, MQTT_ITENSITY_MAX);
         MqttCommandBrightnessReceived = true;
+      }
+      if(doc.containsKey("effect")) {
+        strcpy(MqttCommandPattern, doc["effect"]);
+        MqttCommandPatternReceived = true;
       }
       doc.clear();
     #endif

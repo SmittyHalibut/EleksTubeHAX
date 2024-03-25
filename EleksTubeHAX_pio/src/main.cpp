@@ -152,7 +152,8 @@ void loop() {
   bool MqttCommandReceived = 
     MqttCommandPowerReceived || 
     MqttCommandStateReceived ||
-    MqttCommandBrightnessReceived;
+    MqttCommandBrightnessReceived ||
+    MqttCommandPatternReceived;
   
   if (MqttCommandPowerReceived) {
     MqttCommandPowerReceived = false;
@@ -198,9 +199,25 @@ void loop() {
     backlights.setIntensity(MqttCommandBrightness);
   }
 
+  if(MqttCommandPatternReceived) {
+    MqttCommandPatternReceived = false;
+
+    for(int8_t i = 0; i < Backlights::num_patterns; i++){
+        Serial.print("new pattern ");
+        Serial.print(MqttCommandPattern);
+        Serial.println(Backlights::patterns_str[i]);
+      if(strcmp(MqttCommandPattern, (Backlights::patterns_str[i]).c_str()) == 0) {
+        backlights.setPattern(Backlights::patterns(i));
+        break;
+      }
+    } 
+  }
+
   MqttStatusPower = tfts.isEnabled();
   MqttStatusState = (uclock.getActiveGraphicIdx()+1) * 5;   // 10 
   MqttStatusBrightness = backlights.getIntensity();
+  strcpy(MqttStatusPattern, backlights.getPatternStr().c_str());
+  backlights.getPatternStr().toCharArray(MqttStatusPattern, backlights.getPatternStr().length() + 1);
 
   if(MqttCommandReceived) {
     MqttReportBackEverything();
