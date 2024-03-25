@@ -179,7 +179,7 @@ void Backlights::rainbowPattern() {
     setPixelColor(digit, phaseToColor(my_phase));
   }
   if (dimming) {
-    setBrightness((uint8_t) BACKLIGHT_DIMMED_INTENSITY);
+    setBrightness(0xFF >> max_intensity - (uint8_t) BACKLIGHT_DIMMED_INTENSITY - 1);
   }  else {
     setBrightness(0xFF >> max_intensity - config->intensity - 1);  
   }
