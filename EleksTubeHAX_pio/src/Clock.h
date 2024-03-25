@@ -35,9 +35,15 @@ public:
   void toggleBlankHoursZero()           { config->blank_hours_zero = !config->blank_hours_zero; }
 
   // Internal time is kept in UTC. This affects the displayed time.
-  void setTimeZoneOffset(time_t offset) { config->time_zone_offset = offset; }
+  void setTimeZoneOffset(time_t offset) { 
+    config->time_zone_offset = offset; 
+    loop();
+  }
   time_t getTimeZoneOffset()            { return config->time_zone_offset; }
-  void adjustTimeZoneOffset(time_t adj) { config->time_zone_offset += adj; }
+  void adjustTimeZoneOffset(time_t adj) { 
+    config->time_zone_offset += adj;
+    loop();
+  }
   void  setActiveGraphicIdx(int8_t idx) { config->selected_graphic = idx;}
   int8_t getActiveGraphicIdx()          { return config->selected_graphic; }
   void adjustClockGraphicsIdx(int8_t adj) {
