@@ -289,17 +289,13 @@ bool TFTs::LoadImageIntoBuffer(uint8_t file_index) {
           }
           b = c; g = c >> 8; r = c >> 16;
         }
-/* BUG: this does not work yet        
+
+        uint16_t color = ((r & 0xF8) << 8) | ((g & 0xFC) << 3) | ((b & 0xFF) >> 3);
         if (dimming < 255) { // only dim when needed
-          b *= dimming;
-          g *= dimming;
-          r *= dimming;
-          b = b >> 8;
-          g = g >> 8;
-          r = r >> 8;
+          color = alphaBlend(dimming, color, TFT_BLACK);
         } // dimming
-*/        
-        UnpackedImageBuffer[row+y][col+x] = ((r & 0xF8) << 8) | ((g & 0xFC) << 3) | ((b & 0xFF) >> 3);
+
+        UnpackedImageBuffer[row+y][col+x] = color;
     } // col
   } // row
   FileInBuffer = file_index;
