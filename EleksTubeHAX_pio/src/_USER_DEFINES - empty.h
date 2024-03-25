@@ -22,7 +22,7 @@
 
 
 // ************* Clock font file type selection (.clk or .bmp)  *************
-#define USE_CLK_FILES   // select between .CLK and .BMP images
+//#define USE_CLK_FILES   // select between .CLK and .BMP images
 
 
 // ************* Display Dimming / Night time operation *************
@@ -59,4 +59,4 @@
 //#define ONE_WIRE_BUS_PIN   4  // DS18B20 connected to GPIO4; comment this line if sensor is not connected
 
 
-#endif
+#endif  // USER_DEFINES_H_
