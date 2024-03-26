@@ -235,9 +235,9 @@ void callback(char* topic, byte* payload, unsigned int length) {  //A new messag
   Serial.println(message);
   #endif    
 
-  if (commandNumber < 3) {
+  if (commandNumber < 2) {
     // otherwise code below crashes on the strmp on non-initialized pointers in command[] array
-    Serial.println("Number of command in MQTT message < 3!");
+    Serial.println("Number of command in MQTT message < 2!");
     return; 
   }
     
@@ -376,6 +376,11 @@ void MqttReportBackEverything() {
   //    MqttReportBattery();
     MqttReportWiFiSignal();
     MqttReportTemperature();
+    #endif
+
+    #ifdef MQTT_HOME_ASSISTANT
+    MqttReportState();
+    MqttReportGraphic();
     #endif
     
     lastTimeSent = millis();
