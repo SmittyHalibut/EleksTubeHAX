@@ -225,7 +225,7 @@ void loop() {
   MqttStatusGraphic = uclock.getActiveGraphicIdx();
 
   if(MqttCommandReceived) {
-    MqttReportBackEverything();
+    MqttReportBackEverything(true);
   }
 
   buttons.loop();

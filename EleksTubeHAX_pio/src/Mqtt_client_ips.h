@@ -30,7 +30,7 @@ extern uint8_t MqttStatusGraphic;
 void MqttStart();
 void MqttLoopFrequently();
 void MqttLoopInFreeTime();
-void MqttReportBackEverything();
+void MqttReportBackEverything(bool force);
 
 
 #endif /* mqtt_client_H_ */

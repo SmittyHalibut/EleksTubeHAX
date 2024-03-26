@@ -39,9 +39,9 @@ void MqttReportPowerState();
 void MqttReportWiFiSignal();
 void MqttReportTemperature();
 void MqttReportNotification(String message);
-void MqttReportGraphic();
+void MqttReportGraphic(bool force);
 void MqttReportBackOnChange();
-void MqttReportBackEverything();
+void MqttReportBackEverything(bool force);
 void MqttPeriodicReportBack();
 
 char topic[100];
@@ -102,13 +102,10 @@ void sendToBroker(const char* topic, const char* message) {
   }
 }
 
-void MqttReportState() {
+void MqttReportState(bool force) {
 #ifdef MQTT_HOME_ASSISTANT
   if(MQTTclient.connected()) {
-    if(MqttStatusState != LastSentPowerState || 
-      MqttStatusBrightness != LastSentBrightness ||
-      strcmp(MqttStatusPattern, LastSentPattern) != 0) {
-
+    if(force || MqttStatusState != LastSentPowerState || MqttStatusBrightness != LastSentBrightness || strcmp(MqttStatusPattern, LastSentPattern) != 0) {
       JsonDocument state;
       state["state"] =  MqttStatusPower == 0 ? MQTT_STATE_OFF : MQTT_STATE_ON;
       state["brightness"] = map(MqttStatusBrightness, MQTT_ITENSITY_MIN, MQTT_ITENSITY_MAX, MQTT_BRIGHTNESS_MIN, MQTT_BRIGHTNESS_MAX);
@@ -357,8 +354,8 @@ void MqttReportNotification(String message) {
   }
 }
 
-void MqttReportGraphic() {
-  if (MqttStatusGraphic != LastSentGraphic) {
+void MqttReportGraphic(bool force) {
+  if (force || MqttStatusGraphic != LastSentGraphic) {
     char graphic[2] = "";
     sprintf(graphic, "%i", MqttStatusGraphic);
     sendToBroker("graphic", graphic);  // Reports the signal strength
@@ -368,7 +365,7 @@ void MqttReportGraphic() {
 }
 
 
-void MqttReportBackEverything() {
+void MqttReportBackEverything(bool force) {
   if(!MQTTclient.connected()) {
     #ifndef MQTT_HOME_ASSISTANT
     MqttReportPowerState();
@@ -379,8 +376,8 @@ void MqttReportBackEverything() {
     #endif
 
     #ifdef MQTT_HOME_ASSISTANT
-    MqttReportState();
-    MqttReportGraphic();
+    MqttReportState(force);
+    MqttReportGraphic(force);
     #endif
     
     lastTimeSent = millis();
@@ -395,14 +392,14 @@ void MqttReportBackOnChange() {
     #endif
 
     #ifdef MQTT_HOME_ASSISTANT
-    MqttReportState();
-    MqttReportGraphic();
+    MqttReportState(false);
+    MqttReportGraphic(false);
     #endif
   }
 }
   
 void MqttPeriodicReportBack() {
   if (((millis() - lastTimeSent) > (MQTT_REPORT_STATUS_EVERY_SEC * 1000)) && MQTTclient.connected()) {
-    MqttReportBackEverything();
-    }
+    MqttReportBackEverything(false);
+  }
 }
