@@ -46,6 +46,8 @@ uint8_t       hour_old        = 255;
 bool          DstNeedsUpdate  = false;
 uint8_t       yesterday       = 0;
 
+uint32_t lastMqttCommandExecuted = (uint32_t) -1;
+
 // Helper function, defined below.
 void updateClockDisplay(TFTs::show_t show=TFTs::yes);
 void setupMenu(void);
@@ -225,7 +227,19 @@ void loop() {
   MqttStatusGraphic = uclock.getActiveGraphicIdx();
 
   if(MqttCommandReceived) {
+    lastMqttCommandExecuted = millis();
+
     MqttReportBackEverything(true);
+  }
+
+  if(lastMqttCommandExecuted != -1) {
+    if (((millis() - lastMqttCommandExecuted) > (MQTT_SAVE_PREFERENCES_AFTER_SEC * 1000)) && menu.getState() == Menu::idle) {
+      lastMqttCommandExecuted = -1;
+
+      Serial.print("Saving config...");
+      stored_config.save();
+      Serial.println(" Done.");
+    }
   }
 
   buttons.loop();
