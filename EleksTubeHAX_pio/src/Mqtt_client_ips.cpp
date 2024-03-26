@@ -105,7 +105,7 @@ void sendToBroker(const char* topic, const char* message) {
 void MqttReportState(bool force) {
 #ifdef MQTT_HOME_ASSISTANT
   if(MQTTclient.connected()) {
-    if(force || MqttStatusState != LastSentPowerState || MqttStatusBrightness != LastSentBrightness || strcmp(MqttStatusPattern, LastSentPattern) != 0) {
+    if(force || MqttStatusPower != LastSentPowerState || MqttStatusBrightness != LastSentBrightness || strcmp(MqttStatusPattern, LastSentPattern) != 0) {
       JsonDocument state;
       state["state"] =  MqttStatusPower == 0 ? MQTT_STATE_OFF : MQTT_STATE_ON;
       state["brightness"] = map(MqttStatusBrightness, MQTT_ITENSITY_MIN, MQTT_ITENSITY_MAX, MQTT_BRIGHTNESS_MIN, MQTT_BRIGHTNESS_MAX);
@@ -115,7 +115,7 @@ void MqttReportState(bool force) {
       size_t n = serializeJson(state, buffer);
       MQTTclient.publish(MQTT_CLIENT, buffer, true);
 
-      LastSentPowerState = MqttStatusState;
+      LastSentPowerState = MqttStatusPower;
       LastSentBrightness = MqttStatusBrightness;
       strcpy(LastSentPattern, MqttStatusPattern);
 
@@ -366,7 +366,7 @@ void MqttReportGraphic(bool force) {
 
 
 void MqttReportBackEverything(bool force) {
-  if(!MQTTclient.connected()) {
+  if(MQTTclient.connected()) {
     #ifndef MQTT_HOME_ASSISTANT
     MqttReportPowerState();
     MqttReportStatus();
@@ -389,11 +389,6 @@ void MqttReportBackOnChange() {
     #ifndef MQTT_HOME_ASSISTANT
     MqttReportPowerState();
     MqttReportStatus();
-    #endif
-
-    #ifdef MQTT_HOME_ASSISTANT
-    MqttReportState(false);
-    MqttReportGraphic(false);
     #endif
   }
 }
