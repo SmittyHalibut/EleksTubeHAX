@@ -14,13 +14,17 @@ extern uint8_t MqttCommandBrightness;
 extern bool MqttCommandBrightnessReceived;
 extern char MqttCommandPattern[];
 extern bool MqttCommandPatternReceived;
+extern uint8_t MqttCommandGraphic;
+extern bool MqttCommandGraphicReceived;
 
 // status to server
 extern bool MqttStatusPower;
 extern int MqttStatusState;
 extern int MqttStatusBattery;
-extern int MqttStatusBrightness;
+extern uint8_t MqttStatusBrightness;
 extern char MqttStatusPattern[];
+extern uint8_t MqttStatusGraphic;
+
 
 // functions
 void MqttStart();

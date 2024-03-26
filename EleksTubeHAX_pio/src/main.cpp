@@ -153,7 +153,8 @@ void loop() {
     MqttCommandPowerReceived || 
     MqttCommandStateReceived ||
     MqttCommandBrightnessReceived ||
-    MqttCommandPatternReceived;
+    MqttCommandPatternReceived || 
+    MqttCommandGraphicReceived;
   
   if (MqttCommandPowerReceived) {
     MqttCommandPowerReceived = false;
@@ -186,11 +187,6 @@ void loop() {
     uclock.setClockGraphicsIdx(idx);  
     tfts.current_graphic = uclock.getActiveGraphicIdx();
     updateClockDisplay(TFTs::force);   // redraw everything
-    /* do not save to flash everytime mqtt changes; can be frequent
-    Serial.print("Saving config...");
-    stored_config.save();
-    Serial.println(" Done.");
-    */
   }
 
   if(MqttCommandBrightnessReceived) {
@@ -213,11 +209,20 @@ void loop() {
     } 
   }
 
+  if(MqttCommandGraphicReceived) {
+    MqttCommandGraphicReceived = false;
+
+    uclock.setClockGraphicsIdx(MqttCommandGraphic);
+    tfts.current_graphic = uclock.getActiveGraphicIdx();
+    updateClockDisplay(TFTs::force);   // redraw everything
+  }
+
   MqttStatusPower = tfts.isEnabled();
   MqttStatusState = (uclock.getActiveGraphicIdx()+1) * 5;   // 10 
   MqttStatusBrightness = backlights.getIntensity();
   strcpy(MqttStatusPattern, backlights.getPatternStr().c_str());
   backlights.getPatternStr().toCharArray(MqttStatusPattern, backlights.getPatternStr().length() + 1);
+  MqttStatusGraphic = uclock.getActiveGraphicIdx();
 
   if(MqttCommandReceived) {
     MqttReportBackEverything();

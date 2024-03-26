@@ -29,7 +29,7 @@ PubSubClient MQTTclient(espClient);
 #define MQTT_ITENSITY_MAX 7
 
 // private:
-int splitTopic(char* topic, char* tokens[], int tokensNumber);
+int splitCommand(char* topic, char* tokens[], int tokensNumber);
 void callback(char* topic, byte* payload, unsigned int length);
 
 void MqttProcessCommand();
@@ -39,6 +39,7 @@ void MqttReportPowerState();
 void MqttReportWiFiSignal();
 void MqttReportTemperature();
 void MqttReportNotification(String message);
+void MqttReportGraphic();
 void MqttReportBackOnChange();
 void MqttReportBackEverything();
 void MqttPeriodicReportBack();
@@ -57,29 +58,34 @@ bool MqttCommandPowerReceived = false;
 int  MqttCommandState = 1;  
 bool MqttCommandStateReceived = false;
 
-uint8_t  MqttCommandBrightness = -1;  
+uint8_t MqttCommandBrightness = -1;  
 bool MqttCommandBrightnessReceived = false;
 
 char MqttCommandPattern[24] = "";
 bool MqttCommandPatternReceived = false;
 
+uint8_t MqttCommandGraphic = -1;  
+bool MqttCommandGraphicReceived = false;
+
 // status to server
 bool MqttStatusPower = true;
 int MqttStatusState = 0;
 int MqttStatusBattery = 7;
-int MqttStatusBrightness = 0;
+uint8_t MqttStatusBrightness = 0;
 char MqttStatusPattern[24] = "";
+uint8_t MqttStatusGraphic = 0;
 
 int LastSentSignalLevel = 999;
 int LastSentPowerState = -1;
 int LastSentStatus = -1;
 int LastSentBrightness = -1;
+int LastSentGraphic = -1;
 
 void sendToBroker(const char* topic, const char* message) {
   if (MQTTclient.connected()) {
     char topicArr[100];
     sprintf(topicArr, "%s/%s", MQTT_CLIENT, topic);
-    MQTTclient.publish(topicArr, message);
+    MQTTclient.publish(topicArr, message, true);
 #ifdef DEBUG_OUTPUT // long output
     Serial.print("Sending to MQTT: ");
     Serial.print(topicArr);
@@ -87,15 +93,15 @@ void sendToBroker(const char* topic, const char* message) {
     Serial.println(message);
 #else
     Serial.print("TX MQTT: ");
-    Serial.print(topic);
-    Serial.print("/");
+    Serial.print(topicArr);
+    Serial.print(" ");
     Serial.println(message);
 #endif    
     delay (120);  
   }
 }
 
-void sendStateToBroker() {
+void MqttReportState() {
 #ifdef MQTT_HOME_ASSISTANT
   if(!MQTTclient.connected()) {
     return;
@@ -111,7 +117,7 @@ void sendStateToBroker() {
 
   Serial.print("TX MQTT: ");
   Serial.print(MQTT_CLIENT);
-  Serial.print("/");
+  Serial.print(" ");
   Serial.println(buffer);
 #endif
 }
@@ -157,19 +163,32 @@ void MqttStart() {
     char subscibeTopic[100];
     sprintf(subscibeTopic, "%s/set", MQTT_CLIENT);
     MQTTclient.subscribe(subscibeTopic);
+
+    sprintf(subscibeTopic, "%s/graphic/set", MQTT_CLIENT);
+    MQTTclient.subscribe(subscibeTopic);
   #endif
   }
 #endif
 }
 
-int splitTopic(char* topic, char* tokens[], int tokensNumber) {
+int splitCommand(char* topic, char* tokens[], int tokensNumber) {
+    int mqttClientLength = strlen(MQTT_CLIENT);
+    int topicLength = strlen(topic);
+    int finalLength = topicLength - mqttClientLength + 2;
+    char* command = (char*) malloc(finalLength);
+
+    strncpy(command, topic + (mqttClientLength + 1), finalLength - 2);
+    
     const char s[2] = "/";
     int pos = 0;
-    tokens[0] = strtok(topic, s);
+    tokens[0] = strtok(command, s);
     while (pos < tokensNumber - 1 && tokens[pos] != NULL) {
         pos++;
         tokens[pos] = strtok(NULL, s);
     }
+
+    free(command);
+
     return pos;
 }
 
@@ -181,74 +200,81 @@ void checkMqtt() {
 }
 
 void callback(char* topic, byte* payload, unsigned int length) {  //A new message has been received
-#ifdef DEBUG_OUTPUT
-    Serial.print("Received MQTT topic: ");
-    Serial.print(topic);                       // long output
-#endif    
+  #ifdef DEBUG_OUTPUT
+  Serial.print("Received MQTT topic: ");
+  Serial.print(topic);                       // long output
+  #endif    
+  int commandNumber = 10;
+  char* command[commandNumber];
+  commandNumber = splitCommand(topic, command, commandNumber);
 
   #ifndef MQTT_HOME_ASSISTANT
-    int tokensNumber = 10;
-    char* tokens[tokensNumber];
-    char message[length + 1];
-    tokensNumber = splitTopic(topic, tokens, tokensNumber);
-    sprintf(message, "%c", (char)payload[0]);
-    for (int i = 1; i < length; i++) {
-        sprintf(message, "%s%c", message, (char)payload[i]);
-    }
-#ifdef DEBUG_OUTPUT
-    Serial.print("\t     Message: ");
-    Serial.println(message);
-#else    
-    Serial.print("MQTT RX: ");
-    Serial.print(tokens[1]);
-    Serial.print("/");
-    Serial.print(tokens[2]);
-    Serial.print("/");
-    Serial.println(message);
-#endif    
+  char message[length + 1];
+  sprintf(message, "%c", (char)payload[0]);
+  for (int i = 1; i < length; i++) {
+      sprintf(message, "%s%c", message, (char)payload[i]);
+  }
+  #ifdef DEBUG_OUTPUT
+  Serial.print("\t     Message: ");
+  Serial.println(message);
+  #else    
+  Serial.print("MQTT RX: ");
+  Serial.print(command[0]);
+  Serial.print("/");
+  Serial.print(command[1]);
+  Serial.print("/");
+  Serial.println(message);
+  #endif    
 
-    if (tokensNumber < 3) {
-        // otherwise code below crashes on the strmp on non-initialized pointers in tokens[] array
-        Serial.println("Number of tokens in MQTT message < 3!");
-        return; 
-    }
+  if (commandNumber < 3) {
+    // otherwise code below crashes on the strmp on non-initialized pointers in command[] array
+    Serial.println("Number of command in MQTT message < 3!");
+    return; 
+  }
     
     //------------------Decide what to do depending on the topic and message---------------------------------
-    if (strcmp(tokens[1], "directive") == 0 && strcmp(tokens[2], "powerState") == 0) {  // Turn On or OFF
-        if (strcmp(message, "ON") == 0) {
-            MqttCommandPower = true;
-            MqttCommandPowerReceived = true;
-        } else if (strcmp(message, "OFF") == 0) {
-            MqttCommandPower = false;
-            MqttCommandPowerReceived = true;
-        }                                                       //      SmartNest:                         // SmartThings
-    } else if (strcmp(tokens[1], "directive") == 0 && (strcmp(tokens[2], "setpoint") == 0) || (strcmp(tokens[2], "percentage") == 0)) {
-            double valueD = atof(message);
-            if (!isnan(valueD)) {
-              MqttCommandState = (int) valueD;
-              MqttCommandStateReceived = true;
-            }
+  if (strcmp(command[0], "directive") == 0 && strcmp(command[1], "powerState") == 0) {  // Turn On or OFF
+    if (strcmp(message, "ON") == 0) {
+      MqttCommandPower = true;
+      MqttCommandPowerReceived = true;
+    } else if (strcmp(message, "OFF") == 0) {
+      MqttCommandPower = false;
+      MqttCommandPowerReceived = true;
+    }                                                       //      SmartNest:                         // SmartThings
+  } else if (strcmp(command[0], "directive") == 0 && (strcmp(command[1], "setpoint") == 0) || (strcmp(command[1], "percentage") == 0)) {
+      double valueD = atof(message);
+      if (!isnan(valueD)) {
+        MqttCommandState = (int) valueD;
+        MqttCommandStateReceived = true;
       }
-    #endif
+  }
+  #endif
 
-    #ifdef MQTT_HOME_ASSISTANT
-      JsonDocument doc;
-      deserializeJson(doc, payload, length);
-      
-      if(doc.containsKey("state")) {
-        MqttCommandPower = doc["state"] == MQTT_STATE_ON;
-        MqttCommandPowerReceived = true;
-      }
-      if(doc.containsKey("brightness")) {
-        MqttCommandBrightness = map(doc["brightness"], MQTT_BRIGHTNESS_MIN, MQTT_BRIGHTNESS_MAX, MQTT_ITENSITY_MIN, MQTT_ITENSITY_MAX);
-        MqttCommandBrightnessReceived = true;
-      }
-      if(doc.containsKey("effect")) {
-        strcpy(MqttCommandPattern, doc["effect"]);
-        MqttCommandPatternReceived = true;
-      }
-      doc.clear();
-    #endif
+  #ifdef MQTT_HOME_ASSISTANT
+  if (strcmp(command[0], "set") == 0){
+    JsonDocument doc;
+    deserializeJson(doc, payload, length);
+    
+    if(doc.containsKey("state")) {
+      MqttCommandPower = doc["state"] == MQTT_STATE_ON;
+      MqttCommandPowerReceived = true;
+    }
+    if(doc.containsKey("brightness")) {
+      MqttCommandBrightness = map(doc["brightness"], MQTT_BRIGHTNESS_MIN, MQTT_BRIGHTNESS_MAX, MQTT_ITENSITY_MIN, MQTT_ITENSITY_MAX);
+      MqttCommandBrightnessReceived = true;
+    }
+    if(doc.containsKey("effect")) {
+      strcpy(MqttCommandPattern, doc["effect"]);
+      MqttCommandPatternReceived = true;
+    }
+
+    doc.clear();
+  } else if (strcmp(command[0], "graphic") == 0 && strcmp(command[1], "set") == 0){
+    char graphic = (char) payload[0];
+    MqttCommandGraphic = graphic - '0';
+    MqttCommandGraphicReceived = true;
+  }
+  #endif
  }
 
 void MqttLoopFrequently(){
@@ -322,6 +348,17 @@ void MqttReportNotification(String message) {
   }
 }
 
+void MqttReportGraphic() {
+  if (MqttStatusGraphic != LastSentGraphic) {
+    char graphic[2] = "";
+    sprintf(graphic, "%i", MqttStatusGraphic);
+    sendToBroker("graphic", graphic);  // Reports the signal strength
+
+    LastSentGraphic = MqttStatusGraphic;
+  }
+}
+
+
 void MqttReportBackEverything() {
   if(!MQTTclient.connected()) {
     return;
@@ -336,7 +373,8 @@ void MqttReportBackEverything() {
   #endif
 
   #ifdef MQTT_HOME_ASSISTANT
-  sendStateToBroker();
+  MqttReportState();
+  MqttReportGraphic();
   #endif
   
   lastTimeSent = millis();
