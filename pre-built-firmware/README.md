@@ -8,7 +8,7 @@ In this folder you can find pre-built firmware images that you can upload to you
 
 Note that these firmwares may have limited functionality.
 
-##Enabled functions:
+## Enabled functions:
 - WPS connectivity (press WPS button on your router for WiFi setup).
 - DEBUG_OUTPUT - it will produce diagnostic messages on the serial port.
 - DCORE_DEBUG_LEVEL=5 - it will produce diagnostic messages from the operating system.
@@ -28,6 +28,6 @@ Available files:
 
 Make sure to edit it and write correct COM port and file name into it before running.
 
-##Save your original firmware using the `_ESP32 save flash 4MB.cmd` before tinkering.
+## Save your original firmware using the `_ESP32 save flash 4MB.cmd` before tinkering.
 
-##There is no warranty of any type.
+## There is no warranty of any type.
