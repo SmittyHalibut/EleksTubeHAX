@@ -18,8 +18,8 @@ print("===== adjusting APDS sensor libs ===== ")
 
 new_string_to_check = "#define APDS9960_ID_3"
 
-filename1 = "./.pio/libdeps/esp32dev8mb/SparkFun APDS9960 RGB and Gesture Sensor/src/SparkFun_APDS9960.h"
-filename2 = "./.pio/libdeps/esp32dev8mb/SparkFun APDS9960 RGB and Gesture Sensor/src/SparkFun_APDS9960.cpp"
+filename1 = "./.pio/libdeps/esp32dev8MB/SparkFun APDS9960 RGB and Gesture Sensor/src/SparkFun_APDS9960.h"
+filename2 = "./.pio/libdeps/esp32dev8MB/SparkFun APDS9960 RGB and Gesture Sensor/src/SparkFun_APDS9960.cpp"
 with open(filename1) as f:
     s = f.read()
     if new_string_to_check not in s:
