@@ -4,12 +4,17 @@
 #include "TempSensor.h"
 
 void TFTs::begin() {
+  #ifdef DEBUG_OUTPUT_TFT
+    Serial.println("TFTs::begin");
+  #endif
   // Start with all displays selected.
   chip_select.begin();
   chip_select.setAll();
 
-  // Turn power on to displays.
-  pinMode(TFT_ENABLE_PIN, OUTPUT);
+  // Turn power on to displays. Except for H401. Always On
+  #ifndef HARDWARE_IPSTUBE_H401_CLOCK
+  pinMode(TFT_ENABLE_PIN, OUTPUT);  
+  #endif
   enableAllDisplays();
   InvalidateImageInBuffer();
 
@@ -27,19 +32,26 @@ void TFTs::begin() {
 }
 
 void TFTs::reinit() {
+  #ifdef DEBUG_OUTPUT_TFT
+    Serial.println("TFTs::reinit");
+  #endif
   // Start with all displays selected.
   chip_select.begin();
   chip_select.setAll();
 
   // Turn power on to displays.
-  pinMode(TFT_ENABLE_PIN, OUTPUT);
+  #ifndef HARDWARE_IPSTUBE_H401_CLOCK
+  pinMode(TFT_ENABLE_PIN, OUTPUT);  
+  #endif
   enableAllDisplays();
-
   // Initialize the super class.
   init();
 }
 
 void TFTs::clear() {
+  #ifdef DEBUG_OUTPUT_TFT
+    Serial.println("TFTs::clear");
+  #endif
   // Start with all displays selected.
   chip_select.setAll();
   enableAllDisplays();
@@ -51,7 +63,7 @@ void TFTs::showNoWifiStatus() {
   fillRect(0, TFT_HEIGHT - 27, TFT_WIDTH, 27, TFT_BLACK);
   setCursor(5, TFT_HEIGHT - 27, 4);  // Font 4. 26 pixel high
   print("NO WIFI !");
-  }
+}
 
 void TFTs::showNoMqttStatus() {
   chip_select.setSecondsTens();
@@ -59,7 +71,41 @@ void TFTs::showNoMqttStatus() {
   fillRect(0, TFT_HEIGHT - 27, TFT_WIDTH, 27, TFT_BLACK);
   setCursor(5, TFT_HEIGHT - 27, 4);
   print("NO MQTT !");
+}
+
+void TFTs::enableAllDisplays() {
+  #ifdef DEBUG_OUTPUT_TFT
+    Serial.println("TFTs::enableAllDisplays");
+  #endif
+  // Turn power on to displays.
+  #ifndef HARDWARE_IPSTUBE_H401_CLOCK
+    digitalWrite(TFT_ENABLE_PIN, HIGH);
+  #endif
+  enabled = true;
+}
+
+void TFTs::disableAllDisplays() {
+  #ifdef DEBUG_OUTPUT_TFT
+    Serial.println("TFTs::disableAllDisplays");
+  #endif
+  // Turn power off to displays.
+  #ifndef HARDWARE_IPSTUBE_H401_CLOCK
+    digitalWrite(TFT_ENABLE_PIN, LOW);
+  #endif
+  enabled = false;
+}
+
+void TFTs::toggleAllDisplays() {
+  #ifdef DEBUG_OUTPUT_TFT
+    Serial.println("TFTs::toggleAllDisplays");
+  #endif
+  if (enabled) {
+    disableAllDisplays();
   }
+  else {
+    enableAllDisplays();
+  }
+}
 
 void TFTs::showTemperature() { 
   #ifdef ONE_WIRE_BUS_PIN
@@ -74,11 +120,14 @@ void TFTs::showTemperature() {
    }
 #ifdef DEBUG_OUTPUT
     Serial.println("Temperature to LCD");
-#endif    
+#endif
   #endif
 }
 
 void TFTs::setDigit(uint8_t digit, uint8_t value, show_t show) {
+  #ifdef DEBUG_OUTPUT_VERBOSE
+    Serial.print("TFTs::setDigit! digit: ");Serial.print(digit);Serial.print("; value: ");Serial.println(value);
+  #endif
   uint8_t old_value = digits[digit];
   digits[digit] = value;
   
@@ -106,6 +155,9 @@ void TFTs::setDigit(uint8_t digit, uint8_t value, show_t show) {
  */
  
 void TFTs::showDigit(uint8_t digit) {
+#ifdef DEBUG_OUTPUT_VERBOSE
+  Serial.print("TFTs::showDigit: ");Serial.println(digit);
+#endif
   chip_select.setDigit(digit);
 
   if (digits[digit] == blanked) {
@@ -119,11 +171,14 @@ void TFTs::showDigit(uint8_t digit) {
     if (NextNumber > 9) NextNumber = 0; // pre-load only seconds, because they are drawn first
     NextFileRequired = current_graphic * 10 + NextNumber;
   }
-}
+  #ifdef HARDWARE_IPSTUBE_H401_CLOCK
+    chip_select.update();
+  #endif
+  }
 
 void TFTs::LoadNextImage() {
   if (NextFileRequired != FileInBuffer) {
-#ifdef DEBUG_OUTPUT
+#ifdef DEBUG_OUTPUT_VERBOSE
     Serial.println("Preload next img");
 #endif
     LoadImageIntoBuffer(NextFileRequired);
@@ -177,7 +232,7 @@ bool TFTs::LoadImageIntoBuffer(uint8_t file_index) {
   char filename[10];
   sprintf(filename, "/%d.bmp", file_index);
 
-#ifdef DEBUG_OUTPUT
+#ifdef DEBUG_OUTPUT_VERBOSE
   Serial.print("Loading: ");
   Serial.println(filename);
 #endif
@@ -226,7 +281,7 @@ bool TFTs::LoadImageIntoBuffer(uint8_t file_index) {
   int16_t x = (TFT_WIDTH - w) / 2;
   int16_t y = (TFT_HEIGHT - h) / 2;
   
-#ifdef DEBUG_OUTPUT
+#ifdef DEBUG_OUTPUT_VERBOSE
   Serial.print(" image W, H, BPP: ");
   Serial.print(w); 
   Serial.print(", "); 
@@ -301,7 +356,7 @@ bool TFTs::LoadImageIntoBuffer(uint8_t file_index) {
   FileInBuffer = file_index;
   
   bmpFS.close();
-#ifdef DEBUG_OUTPUT
+#ifdef DEBUG_OUTPUT_VERBOSE
   Serial.print("img load time: ");
   Serial.println(millis() - StartTime);  
 #endif
@@ -338,7 +393,7 @@ bool TFTs::LoadImageIntoBuffer(uint8_t file_index) {
   char filename[10];
   sprintf(filename, "/%d.clk", file_index);
 
-#ifdef DEBUG_OUTPUT
+#ifdef DEBUG_OUTPUT_VERBOSE
   Serial.print("Loading: ");
   Serial.println(filename);
 #endif
@@ -380,7 +435,7 @@ bool TFTs::LoadImageIntoBuffer(uint8_t file_index) {
   int16_t x = (TFT_WIDTH - w) / 2;
   int16_t y = (TFT_HEIGHT - h) / 2;
   
-#ifdef DEBUG_OUTPUT
+#ifdef DEBUG_OUTPUT_VERBOSE
   Serial.print(" image W, H: ");
   Serial.print(w); 
   Serial.print(", "); 
@@ -425,7 +480,7 @@ bool TFTs::LoadImageIntoBuffer(uint8_t file_index) {
   FileInBuffer = file_index;
   
   bmpFS.close();
-#ifdef DEBUG_OUTPUT
+#ifdef DEBUG_OUTPUT_VERBOSE
   Serial.print("img load time: ");
   Serial.println(millis() - StartTime);  
 #endif
@@ -436,14 +491,14 @@ bool TFTs::LoadImageIntoBuffer(uint8_t file_index) {
 void TFTs::DrawImage(uint8_t file_index) {
 
   uint32_t StartTime = millis();
-#ifdef DEBUG_OUTPUT
+#ifdef DEBUG_OUTPUT_VERBOSE
   Serial.println("");  
   Serial.print("Drawing image: ");  
   Serial.println(file_index);  
 #endif  
   // check if file is already loaded into buffer; skip loading if it is. Saves 50 to 150 msec of time.
   if (file_index != FileInBuffer) {
-#ifdef DEBUG_OUTPUT
+#ifdef DEBUG_OUTPUT_VERBOSE
   Serial.println("Not preloaded; loading now...");  
 #endif  
     LoadImageIntoBuffer(file_index);
@@ -454,7 +509,7 @@ void TFTs::DrawImage(uint8_t file_index) {
   pushImage(0,0, TFT_WIDTH, TFT_HEIGHT, (uint16_t *)UnpackedImageBuffer);
   setSwapBytes(oldSwapBytes);
 
-#ifdef DEBUG_OUTPUT
+#ifdef DEBUG_OUTPUT_VERBOSE
   Serial.print("img transfer time: ");  
   Serial.println(millis() - StartTime);  
 #endif
@@ -480,4 +535,4 @@ uint32_t TFTs::read32(fs::File &f) {
   ((uint8_t *)&result)[3] = f.read(); // MSB
   return result;
 }
-//// END STOLEN CODE
+// END STOLEN CODE

@@ -1,7 +1,7 @@
 #include "Clock.h"
 #include "WiFi_WPS.h"
 
-#ifdef HARDWARE_SI_HAI_CLOCK // SI HAI IPS Clock XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+#if defined(HARDWARE_SI_HAI_CLOCK) || defined(HARDWARE_IPSTUBE_H401_CLOCK) // for Clocks with DS1302 chip #SI HAI or H401 XXXXXXXXXXXXXXXXXX
   // If it is a SI HAI Clock, use differnt RTC chip drivers
   #include <ThreeWire.h>  
   #include <RtcDS1302.h>
@@ -72,7 +72,7 @@ void Clock::begin(StoredConfig::Config::Clock *config_) {
     Serial.println("Loaded Clock config is invalid, using default.  This is normal on first boot.");
     setTwelveHour(false);
     setBlankHoursZero(false);
-    setTimeZoneOffset(1 * 3600);  // CET
+    setTimeZoneOffset(2 * 3600);  // defaulting CEST
     setActiveGraphicIdx(1);
     config->is_valid = StoredConfig::valid;
   }

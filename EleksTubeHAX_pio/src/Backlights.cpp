@@ -1,6 +1,9 @@
 #include "Backlights.h"
 
 void Backlights::begin(StoredConfig::Config::Backlights *config_)  {
+  #ifdef DEBUG_OUTPUT_VERBOSE
+    Serial.println("Backlights::begin!");
+  #endif
   config=config_;
 
   if (config->is_valid != StoredConfig::valid) {
@@ -22,6 +25,9 @@ void Backlights::begin(StoredConfig::Config::Backlights *config_)  {
 // These feel like they should be generalizable into a helper function.
 // https://stackoverflow.com/questions/11720656/modulo-operation-with-negative-numbers
 void Backlights::setNextPattern(int8_t i) {
+  #ifdef DEBUG_OUTPUT_VERBOSE
+    Serial.println("Backlights::setNextPattern!");
+  #endif
   int8_t next_pattern = (config->pattern + i) % num_patterns;
   while (next_pattern < 0) {
     next_pattern += num_patterns;
@@ -30,6 +36,9 @@ void Backlights::setNextPattern(int8_t i) {
 }
 
 void Backlights::adjustColorPhase(int16_t adj) {
+  #ifdef DEBUG_OUTPUT_VERBOSE
+    Serial.println("Backlights::adjustColorPhase!");
+  #endif
   int16_t new_phase = (int16_t(config->color_phase % max_phase) + adj) % max_phase;
   while (new_phase < 0) {
     new_phase += max_phase;
@@ -38,6 +47,9 @@ void Backlights::adjustColorPhase(int16_t adj) {
 }
 
 void Backlights::adjustIntensity(int16_t adj) {
+  #ifdef DEBUG_OUTPUT_VERBOSE
+    Serial.println("Backlights::adjustIntensity!");
+  #endif
   int16_t new_intensity = (int16_t(config->intensity) + adj) % max_intensity;
   while (new_intensity < 0) {
     new_intensity += max_intensity;
@@ -46,13 +58,18 @@ void Backlights::adjustIntensity(int16_t adj) {
 }
 
 void Backlights::setIntensity(uint8_t intensity) {
+  #ifdef DEBUG_OUTPUT_VERBOSE
+    Serial.println("Backlights::setIntesity!");
+  #endif
   config->intensity = intensity;
   setBrightness(0xFF >> max_intensity - config->intensity - 1);
   pattern_needs_init = true;
 }
 
 void Backlights::loop() {
-  //   enum patterns { dark, test, constant, rainbow, pulse, breath, num_patterns };
+  #ifdef DEBUG_OUTPUT_VERBOSE
+    Serial.println("Backlights::loop!");
+  #endif
   if (off || config->pattern == dark) {
     if (pattern_needs_init) {
       clear();
@@ -87,6 +104,9 @@ void Backlights::loop() {
 }
 
 void Backlights::pulsePattern() {
+  #ifdef DEBUG_OUTPUT_VERBOSE
+    Serial.println("Backlights::pulsePattern!");
+  #endif
   if (pattern_needs_init) {
     fill(phaseToColor(config->color_phase));
   }
@@ -103,6 +123,9 @@ void Backlights::pulsePattern() {
 }
 
 void Backlights::breathPattern() {
+  #ifdef DEBUG_OUTPUT_VERBOSE
+    Serial.println("Backlights::breathPattern!");
+  #endif
   if (pattern_needs_init) {
     fill(phaseToColor(config->color_phase));
   }
@@ -124,6 +147,9 @@ void Backlights::breathPattern() {
 }
 
 void Backlights::testPattern() {
+  #ifdef DEBUG_OUTPUT_VERBOSE
+    Serial.println("Backlights::testPattern!");
+  #endif
   const uint8_t num_colors = 4;  // or 3 if you don't want black
   uint8_t num_states = NUM_DIGITS * num_colors;
   uint8_t state = (millis()/test_ms_delay) % num_states;
@@ -138,6 +164,9 @@ void Backlights::testPattern() {
 }
 
 uint8_t Backlights::phaseToIntensity(uint16_t phase) {
+  #ifdef DEBUG_OUTPUT_VERBOSE
+    Serial.println("Backlights::phaseToIntensity!");
+  #endif
   uint16_t color = 0;
   if (phase <= 255) {
     // Ramping up
@@ -158,6 +187,9 @@ uint8_t Backlights::phaseToIntensity(uint16_t phase) {
 }
 
 uint32_t Backlights::phaseToColor(uint16_t phase) {
+  #ifdef DEBUG_OUTPUT_VERBOSE
+    Serial.println("Backlights::phaseToColor!");
+  #endif
   uint8_t red = phaseToIntensity(phase);
   uint8_t green = phaseToIntensity((phase + 256)%max_phase);
   uint8_t blue = phaseToIntensity((phase + 512)%max_phase);
@@ -165,6 +197,9 @@ uint32_t Backlights::phaseToColor(uint16_t phase) {
 }
 
 void Backlights::rainbowPattern() {
+  #ifdef DEBUG_OUTPUT_VERBOSE
+    Serial.println("Backlights::rainbowPattern!");
+  #endif
   // Divide by 3 to spread it out some, so the whole rainbow isn't displayed at once.
   // TODO Make this /3 a parameter
   const uint16_t phase_per_digit = (max_phase/NUM_DIGITS)/3;
@@ -186,5 +221,11 @@ void Backlights::rainbowPattern() {
   show();
 }
 
-const String Backlights::patterns_str[Backlights::num_patterns] = 
-  { "Dark", "Test", "Constant", "Rainbow", "Pulse", "Breath" };
+const String Backlights::patterns_str[Backlights::num_patterns] = { 
+    "Dark", 
+    "Test", 
+    "Constant", 
+    "Rainbow", 
+    "Pulse", 
+    "Breath" 
+  };

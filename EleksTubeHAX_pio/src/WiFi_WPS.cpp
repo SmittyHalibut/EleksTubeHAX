@@ -168,7 +168,7 @@ void WiFiStartWps() {
   sprintf(stored_config.config.wifi.ssid, ""); 
   sprintf(stored_config.config.wifi.password, ""); 
   stored_config.config.wifi.WPS_connected = 0x11; // invalid = different than 0x55
-  Serial.print("Saving config.");
+  Serial.print("Saving config, triggered by WPS connect...");
   stored_config.save();
   Serial.println(" Done.");
    
@@ -206,8 +206,10 @@ void WiFiStartWps() {
      
   sprintf(stored_config.config.wifi.password, ""); // can't save a password from WPS
   stored_config.config.wifi.WPS_connected = StoredConfig::valid;
+  Serial.print("Saving config, triggered by WPS connect...");
   stored_config.save();
-  Serial.println(" WPS finished."); 
+  Serial.println(" Done.");
+  Serial.println(" WPS finished.");
 }
 #endif
 
@@ -224,13 +226,13 @@ bool GetGeoLocationTimeZoneOffset() {
   IPGeo IPG;
   if (location.updateStatus(&IPG)) {
    
-    Serial.println(String("Geo Time Zone: ") + String(IPG.tz));
-    Serial.println(String("Geo TZ Offset: ") + String(IPG.offset));  // we are interested in this one, type = double
+    Serial.println(String("Geo Time Zone: ") + String(IPG.tz)); // currently not used
+    Serial.println(String("Geo TZ Offset: ") + String(IPG.offset));  // we are interested in this one, type = double, Offset in hours from UTC
     Serial.println(String("Geo Current Time: ") + String(IPG.current_time)); // currently not used
     GeoLocTZoffset = IPG.offset;
     return true;
   } else {
-    Serial.println("Geolocation failed.");    
+    Serial.println("Geolocation failed.");
     return false;
   }
 }
