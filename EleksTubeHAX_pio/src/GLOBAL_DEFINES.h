@@ -330,7 +330,7 @@
   //#define SECOND_BACKLIGHTS_PIN (GPIO_NUM_4) // Second LED strip on the bottom of the clock
 
   // Only one Button on H401 version!!!
-  //#define ONE_BUTTON_ONLY_MENU
+  #define ONE_BUTTON_ONLY_MENU
 
   // Set the other pins, to pins, which should always be in a defined, non changing state like Always HIGH or Always LOW!
   // Pin 9 = CPU_PU = Chip enabled = Always LOW on this board
