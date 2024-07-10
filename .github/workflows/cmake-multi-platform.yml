@@ -23,26 +23,28 @@ jobs:
       #
       # To add more build types (Release, Debug, RelWithDebInfo, etc.) customize the build_type list.
       matrix:
-        os: [ubuntu-latest, windows-latest]
+        os: [windows-latest]
+        #os: [ubuntu-latest, windows-latest]
         build_type: [Release]
-        c_compiler: [gcc, clang, cl]
-        include:
-          - os: windows-latest
-            c_compiler: cl
-            cpp_compiler: cl
+        c_compiler: [cl]
+        #c_compiler: [gcc, clang, cl]
+        #include:
+        #  - os: windows-latest
+        #    c_compiler: cl
+        #    cpp_compiler: cl
         #  - os: ubuntu-latest
         #    c_compiler: gcc
         #    cpp_compiler: g++
         #  - os: ubuntu-latest
         #    c_compiler: clang
         #    cpp_compiler: clang++
-        exclude:
-          - os: windows-latest
-            c_compiler: gcc
-          - os: windows-latest
-            c_compiler: clang
-          - os: ubuntu-latest
-            c_compiler: cl
+        #exclude:
+        #  - os: windows-latest
+        #    c_compiler: gcc
+        #  - os: windows-latest
+        #    c_compiler: clang
+        #  - os: ubuntu-latest
+        #    c_compiler: cl
 
     steps:
     - uses: actions/checkout@v4
@@ -63,14 +65,14 @@ jobs:
         
     - uses: actions/setup-python@v5
       with:
-        python-version: '3.12'
+        python-version: '3.11'
         
     - name: Install PlatformIO Core
       run: pip install --upgrade platformio
 
     - name: Build PlatformIO Project
       run: pio run
-      working-directory: .\EleksTubeHAX_pio
+      working-directory: ./EleksTubeHAX_pio
     
     - name: Configure CMake
       if: 1 == 2
