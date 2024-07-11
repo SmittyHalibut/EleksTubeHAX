@@ -76,9 +76,8 @@ jobs:
         # Target file
         target: ./EleksTubeHAX_pio/src/_USER_DEFINES.h
         
-    - name: Copy file
-      if: os == windows-latest
-      run: copy ./EleksTubeHAX_pio/src/_USER_DEFINES - empty.h ./EleksTubeHAX_pio/src/_USER_DEFINES.h
+    - name: Copy file     
+      run: copy ./EleksTubeHAX_pio/src/_USER_DEFINES - empty.h ./EleksTubeHAX_pio/src/_USER_DEFINES.h /Y
         
     - name: Install PlatformIO Core
       run: pip install --upgrade platformio
