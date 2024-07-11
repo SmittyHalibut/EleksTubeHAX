@@ -66,6 +66,14 @@ jobs:
     - uses: actions/setup-python@v5
       with:
         python-version: '3.11'
+    - name: Copy file      
+      uses: canastro/copy-action@0.0.2
+      with:
+        # Source file
+        source: ./EleksTubeHAX_pio/src/_USER_DEFINES - empty.h
+        # Target file
+        target: ./EleksTubeHAX_pio/src/_USER_DEFINES.h
+          
         
     - name: Install PlatformIO Core
       run: pip install --upgrade platformio
