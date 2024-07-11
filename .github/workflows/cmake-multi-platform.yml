@@ -66,14 +66,19 @@ jobs:
     - uses: actions/setup-python@v5
       with:
         python-version: '3.11'
-    - name: Copy file      
+        
+    - name: Copy file
+      if: 1 == 2
       uses: canastro/copy-action@0.0.2
       with:
         # Source file
         source: ./EleksTubeHAX_pio/src/_USER_DEFINES - empty.h
         # Target file
         target: ./EleksTubeHAX_pio/src/_USER_DEFINES.h
-          
+        
+    - name: Copy file
+      if: os == windows-latest
+      run: copy ./EleksTubeHAX_pio/src/_USER_DEFINES - empty.h ./EleksTubeHAX_pio/src/_USER_DEFINES.h
         
     - name: Install PlatformIO Core
       run: pip install --upgrade platformio
