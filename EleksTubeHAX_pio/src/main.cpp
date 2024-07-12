@@ -413,7 +413,8 @@ void handleMQTTCommands() {
           Serial.print("Unknown MQTT button pressed command received: ");Serial.println(MqttCommandState);
           #endif
         }
-        #else { //ONE_BUTTON_ONLY_MENU
+        #else //ONE_BUTTON_ONLY_MENU
+        { 
           #ifdef DEBUG_OUTPUT_MQTT
           Serial.print("Unknown MQTT button pressed command received: ");Serial.println(MqttCommandState);
           #endif
