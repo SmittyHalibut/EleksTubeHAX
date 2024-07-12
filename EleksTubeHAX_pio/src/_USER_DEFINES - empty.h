@@ -12,12 +12,13 @@
 
 //uncomment for Debug logs via serial interface
 #define DEBUG_OUTPUT 1
-//#define DEBUG_OUTPUT_VERBOSE 1
 
 //#define DEBUG_OUTPUT_TFT 1
 //#define DEBUG_OUTPUT_MENU 1
 //#define DEBUG_OUTPUT_BUTTONS 1
 //#define DEBUG_OUTPUT_MQTT 1
+//#define DEBUG_OUTPUT_BACKLIGHTS 1
+//#define DEBUG_OUTPUT_CHIPSELECT 1
 
 
 // ************* Type of the clock hardware  *************
@@ -43,9 +44,9 @@
 // ************* WiFi config *************
 #define WIFI_CONNECT_TIMEOUT_SEC    20
 #define WIFI_RETRY_CONNECTION_SEC   15
-#define WIFI_USE_WPS                                        //uncomment to use WPS instead of hard coded wifi credentials 
+#define WIFI_USE_WPS                                        //uncomment to use WPS instead of hard coded wifi credentials
 #define WIFI_SSID      "__enter_your_wifi_ssid_here__"      // not needed if WPS is used
-#define WIFI_PASSWD    "__enter_your_wifi_password_here__"  // not needed if WPS is used.  Caution - Hard coded password is stored as clear text in BIN file
+#define WIFI_PASSWD    "__enter_your_wifi_password_here__"  // not needed if WPS is used. Caution - Hard coded password is stored as clear text in BIN file
 
 
 //  *************  Geolocation  *************

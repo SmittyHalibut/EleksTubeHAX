@@ -61,7 +61,7 @@ void sendToBroker(const char* topic, const char* message) {
     char topicArr[100];
     sprintf(topicArr, "%s/%s", MQTT_CLIENT, topic);
     MQTTclient.publish(topicArr, message);
-#ifdef DEBUG_OUTPUT // long output
+#ifdef DEBUG_OUTPUT_MQTT // long output
     Serial.print("Sending to MQTT: ");
     Serial.print(topicArr);
     Serial.print("/");
@@ -133,7 +133,7 @@ void checkMqtt() {
 }
 
 void callback(char* topic, byte* payload, unsigned int length) {  //A new message has been received
-#ifdef DEBUG_OUTPUT
+#ifdef DEBUG_OUTPUT_MQTT
     Serial.print("Received MQTT topic: ");
     Serial.println(topic);                       // long output
 #endif    
@@ -141,7 +141,7 @@ void callback(char* topic, byte* payload, unsigned int length) {  //A new messag
     char* tokens[tokensNumber];
     char message[length + 1];
     tokensNumber = splitTopic(topic, tokens, tokensNumber);
-#ifdef DEBUG_OUTPUT
+#ifdef DEBUG_OUTPUT_MQTT
     Serial.print("\tNumber of tokens from the topic: ");
     Serial.println(tokensNumber);
 #endif
@@ -149,7 +149,7 @@ void callback(char* topic, byte* payload, unsigned int length) {  //A new messag
     for (int i = 1; i < length; i++) {
         sprintf(message, "%s%c", message, (char)payload[i]);
     }
-#ifdef DEBUG_OUTPUT
+#ifdef DEBUG_OUTPUT_MQTT
     Serial.print("\tMQTT message payload: ");Serial.println(message);
 #else
     Serial.print("MQTT RX: ");
@@ -159,14 +159,12 @@ void callback(char* topic, byte* payload, unsigned int length) {  //A new messag
     Serial.print("/");
     Serial.println(message);
 #endif
-
     if (tokensNumber < 3) {
         // otherwise code below crashes on the strcmp on non-initialized pointers in tokens[] array
         //can be handle differently, but this is the easiest way for now
         Serial.println("Number of tokens in MQTT message < 3! Can't process! Exiting...");
         return;
-    }
-    
+    }    
     //------------------Decide what to do depending on the topic and message---------------------------------
     if (strcmp(tokens[1], "directive") == 0 && strcmp(tokens[2], "powerState") == 0) {  // Turn On or OFF
         if (strcmp(message, "ON") == 0) {
@@ -192,7 +190,7 @@ void callback(char* topic, byte* payload, unsigned int length) {  //A new messag
         MqttReportBackEverything();
       }
     } else 
-    //Mode or OK button
+    //mode or OK button
     // topic 1: /MQTT_CLIENT/buttons/mode ; Payload: 1
     // topic 2: /MQTT_CLIENT/buttons/OK ; Payload: 1
     if (strcmp(tokens[1], "buttons") == 0 && (strcmp(tokens[2], "mode") == 0) || strcmp(tokens[1], "buttons") == 0 && (strcmp(tokens[2], "OK") == 0)) {
@@ -204,7 +202,7 @@ void callback(char* topic, byte* payload, unsigned int length) {  //A new messag
         MqttReportBackEverything();
       }
     } else
-    //Up
+    //up
     // Topic: /MQTT_CLIENT/buttons/up ; Payload: 1
     if (strcmp(tokens[1], "buttons") == 0 && (strcmp(tokens[2], "up") == 0)) {
       double valueD = atof(message);
@@ -249,7 +247,7 @@ void callback(char* topic, byte* payload, unsigned int length) {  //A new messag
         MqttReportBackEverything();
       }
     } else {
-#ifdef DEBUG_OUTPUT
+#ifdef DEBUG_OUTPUT_MQTT
       Serial.println("Unknown MQTT message! Can't process! Exiting...");
 #endif
       return;

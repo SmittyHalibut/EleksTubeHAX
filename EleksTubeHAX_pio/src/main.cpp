@@ -377,7 +377,9 @@ void handleMQTTCommands() {
 
       int MaxIdx = tfts.NumberOfClockFaces;
       if (idx > MaxIdx) { idx = 1; }
+      #ifdef DEBUG_OUTPUT_MQTT
       Serial.print("Clock face change request from MQTT; command: ");Serial.print(MqttCommandState);Serial.print("; so selected index: ");Serial.println(idx);
+      #endif
       uclock.setClockGraphicsIdx(idx);
       tfts.current_graphic = uclock.getActiveGraphicIdx();
       updateClockDisplay(TFTs::force);   // redraw everything
@@ -385,37 +387,42 @@ void handleMQTTCommands() {
       //button press commands
       if (MqttCommandState >= 100 && MqttCommandState <= 120){
         if (MqttCommandState == 100) {
-          #ifdef DEBUG_OUTPUT
+          #ifdef DEBUG_OUTPUT_MQTT
             Serial.println("MQTT button pressed command received: MODE");
           #endif
           buttons.mode.setUpEdgeState();
         } else
         #ifndef ONE_BUTTON_ONLY_MENU 
         if (MqttCommandState == 110) {
-          #ifdef DEBUG_OUTPUT
+          #ifdef DEBUG_OUTPUT_MQTT
             Serial.println("MQTT button pressed command received: LEFT");
           #endif
           buttons.left.setUpEdgeState();        
         } else if (MqttCommandState == 115) {
-          #ifdef DEBUG_OUTPUT
+          #ifdef DEBUG_OUTPUT_MQTT
             Serial.println("MQTT button pressed command received: POWER");
           #endif
           buttons.power.setUpEdgeState();
         } else if (MqttCommandState == 120) {
-          #ifdef DEBUG_OUTPUT
+          #ifdef DEBUG_OUTPUT_MQTT
             Serial.println("MQTT button pressed command received: RIGHT");
           #endif
           buttons.right.setUpEdgeState();
-        } else {   
+        } else {
+          #ifdef DEBUG_OUTPUT_MQTT
           Serial.print("Unknown MQTT button pressed command received: ");Serial.println(MqttCommandState);
+          #endif
         }
-        #else
-        {   
+        #else { //ONE_BUTTON_ONLY_MENU
+          #ifdef DEBUG_OUTPUT_MQTT
           Serial.print("Unknown MQTT button pressed command received: ");Serial.println(MqttCommandState);
+          #endif
         }
-        #endif      
+        #endif //ONE_BUTTON_ONLY_MENU
       } else { //else from button press commands (state 100-120)
+        #ifdef DEBUG_OUTPUT_MQTT
         Serial.print("Unknown MQTT command received: ");Serial.println(MqttCommandState);
+        #endif
       } //end if button press commands
     } //commands under 100  
   }
@@ -484,7 +491,7 @@ void updateDstEveryNight() {
 }
 
 void updateClockDisplay(TFTs::show_t show) {
-  #ifdef DEBUG_OUTPUT_VERBOSE
+  #ifdef DEBUG_OUTPUT_TFT
     Serial.println("main::updateClockDisplay!");
   #endif
   // refresh starting on seconds
@@ -507,7 +514,7 @@ void drawMenu() {
       updateClockDisplay(TFTs::force);
       Serial.print("Saving config, after leaving menu...");
       stored_config.save();
-      Serial.println(" Done.");
+      Serial.println("Done.");
     }
     else {
       // Backlight Pattern
@@ -568,7 +575,7 @@ void drawMenu() {
         }
         setupMenu();
         tfts.println("UTC Offset");
-        tfts.println(" +/- Hour");
+        tfts.println("+/- 1h");
         time_t offset = uclock.getTimeZoneOffset();
         int8_t offset_hour = offset/3600;
         int8_t offset_min = (offset%3600)/60;
@@ -589,7 +596,7 @@ void drawMenu() {
         }
         setupMenu();
         tfts.println("UTC Offset");
-        tfts.println(" +/- 15m");
+        tfts.println("+/- 15m");
         time_t offset = uclock.getTimeZoneOffset();
         int8_t offset_hour = offset/3600;
         int8_t offset_min = (offset%3600)/60;
@@ -610,7 +617,7 @@ void drawMenu() {
         }
         setupMenu();
         tfts.println("Selected");
-        tfts.println(" graphic:");
+        tfts.println("graphic:");
         tfts.printf("    %d\n", uclock.getActiveGraphicIdx());
       }
 #ifdef WIFI_USE_WPS   ////  WPS code
@@ -625,8 +632,7 @@ void drawMenu() {
             tfts.setCursor(0, 0, 4);  // Font 4. 26 pixel high
             WiFiStartWps();
           }
-        }
-        
+        }        
         setupMenu();
         tfts.println("Connect to WiFi?");
         tfts.println("Left=WPS");

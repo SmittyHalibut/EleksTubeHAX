@@ -7,7 +7,7 @@ const int numLCDs = NUM_DIGITS;
 #endif
 
 void ChipSelect::begin() {
-  #ifdef DEBUG_OUTPUT_VERBOSE
+  #ifdef DEBUG_OUTPUT_CHIPSELECT
     Serial.println("ChipSelect::begin!");
   #endif
   #ifndef HARDWARE_IPSTUBE_H401_CLOCK
@@ -29,7 +29,7 @@ void ChipSelect::begin() {
 }
 
 void ChipSelect::clear(bool update_) {
-#ifdef DEBUG_OUTPUT_VERBOSE
+#ifdef DEBUG_OUTPUT_CHIPSELECT
   Serial.println("ChipSelect::clear!");
 #endif
 #ifndef HARDWARE_IPSTUBE_H401_CLOCK
@@ -40,7 +40,7 @@ void ChipSelect::clear(bool update_) {
 }
 
 void ChipSelect::setAll(bool update_) {
-#ifdef DEBUG_OUTPUT_VERBOSE 
+#ifdef DEBUG_OUTPUT_CHIPSELECT 
   Serial.println("ChipSelect::setAll!");
 #endif
 #ifndef HARDWARE_IPSTUBE_H401_CLOCK
@@ -51,7 +51,7 @@ void ChipSelect::setAll(bool update_) {
 }
 
 void ChipSelect::setDigit(uint8_t digit, bool update_) {
-#ifdef DEBUG_OUTPUT_VERBOSE
+#ifdef DEBUG_OUTPUT_CHIPSELECT
   Serial.print("ChipSelect::setDigit! digit: ");Serial.println(digit);
 #endif
   #ifndef HARDWARE_IPSTUBE_H401_CLOCK
@@ -72,7 +72,7 @@ void ChipSelect::setDigit(uint8_t digit, bool update_) {
 }
 
 void ChipSelect::update() {
-  #ifdef DEBUG_OUTPUT_VERBOSE
+  #ifdef DEBUG_OUTPUT_CHIPSELECT
     Serial.println("ChipSelect::update!");
   #endif
 
@@ -88,7 +88,7 @@ void ChipSelect::update() {
     shiftOut(CSSR_DATA_PIN, CSSR_CLOCK_PIN, LSBFIRST, to_shift);
     digitalWrite(CSSR_LATCH_PIN, HIGH);
   #else
-    #ifdef DEBUG_OUTPUT_VERBOSE
+    #ifdef DEBUG_OUTPUT_CHIPSELECT
       Serial.print("currentLCD/digit: ");Serial.println(currentLCD);
       Serial.print("lcdEnablePins[currentLCD]: ");Serial.println(lcdEnablePins[currentLCD]);
     #endif
@@ -101,7 +101,7 @@ void ChipSelect::update() {
 }
 
 bool ChipSelect::isSecondsOnes() {
-#ifdef DEBUG_OUTPUT_VERBOSE
+#ifdef DEBUG_OUTPUT_CHIPSELECT
   Serial.println("ChipSelect::isSecondsOnes!");
 #endif
 #ifndef HARDWARE_IPSTUBE_H401_CLOCK
@@ -112,7 +112,7 @@ bool ChipSelect::isSecondsOnes() {
 }
 
 bool ChipSelect::isSecondsTens() {
-#ifdef DEBUG_OUTPUT_VERBOSE
+#ifdef DEBUG_OUTPUT_CHIPSELECT
   Serial.println("ChipSelect::isSecondsTens!");
 #endif
 #ifndef HARDWARE_IPSTUBE_H401_CLOCK
@@ -123,7 +123,7 @@ bool ChipSelect::isSecondsTens() {
 }
 
 bool ChipSelect::isMinutesOnes() {
-#ifdef DEBUG_OUTPUT_VERBOSE
+#ifdef DEBUG_OUTPUT_CHIPSELECT
   Serial.println("ChipSelect::isMinutesOnes!");
 #endif
 #ifndef HARDWARE_IPSTUBE_H401_CLOCK
@@ -134,7 +134,7 @@ bool ChipSelect::isMinutesOnes() {
 }
 
 bool ChipSelect::isMinutesTens() {
-#ifdef DEBUG_OUTPUT_VERBOSE
+#ifdef DEBUG_OUTPUT_CHIPSELECT
   Serial.println("ChipSelect::isMinutesTens!");
 #endif
 #ifndef HARDWARE_IPSTUBE_H401_CLOCK
@@ -145,7 +145,7 @@ bool ChipSelect::isMinutesTens() {
 }
 
 bool ChipSelect::isHoursOnes() {
-#ifdef DEBUG_OUTPUT_VERBOSE
+#ifdef DEBUG_OUTPUT_CHIPSELECT
   Serial.println("ChipSelect::isHoursOnes!");
 #endif
 #ifndef HARDWARE_IPSTUBE_H401_CLOCK
@@ -156,7 +156,7 @@ bool ChipSelect::isHoursOnes() {
 }
 
 bool ChipSelect::isHoursTens() {
-#ifdef DEBUG_OUTPUT_VERBOSE
+#ifdef DEBUG_OUTPUT_CHIPSELECT
   Serial.println("ChipSelect::isHoursTens!");
 #endif
 #ifndef HARDWARE_IPSTUBE_H401_CLOCK
@@ -168,7 +168,7 @@ bool ChipSelect::isHoursTens() {
 
 
 void ChipSelect::enableAllCSPinsH401() {
-#ifdef DEBUG_OUTPUT_VERBOSE
+#ifdef DEBUG_OUTPUT_CHIPSELECT
   Serial.println("ChipSelect::enableAllCSPinsH401!");
 #endif
 #ifdef HARDWARE_IPSTUBE_H401_CLOCK
@@ -180,7 +180,7 @@ void ChipSelect::enableAllCSPinsH401() {
 }
 
 void ChipSelect::disableAllCSPinsH401() {
-#ifdef DEBUG_OUTPUT_VERBOSE
+#ifdef DEBUG_OUTPUT_CHIPSELECT
   Serial.println("ChipSelect::disableAllCSPinsH401!");
 #endif
 #ifdef HARDWARE_IPSTUBE_H401_CLOCK
@@ -192,7 +192,7 @@ void ChipSelect::disableAllCSPinsH401() {
 }
 
 void ChipSelect::enableDigitCSPinsH401(uint8_t digit) {
-#ifdef DEBUG_OUTPUT_VERBOSE
+#ifdef DEBUG_OUTPUT_CHIPSELECT
   Serial.print("ChipSelect::enableDigitCSPinsH401! digit: ");Serial.println(digit);
 #endif
 #ifdef HARDWARE_IPSTUBE_H401_CLOCK
@@ -202,7 +202,7 @@ void ChipSelect::enableDigitCSPinsH401(uint8_t digit) {
 }
 
 void ChipSelect::disableDigitCSPinsH401(uint8_t digit) {
-#ifdef DEBUG_OUTPUT_VERBOSE
+#ifdef DEBUG_OUTPUT_CHIPSELECT
   Serial.print("ChipSelect::disableDigitCSPinsH401! digit: ");Serial.println(digit);
 #endif
 #ifdef HARDWARE_IPSTUBE_H401_CLOCK
