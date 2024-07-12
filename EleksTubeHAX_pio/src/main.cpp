@@ -130,6 +130,18 @@ void setup() {
   }
 #endif
 
+  #ifdef DEBUG_OUTPUT
+  Serial.print("Current active graphic index: ");Serial.println(uclock.getActiveGraphicIdx());
+  Serial.print("Number of clock faces: ");Serial.println(tfts.NumberOfClockFaces);
+  #endif
+
+  //Fallback, if Number of clock faces is not counted correctly, set at least to 1
+  if (tfts.NumberOfClockFaces <= 0) {
+    tfts.NumberOfClockFaces = 1;
+    Serial.println("Number of clock faces is not counted correctly, set to 1.");
+  }
+
+  // Check if the selected clock face is within the available range of clock faces
   if (uclock.getActiveGraphicIdx() > tfts.NumberOfClockFaces) {
     uclock.setActiveGraphicIdx(tfts.NumberOfClockFaces);
     Serial.println("Last selected index of clock face is larger than currently available number of image sets.");
@@ -137,8 +149,7 @@ void setup() {
   
   tfts.current_graphic = uclock.getActiveGraphicIdx();
   #ifdef DEBUG_OUTPUT
-    Serial.print("Current active graphic index: ");
-    Serial.println(tfts.current_graphic);
+    Serial.print("Current active graphic index: ");Serial.println(tfts.current_graphic);
   #endif
 
   tfts.println("Done with initializing setup!");Serial.println("Done with initializing setup!");
@@ -414,7 +425,7 @@ void handleMQTTCommands() {
           #endif
         }
         #else //ONE_BUTTON_ONLY_MENU
-        { 
+        {
           #ifdef DEBUG_OUTPUT_MQTT
           Serial.print("Unknown MQTT button pressed command received: ");Serial.println(MqttCommandState);
           #endif
