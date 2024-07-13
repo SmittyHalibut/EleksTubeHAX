@@ -23,12 +23,21 @@ void TFTs::begin() {
 
   // Set SPIFFS ready
   if (!SPIFFS.begin()) {
-    Serial.println("SPIFFS initialization failed!");
+    Serial.println("SPIFFS initialization FAILED! Set NuberOfClockFaces to 0");
     NumberOfClockFaces = 0;
     return;
   }
+  else{
+    Serial.println("SPIFFS initialization successfull!");
+  }
 
+  #ifdef DEBUG_OUTPUT_TFT
+    Serial.println("Call CountNumberOfClockFaces()");
+  #endif
   NumberOfClockFaces = CountNumberOfClockFaces();
+  #ifdef DEBUG_OUTPUT_TFT
+    Serial.print("NumberOfClockFaces: ");Serial.println(NumberOfClockFaces);
+  #endif
 }
 
 void TFTs::reinit() {
@@ -207,17 +216,32 @@ uint16_t TFTs::UnpackedImageBuffer[TFT_HEIGHT][TFT_WIDTH];
 #ifndef USE_CLK_FILES
 
 int8_t TFTs::CountNumberOfClockFaces() {
+  #ifdef DEBUG_OUTPUT_TFT
+    Serial.println("TFTs::CountNumberOfClockFaces");
+  #endif
   int8_t i, found;
   char filename[10];
 
-  Serial.print("Searching for BMP clock files... ");
+  Serial.print("Searching for clock face file sets...");
   found = 0;
-  for (i=1; i < 10; i++) {
-    sprintf(filename, "/%d.bmp", i*10); // search for files 10.bmp, 20.bmp,...
+  // this works only till 90.bmp - onyl 8 different clock face sets can be used!
+  // this only checks the first file of a set, not the full set!
+  for (i=1; i<10; i++) {
+    sprintf(filename, "/%d.bmp", i*10); // search for files 10.bmp, 20.bmp,...90.bmp
+    #ifdef DEBUG_OUTPUT_TFT
+      Serial.print("Checking for: ");Serial.println(filename);
+    #endif
     if (!FileExists(filename)) {
+      #ifdef DEBUG_OUTPUT_TFT
+        Serial.print("File NOT found: ");Serial.println(filename);
+      #endif
       found = i-1;
       break;
-    }
+    } else {
+      #ifdef DEBUG_OUTPUT_TFT
+        Serial.print("File FOUND: ");Serial.println(filename);
+      #endif
+    }    
   }
   Serial.print(found);
   Serial.println(" fonts found.");
@@ -357,8 +381,7 @@ bool TFTs::LoadImageIntoBuffer(uint8_t file_index) {
   
   bmpFS.close();
 #ifdef DEBUG_OUTPUT_TFT
-  Serial.print("img load time: ");
-  Serial.println(millis() - StartTime);  
+  Serial.print("img load time: ");Serial.println(millis() - StartTime);
 #endif
   return (true);
 }

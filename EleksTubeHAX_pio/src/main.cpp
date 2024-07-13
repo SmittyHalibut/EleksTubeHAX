@@ -64,6 +64,7 @@ void setup() {
   Serial.begin(115200);
   delay(1000);  // Waiting for serial monitor to catch up.
   Serial.println("");
+  delay(5000);  // Waiting for serial monitor to catch up.
   Serial.println(FIRMWARE_VERSION);
   Serial.println("In setup().");
 
@@ -75,11 +76,11 @@ void setup() {
   menu.begin();
 
   // Setup the displays (TFTs) initaly and show bootup message(s)
-  tfts.begin();  // and count number of clock faces available
+  tfts.begin();  // Init all things for the TFT LCDs. Call Init() method of the super class, init SPIFFS and count number of clock faces available.
   tfts.fillScreen(TFT_BLACK);
   tfts.setTextColor(TFT_WHITE, TFT_BLACK);
   tfts.setCursor(0, 0, 2);  // Font 2. 16 pixel high
-  tfts.println("setup...");
+  tfts.println("Setup...");
 
 #ifdef HARDWARE_NovelLife_SE_CLOCK // NovelLife_SE Clone XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
   //Init the Gesture sensor
@@ -92,14 +93,14 @@ void setup() {
   tfts.println("WiFi start");Serial.println("WiFi start");
   WifiBegin();
   
-  // wait for a bit before querying NTP
+  // Wait a bit (500ms) to let Wifi settle before querying NTP
   for (uint8_t ndx=0; ndx < 5; ndx++) {
     tfts.print(">");
     delay(100);
   }
   tfts.println("");
 
-  // Setup the clock.  It needs WiFi to be established already.
+  // Setup all around the clock. It needs WiFi to be established already.
   tfts.println("Clock start");Serial.println("Clock start");
   uclock.begin(&stored_config.config.uclock);
   #ifdef DEBUG_OUTPUT
@@ -135,23 +136,25 @@ void setup() {
   Serial.print("Number of clock faces: ");Serial.println(tfts.NumberOfClockFaces);
   #endif
 
-  //Fallback, if Number of clock faces is not counted correctly, set at least to 1
+  //Fallback, if number of clock faces is not counted correctly, set at least to 1 (can happen, if the SPIFFS is not mounted correctly)
   if (tfts.NumberOfClockFaces <= 0) {
     tfts.NumberOfClockFaces = 1;
     Serial.println("Number of clock faces is not counted correctly, set to 1.");
   }
 
-  // Check if the selected clock face is within the available range of clock faces
+  // Check if the selected clock face is within the available range of clock faces (some clock faces which was existing before, could be deleted now)
   if (uclock.getActiveGraphicIdx() > tfts.NumberOfClockFaces) {
     uclock.setActiveGraphicIdx(tfts.NumberOfClockFaces);
     Serial.println("Last selected index of clock face is larger than currently available number of image sets.");
   }
   
+  // Set actual clock face in the instance of the TFTs class to the selected one from the clock 
   tfts.current_graphic = uclock.getActiveGraphicIdx();
   #ifdef DEBUG_OUTPUT
     Serial.print("Current active graphic index: ");Serial.println(tfts.current_graphic);
   #endif
 
+  // Done with initalizing the hardware
   tfts.println("Done with initializing setup!");Serial.println("Done with initializing setup!");
 
   // Leave boot up messages on screen for a few seconds.
@@ -163,35 +166,36 @@ void setup() {
 
   // Start up the clock displays.
   tfts.fillScreen(TFT_BLACK);
-  uclock.loop();
-  updateClockDisplay(TFTs::force);
+  uclock.loop();                    // Get the actual time into memory, if not initialized already
+  updateClockDisplay(TFTs::force);  // Update the digits of the clock face. Get actual time from RTC and set the LCDs.
 
   Serial.println("Setup finished!");
 }
 
+//main loop
 void loop() {
   uint32_t millis_at_top = millis();
 
   // Do all the maintenance work
   WifiReconnect(); // if not connected attempt to reconnect
 
-  buttons.loop(); // Sets the states of the buttons, by the detected button presses, releases and gives the time of the press
+  buttons.loop(); // Sets the states of the buttons, by the detected button presses, releases and gives the duration of the press
 
-  handleMQTTCommands(); // Handle MQTT commands, afer the buttons loop, to simulate button presses from MQTT, if needed
+  handleMQTTCommands(); // Handle MQTT commands. Run afer the buttons loop, to simulate button presses from MQTT, if needed
 
   #ifdef HARDWARE_NovelLife_SE_CLOCK // NovelLife_SE Clone XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-  handleGestureInterupt();
+  handleGestureInterupt();  // Handle the interupt, if set, from the gesture sensor. Run afer the buttons loop, to simulate button presses, if needed
   #endif // NovelLife_SE Clone XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
   handlePowerSwitchPressed();
  
-  menu.loop(buttons);     // Must be called after buttons.loop() - Sets the states of the menu, by the detected button presses
+  menu.loop(buttons);     // Sets the states of the menu, by the detected button presses. Must be called after buttons.loop(), handleMQTTCommands() and handleGestureInterupt()
   backlights.loop();
   uclock.loop();          // Read the time values from RTC, if needed
 
-  checkOnEveryFullHour(true);    // Check, if dimming is needed, if actual time is in the timeslot for the night time.
-  updateClockDisplay();   // Update the digits of the clock face. Get actual time from RTC and set the LCDs.
-  updateDstEveryNight();  // Check for Daylight-Saving-Time (Summertime) adjustment once a day
+  checkOnEveryFullHour(true);       // Check, if dimming is needed, if actual time is in the timeslot for the night time.
+  updateClockDisplay(TFTs::force);  // Update the digits of the clock face. Get actual time from RTC and set the LCDs.
+  updateDstEveryNight();            // Check for Daylight-Saving-Time (Summertime) adjustment once a day
 
   drawMenu();             // Draw the menu on the clock face, if menu is requested
 
@@ -381,7 +385,7 @@ void handleMQTTCommands() {
     //All commands under 100 are graphic change requests now
     if (MqttCommandState < 100) {
       //to enhance the possible selecteable clock faces with the MQTT commands, we index the commands (base 5)
-      //I personally have NO IDEA, why this is done this way. We can select ANY topic, with ANY values we like! 
+      //I personally have NO IDEA, why this is done this way. We can select ANY topic, with ANY values we like!
       //So I don't get this, lets say, "interesting" way to do this.
       idx = (MqttCommandState / 5) - 1; // e.g. state = 25; 25/5 = 5; 5-1 = 4
       //10 == clock face 1; 15 == clock face 2; 20 == clock face 3; 25 == clock face 4; 30 == clock face 5; 35 == clock face 6; 40 == clock face 7...
@@ -444,7 +448,7 @@ void handleMQTTCommands() {
 void setupMenu() {
   #ifdef DEBUG_OUTPUT
     Serial.println("main::setupMenu!");
-  #endif  
+  #endif
   tfts.chip_select.setHoursTens();
   tfts.setTextColor(TFT_WHITE, TFT_BLACK, true);
   tfts.fillRect(0, 120, 135, 240, TFT_BLACK);
@@ -458,7 +462,7 @@ bool isNightTime(uint8_t current_hour) {
     }
     else {
       // "Night" starts after midnight, entirely contained within the day
-      return (current_hour >= NIGHT_TIME) && (current_hour < DAY_TIME);  
+      return (current_hour >= NIGHT_TIME) && (current_hour < DAY_TIME);
     }
 }
 
@@ -649,7 +653,7 @@ void drawMenu() {
         tfts.println("Connect to WiFi?");
         tfts.println("Left=WPS");
       }
-#endif   
+#endif
     }
   } // if (menu.stateChanged() && tfts.isEnabled())  
 } //drawMenu
