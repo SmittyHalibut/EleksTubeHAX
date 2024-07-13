@@ -57,6 +57,9 @@ int LastSentStatus = -1;
 
 
 void sendToBroker(const char* topic, const char* message) {
+#ifdef DEBUG_OUTPUT_MQTT
+  Serial.println("sendToBroker");    
+#endif  
   if (MQTTclient.connected()) {
     char topicArr[100];
     sprintf(topicArr, "%s/%s", MQTT_CLIENT, topic);
@@ -78,6 +81,9 @@ void sendToBroker(const char* topic, const char* message) {
 
 void MqttStart() {
 #ifdef MQTT_ENABLED
+#ifdef DEBUG_OUTPUT_MQTT
+  Serial.println("MqttStart");
+#endif  
   MqttConnected = false;
   if (((millis() - LastTimeTriedToConnect) > (MQTT_RECONNECT_WAIT_SEC * 1000)) || (LastTimeTriedToConnect == 0)) {
     LastTimeTriedToConnect = millis();
@@ -128,22 +134,23 @@ int splitTopic(char* topic, char* tokens[], int tokensNumber) {
 void checkMqtt() {
   MqttConnected = MQTTclient.connected();
   if (!MqttConnected) {
-        MqttStart();
+    #ifdef DEBUG_OUTPUT_MQTT
+      Serial.println("MQTT disconnected, trying to reconnect...");
+    #endif  
+      MqttStart();
     }
 }
 
 void callback(char* topic, byte* payload, unsigned int length) {  //A new message has been received
 #ifdef DEBUG_OUTPUT_MQTT
-    Serial.print("Received MQTT topic: ");
-    Serial.println(topic);                       // long output
+    Serial.print("Received MQTT topic: ");Serial.println(topic);                       // long output
 #endif    
     int tokensNumber = 10;
     char* tokens[tokensNumber];
     char message[length + 1];
     tokensNumber = splitTopic(topic, tokens, tokensNumber);
 #ifdef DEBUG_OUTPUT_MQTT
-    Serial.print("\tNumber of tokens from the topic: ");
-    Serial.println(tokensNumber);
+    Serial.print("\tNumber of tokens from the topic: ");Serial.println(tokensNumber);
 #endif
     sprintf(message, "%c", (char)payload[0]);
     for (int i = 1; i < length; i++) {

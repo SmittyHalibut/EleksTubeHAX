@@ -131,8 +131,8 @@ void setup() {
 #endif
 
   #ifdef DEBUG_OUTPUT
-  Serial.print("Current active graphic index: ");Serial.println(uclock.getActiveGraphicIdx());
-  Serial.print("Number of clock faces: ");Serial.println(tfts.NumberOfClockFaces);
+  Serial.print("Current active graphic index in uclock after init with config load: ");Serial.println(uclock.getActiveGraphicIdx());
+  Serial.print("Number of clock faces in tfts after init: ");Serial.println(tfts.NumberOfClockFaces);
   #endif
 
   //Fallback, if number of clock faces is not counted correctly, set at least to 1 (can happen, if the SPIFFS is not mounted correctly)
@@ -144,13 +144,13 @@ void setup() {
   // Check if the selected clock face is within the available range of clock faces (some clock faces which was existing before, could be deleted now)
   if (uclock.getActiveGraphicIdx() > tfts.NumberOfClockFaces) {
     uclock.setActiveGraphicIdx(tfts.NumberOfClockFaces);
-    Serial.println("Last selected index of clock face is larger than currently available number of image sets.");
+    Serial.println("Last selected index of clock face is larger than currently available number of image sets. Set to last available.");
   }
   
   // Set actual clock face in the instance of the TFTs class to the selected one from the clock 
   tfts.current_graphic = uclock.getActiveGraphicIdx();
   #ifdef DEBUG_OUTPUT
-    Serial.print("Current active graphic index: ");Serial.println(tfts.current_graphic);
+    Serial.print("Current active graphic index in tfts after correction: ");Serial.println(tfts.current_graphic);
   #endif
 
   // Done with initalizing the hardware
@@ -193,7 +193,7 @@ void loop() {
   uclock.loop();          // Read the time values from RTC, if needed
 
   checkOnEveryFullHour(true);       // Check, if dimming is needed, if actual time is in the timeslot for the night time.
-  updateClockDisplay(TFTs::force);  // Update the digits of the clock face. Get actual time from RTC and set the LCDs.
+  updateClockDisplay(TFTs::yes);  // Update the digits of the clock face. Get actual time from RTC and set the LCDs.
   updateDstEveryNight();            // Check for Daylight-Saving-Time (Summertime) adjustment once a day
 
   drawMenu();             // Draw the menu on the clock face, if menu is requested
