@@ -64,7 +64,6 @@ void setup() {
   Serial.begin(115200);
   delay(1000);  // Waiting for serial monitor to catch up.
   Serial.println("");
-  delay(5000);  // Waiting for serial monitor to catch up.
   Serial.println(FIRMWARE_VERSION);
   Serial.println("In setup().");
 

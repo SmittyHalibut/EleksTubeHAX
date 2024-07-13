@@ -235,13 +235,20 @@ int8_t TFTs::CountNumberOfClockFaces() {
       #ifdef DEBUG_OUTPUT_TFT
         Serial.print("File NOT found: ");Serial.println(filename);
       #endif
+      //I guess, this is an "emergency stop", if the first file of the actual set (based on i*10) is not found, they ASSuME, that the whole set is not there and set the "last found" set as the last one.
+      //This only works, if there are LESS then then 8 sets (i<10) -> if there are 8 sets -> "found" IS NEVER SET to a usefull value and stays 0! 
+      //Workaround: Iincrement "found" if first image of the actual searched set is found!
       found = i-1;
+      #ifdef DEBUG_OUTPUT_TFT
+        Serial.print("found = i-1 -> found is now: ");Serial.println(found);
+      #endif
       break;
-    } else {
+    } else { //!FileExists(filename)
       #ifdef DEBUG_OUTPUT_TFT
         Serial.print("File FOUND: ");Serial.println(filename);
       #endif
-    }    
+      found++;
+    } //!FileExists(filename)
   }
   Serial.print(found);
   Serial.println(" fonts found.");
