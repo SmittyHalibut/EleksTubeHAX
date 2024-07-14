@@ -72,18 +72,18 @@ void setup() {
   buttons.begin();
   menu.begin();
 
-#ifdef HARDWARE_NovelLife_SE_CLOCK // NovelLife_SE Clone XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-  //Init the Gesture sensor
-  tfts.println("Gesture sensor start");
-  GestureStart(); //TODO put into class
-#endif
-
   // Setup the displays (TFTs) initaly and show bootup message(s)
-  tfts.begin();  // and count number of clock faces available
+  tfts.begin();
   tfts.fillScreen(TFT_BLACK);
   tfts.setTextColor(TFT_WHITE, TFT_BLACK);
   tfts.setCursor(0, 0, 2);  // Font 2. 16 pixel high
   tfts.println("setup...");
+
+#ifdef HARDWARE_NovelLife_SE_CLOCK // NovelLife_SE Clone XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+  //Init the Gesture sensor
+  tfts.println("Gesture sensor start");Serial.println("Gesture sensor start");
+  gestureStart(); //TODO put into class
+#endif
 
   // Setup WiFi connection. Must be done before setting up Clock.
   // This is done outside Clock so the network can be used for other things.
@@ -195,22 +195,25 @@ void loop() {
 #endif // NovelLife_SE Clone XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
   // Power button: If in menu, exit menu. Else turn off displays and backlight.
+#ifndef ONE_BUTTON_ONLY_MENU
   if (buttons.power.isDownEdge() && (menu.getState() == Menu::idle)) {
+    #ifdef DEBUG_OUTPUT
+      Serial.println("Power button pressed.");
+    #endif
     tfts.chip_select.setAll();
     tfts.fillScreen(TFT_BLACK);
-
     tfts.toggleAllDisplays();
     if (tfts.isEnabled()) {
-#ifndef HARDWARE_SI_HAI_CLOCK
+    #ifndef HARDWARE_SI_HAI_CLOCK
       tfts.reinit();  // reinit (original EleksTube HW: after a few hours in OFF state the displays do not wake up properly)
-#endif
+    #endif
       tfts.chip_select.setAll();
       tfts.fillScreen(TFT_BLACK);
-
       updateClockDisplay(TFTs::force);
     }
     backlights.togglePower();
   }
+#endif
  
   menu.loop(buttons);  // Must be called after buttons.loop()
   backlights.loop();
@@ -495,7 +498,7 @@ void HandleGesture() {
 void setupMenu() {
   tfts.chip_select.setHoursTens();
   tfts.setTextColor(TFT_WHITE, TFT_BLACK);
-  tfts.fillRect(0, 120, 135, 120, TFT_BLACK);
+  tfts.fillRect(0, 120, 135, 240, TFT_BLACK);
   tfts.setCursor(0, 124, 4);  // Font 4. 26 pixel high
 }
 

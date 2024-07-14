@@ -8,8 +8,10 @@ void TFTs::begin() {
   chip_select.begin();
   chip_select.setAll();
 
-  // Turn power on to displays.
-  pinMode(TFT_ENABLE_PIN, OUTPUT);
+  // Turn power on to displays. Except for H401. Always On
+  #ifndef HARDWARE_IPSTUBE_H401_CLOCK
+  pinMode(TFT_ENABLE_PIN, OUTPUT);  
+  #endif
   enableAllDisplays();
   InvalidateImageInBuffer();
 
@@ -32,7 +34,9 @@ void TFTs::reinit() {
   chip_select.setAll();
 
   // Turn power on to displays.
-  pinMode(TFT_ENABLE_PIN, OUTPUT);
+  #ifndef HARDWARE_IPSTUBE_H401_CLOCK
+  pinMode(TFT_ENABLE_PIN, OUTPUT);  
+  #endif
   enableAllDisplays();
 
   // Initialize the super class.
@@ -51,7 +55,7 @@ void TFTs::showNoWifiStatus() {
   fillRect(0, TFT_HEIGHT - 27, TFT_WIDTH, 27, TFT_BLACK);
   setCursor(5, TFT_HEIGHT - 27, 4);  // Font 4. 26 pixel high
   print("NO WIFI !");
-  }
+}
 
 void TFTs::showNoMqttStatus() {
   chip_select.setSecondsTens();
@@ -59,7 +63,32 @@ void TFTs::showNoMqttStatus() {
   fillRect(0, TFT_HEIGHT - 27, TFT_WIDTH, 27, TFT_BLACK);
   setCursor(5, TFT_HEIGHT - 27, 4);
   print("NO MQTT !");
+}
+
+void TFTs::enableAllDisplays() {  
+  // Turn power on to displays.
+  #ifndef HARDWARE_IPSTUBE_H401_CLOCK
+    digitalWrite(TFT_ENABLE_PIN, HIGH);
+  #endif
+  enabled = true;
+}
+
+void TFTs::disableAllDisplays() {  
+  // Turn power off to displays.
+  #ifndef HARDWARE_IPSTUBE_H401_CLOCK
+    digitalWrite(TFT_ENABLE_PIN, LOW);
+  #endif
+  enabled = false;
+}
+
+void TFTs::toggleAllDisplays() {  
+  if (enabled) {
+    disableAllDisplays();
   }
+  else {
+    enableAllDisplays();
+  }
+}
 
 void TFTs::showTemperature() { 
   #ifdef ONE_WIRE_BUS_PIN
@@ -119,7 +148,10 @@ void TFTs::showDigit(uint8_t digit) {
     if (NextNumber > 9) NextNumber = 0; // pre-load only seconds, because they are drawn first
     NextFileRequired = current_graphic * 10 + NextNumber;
   }
-}
+  #ifdef HARDWARE_IPSTUBE_H401_CLOCK
+    chip_select.update();
+  #endif
+  }
 
 void TFTs::LoadNextImage() {
   if (NextFileRequired != FileInBuffer) {
