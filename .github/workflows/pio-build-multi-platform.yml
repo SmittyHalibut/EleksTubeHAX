@@ -2,7 +2,7 @@ name: EleksTubeHAX builds with PlatformIO on multiple platforms
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "*" ]
   pull_request:
     branches: [ "main" ]
 
@@ -14,16 +14,11 @@ jobs:
       # Set fail-fast to false to ensure that feedback is delivered for all matrix combinations. Consider changing this to true when your workflow is stable.
       fail-fast: false
 
-      # Set up a matrix to run the following 3 configurations:
-      # 1. <Windows, Release, latest MSVC compiler toolchain on the default runner image, default generator>
-      # 2. <Linux, Release, latest GCC compiler toolchain on the default runner image, default generator>
-      # 3. <Linux, Release, latest Clang compiler toolchain on the default runner image, default generator>
-      #
+      # Set up a matrix to run 2 configurations:
       # To add more build types (Release, Debug, RelWithDebInfo, etc.) customize the build_type list.
-      matrix:
-        os: [windows-latest]
-        #os: [ubuntu-latest, windows-latest]
-        build_type: [Release]
+      matrix:        
+        os: [ubuntu-latest, windows-latest]
+        build_type: [Debug]
 
     steps:
     - uses: actions/checkout@v4
@@ -34,24 +29,26 @@ jobs:
           ~/.cache/pip
           ~/.platformio/.cache
         key: ${{ runner.os }}-pio
-
-    - name: Set reusable strings
-      # Turn repeated input strings (such as the build output directory) into step outputs. These step outputs can be used throughout the workflow file.
-      id: strings
-      shell: bash
-      run: |
-        echo "build-output-dir=${{ github.workspace }}/build" >> "$GITHUB_OUTPUT"
         
     - uses: actions/setup-python@v5
       with:
         python-version: '3.11'
        
-    - name: Copy file     
+    - name: Copy user_defines.h file on windows
       run: copy "./EleksTubeHAX_pio/src/_USER_DEFINES - empty.h" "./EleksTubeHAX_pio/src/_USER_DEFINES.h"
-        
+      if: runner.os == 'Windows'
+
+    - name: Copy user_defines.h file on linux
+      run: cp "./EleksTubeHAX_pio/src/_USER_DEFINES - empty.h" "./EleksTubeHAX_pio/src/_USER_DEFINES.h"
+      if: runner.os == 'Linux'
+      
     - name: Install PlatformIO Core
       run: pip install --upgrade platformio
 
-    - name: Build PlatformIO Project
-      run: pio run
+    - name: Build PlatformIO Project esp32dev
+      run: pio run --environment esp32dev
+      working-directory: ./EleksTubeHAX_pio
+
+    - name: Build PlatformIO Project esp32dev8MB
+      run: pio run --environment esp32dev8MB
       working-directory: ./EleksTubeHAX_pio
