@@ -498,7 +498,7 @@ void HandleGesture() {
 void setupMenu() {
   tfts.chip_select.setHoursTens();
   tfts.setTextColor(TFT_WHITE, TFT_BLACK);
-  tfts.fillRect(0, 120, 135, 240, TFT_BLACK);
+  tfts.fillRect(0, 120, 135, 120, TFT_BLACK);
   tfts.setCursor(0, 124, 4);  // Font 4. 26 pixel high
 }
 
