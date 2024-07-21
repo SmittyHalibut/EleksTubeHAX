@@ -50,9 +50,5 @@ jobs:
       run: pip install --upgrade platformio
 
     - name: Build PlatformIO Project for 4MB flash
-      run: pio run --environment esp32dev8MB
-      working-directory: ./EleksTubeHAX_pio
-
-    - name: Build PlatformIO Project for 8MB flash
-      run: pio run --environment esp32dev8MB
+      run: pio run --environment esp32dev
       working-directory: ./EleksTubeHAX_pio
