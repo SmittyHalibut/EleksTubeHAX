@@ -82,7 +82,7 @@ void setup() {
 #ifdef HARDWARE_NovelLife_SE_CLOCK // NovelLife_SE Clone XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
   //Init the Gesture sensor
   tfts.println("Gesture sensor start");Serial.println("Gesture sensor start");
-  gestureStart(); //TODO put into class
+  GestureStart(); //TODO put into class
 #endif
 
   // Setup WiFi connection. Must be done before setting up Clock.

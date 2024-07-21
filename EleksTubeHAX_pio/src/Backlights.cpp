@@ -125,7 +125,7 @@ void Backlights::breathPattern() {
 
 void Backlights::testPattern() {
   const uint8_t num_colors = 4;  // or 3 if you don't want black
-  uint8_t num_states = NUM_DIGITS * num_colors;
+  uint8_t num_states = NUM_BACKLIGHT_LEDS * num_colors;
   uint8_t state = (millis()/test_ms_delay) % num_states;
 
   uint8_t digit = state/num_colors;
@@ -167,13 +167,13 @@ uint32_t Backlights::phaseToColor(uint16_t phase) {
 void Backlights::rainbowPattern() {
   // Divide by 3 to spread it out some, so the whole rainbow isn't displayed at once.
   // TODO Make this /3 a parameter
-  const uint16_t phase_per_digit = (max_phase/NUM_DIGITS)/3;
+  const uint16_t phase_per_digit = (max_phase/NUM_BACKLIGHT_LEDS)/3;
 
   // Divide by 10 to slow down the rainbow rotation rate.
   // TODO Make this /10 a parameter
   uint16_t phase = millis()/16 % max_phase;  
   
-  for (uint8_t digit=0; digit < NUM_DIGITS; digit++) {
+  for (uint8_t digit=0; digit < NUM_BACKLIGHT_LEDS; digit++) {
     // Shift the phase for this LED.
     uint16_t my_phase = (phase + digit*phase_per_digit) % max_phase;
     setPixelColor(digit, phaseToColor(my_phase));

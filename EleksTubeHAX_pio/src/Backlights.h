@@ -21,7 +21,7 @@
 class Backlights: public Adafruit_NeoPixel {
 public:
   Backlights() : config(NULL), pattern_needs_init(true), off(true),
-    Adafruit_NeoPixel(NUM_DIGITS, BACKLIGHTS_PIN, NEO_GRB + NEO_KHZ800)
+    Adafruit_NeoPixel(NUM_BACKLIGHT_LEDS, BACKLIGHTS_PIN, NEO_GRB + NEO_KHZ800)
     {}
 
   enum patterns { dark, test, constant, rainbow, pulse, breath, num_patterns };

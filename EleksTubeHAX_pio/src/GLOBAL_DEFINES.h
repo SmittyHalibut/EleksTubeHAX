@@ -78,6 +78,7 @@
 
   // WS2812 (or compatible) LEDs on the back of the display modules.
   #define BACKLIGHTS_PIN (32)
+  #define NUM_BACKLIGHT_LEDS  (6) // 6 LEDs on the bottom of every LCD.
 
   // Buttons, active low, externally pulled up (with actual resistors!)
   #define BUTTON_LEFT_PIN (35)
@@ -137,6 +138,7 @@
 
   // WS2812 (or compatible) LEDs on the back of the display modules.
   #define BACKLIGHTS_PIN (GPIO_NUM_12)
+  #define NUM_BACKLIGHT_LEDS  (6) // 6 LEDs on the bottom of every LCD.
 
   // No Buttons on SE verion!!!
   // Set to pins, which should always be HIGH!
@@ -201,6 +203,7 @@
 
   // WS2812 (or compatible) LEDs on the back of the display modules.
   #define BACKLIGHTS_PIN (12)
+  #define NUM_BACKLIGHT_LEDS  (6) // 6 LEDs on the bottom of every LCD.
 
   // Buttons, active low, externally pulled up (with actual resistors!)
   #define BUTTON_LEFT_PIN (33)
@@ -260,6 +263,7 @@
 
   // WS2812 (or compatible) LEDs on the back of the display modules.
   #define BACKLIGHTS_PIN (12)
+  #define NUM_BACKLIGHT_LEDS  (6) // 6 LEDs on the bottom of every LCD.
 
   // Buttons, active low, externally pulled up (with actual resistors!)
   #define BUTTON_LEFT_PIN (33)
@@ -319,15 +323,10 @@
 
   // WS2812 (or compatible) LEDs on the back of the display modules.
   #define BACKLIGHTS_PIN (GPIO_NUM_5)
-  
-  //NOTE Switching to GPIO_NUM_4, stops all LCDs working (beside the backlight)...so the transistor (Q1) on pin 23 (GPIO_NUM_4) NEEDS to be used somehow in a way that the LCD works! and/or the backlights
-  //I never initialize the pin knowly, so it should NOT be in a defined state, but iniatal value works..
-  //TODO -> Find out, what pin 4 in doing, by switiching INPUT/OUTPUT and HIGH/LOW while displays are in use
-  //#define BACKLIGHTS_PIN (GPIO_NUM_4) //NOT working!!!
 
-  //TODO: Check if the second backlight is somehow connected to the same pin as the first one 
-  //or how to control it!
-  //#define SECOND_BACKLIGHTS_PIN (GPIO_NUM_4) // Second LED strip on the bottom of the clock
+  // ATTENTION: SOME IPSTUBE H401 has a LED stripe on the bottom of the clock! SOME NOT! Define the number of LEDs here!
+  #define NUM_BACKLIGHT_LEDS  (34) // 6 LEDs on the bottom of every LCD. For IPSTUBE H401 with LED stripe: 28 LEDs in a stripe on the bottom of the clock.
+  //#define NUM_BACKLIGHT_LEDS  (6) // 6 LEDs on the bottom of every LCD. For IPSTUBE H401 without LED stripe.
 
   // Only one Button on H401 version!!!
   #define ONE_BUTTON_ONLY_MENU
