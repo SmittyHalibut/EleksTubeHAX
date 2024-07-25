@@ -14,11 +14,14 @@ jobs:
       # Set fail-fast to false to ensure that feedback is delivered for all matrix combinations. Consider changing this to true when your workflow is stable.
       fail-fast: false
 
-      # Set up a matrix to run 2 configurations:
+      # Set up a matrix to run the following 2 configurations:
+      # 1. <Windows, Release, toolchain on the default runner image, default generator>
+      # 2. <Linux, Release, toolchain on the default runner image, default generator>
+
       # To add more build types (Release, Debug, RelWithDebInfo, etc.) customize the build_type list.
       matrix:        
         os: [ubuntu-latest, windows-latest]
-        build_type: [Debug]
+        build_type: [Release]
 
     steps:
     - uses: actions/checkout@v4
@@ -29,7 +32,7 @@ jobs:
           ~/.cache/pip
           ~/.platformio/.cache
         key: ${{ runner.os }}-pio
-        
+      
     - uses: actions/setup-python@v5
       with:
         python-version: '3.11'
@@ -45,10 +48,10 @@ jobs:
     - name: Install PlatformIO Core
       run: pip install --upgrade platformio
 
-    - name: Build PlatformIO Project esp32dev
+    - name: Build PlatformIO Project for 4MB flash
       run: pio run --environment esp32dev
       working-directory: ./EleksTubeHAX_pio
 
-    - name: Build PlatformIO Project esp32dev8MB
+    - name: Build PlatformIO Project for 8MB flash
       run: pio run --environment esp32dev8MB
       working-directory: ./EleksTubeHAX_pio
