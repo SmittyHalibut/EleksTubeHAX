@@ -196,7 +196,7 @@ void loop() {
 
   // Power button: If in menu, exit menu. Else turn off displays and backlight.
 #ifndef ONE_BUTTON_ONLY_MENU
-  if (buttons.power.isDownEdge() && (menu.getState() == Menu::idle)) {
+  if (buttons.power.isUpEdge() && (menu.getState() == Menu::idle)) {
     #ifdef DEBUG_OUTPUT
       Serial.println("Power button pressed.");
     #endif
@@ -440,7 +440,7 @@ void GestureStart()
   }
 }
 
-//Handle Interrupt from gesture sensor and simulate a short button press (state down_edge) of the corresponding button, if a gesture is detected 
+//Handle Interrupt from gesture sensor and simulate a short button press of the corresponding button, if a gesture is detected 
 void HandleGestureInterupt()
 {
   if( isr_flag == 1 ) {
@@ -464,30 +464,30 @@ void HandleGesture() {
     if ( apds.isGestureAvailable() ) {
     switch ( apds.readGesture() ) {
       case DIR_UP:
-        buttons.left.setDownEdgeState();
+        buttons.left.setUpEdgeState();
         Serial.println("Gesture detected! LEFT");
         break;
       case DIR_DOWN:
-        buttons.right.setDownEdgeState();
+        buttons.right.setUpEdgeState();
         Serial.println("Gesture detected! RIGHT");
         break;
       case DIR_LEFT:
-        buttons.power.setDownEdgeState();
+        buttons.power.setUpEdgeState();
         Serial.println("Gesture detected! DOWN");
         break;
       case DIR_RIGHT:
-        buttons.mode.setDownEdgeState();
+        buttons.mode.setUpEdgeState();
         Serial.println("Gesture detected! UP");
         break;
       case DIR_NEAR:
-        buttons.mode.setDownEdgeState();
+        buttons.mode.setUpEdgeState();
         Serial.println("Gesture detected! NEAR");
         break;
       case DIR_FAR:
-        buttons.power.setDownEdgeState();
+        buttons.power.setUpEdgeState();
         Serial.println("Gesture detected! FAR");
         break;
-      default:        
+      default:
         Serial.println("Movement detected but NO gesture detected!");
     }
   }
