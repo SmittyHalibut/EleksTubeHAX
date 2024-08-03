@@ -322,10 +322,10 @@
 #ifdef HARDWARE_IPSTUBE_H401_CLOCK // IPSTUBE Model H401 Clone XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
   // WS2812 (or compatible) LEDs on the back of the display modules.
-  #define BACKLIGHTS_PIN (GPIO_NUM_5)
+  #define BACKLIGHTS_PIN (GPIO_NUM_5) //pin 35 is GPIO5
 
   // ATTENTION: SOME IPSTUBE H401 has a LED stripe on the bottom of the clock! SOME NOT! Define the number of LEDs here!
-  #define NUM_BACKLIGHT_LEDS  (34) // 6 LEDs on the bottom of every LCD. For IPSTUBE H401 with LED stripe: 28 LEDs in a stripe on the bottom of the clock.
+  #define NUM_BACKLIGHT_LEDS  (34) // 6 LEDs on the bottom of every LCD. For IPSTUBE H401 with LED stripe: 28 LEDs in a stripe on the bottom of the clock = 34 LEDs in total.
   //#define NUM_BACKLIGHT_LEDS  (6) // 6 LEDs on the bottom of every LCD. For IPSTUBE H401 without LED stripe.
 
   // Only one Button on H401 version!!!
@@ -336,19 +336,19 @@
   // Pin 3 = VDD3P3 = 3.3V analog power supply = Always LOW on this board
   // Pin 5 = SENSOR_VP = GPIO36 = Unconnected = SHOULD be HIGH = Always HIGH
   #ifdef ONE_BUTTON_ONLY_MENU
-    #define BUTTON_MODE_PIN (GPIO_NUM_0) // Only ONE Button on the back of the clock
+    #define BUTTON_MODE_PIN (GPIO_NUM_0) // Only ONE Button on the back of the clock - pin 23 is GPIO0 = BOOT Button
   #else
     #define BUTTON_LEFT_PIN  (3)
     #define BUTTON_RIGHT_PIN (3)
     #define BUTTON_POWER_PIN (3)
-    #define BUTTON_MODE_PIN (GPIO_NUM_0) // Only ONE Button on the back of the clock
+    #define BUTTON_MODE_PIN (GPIO_NUM_0) // Only ONE Button on the back of the clock - pin 23 is GPIO0 = BOOT Button
   #endif
   
    
   // 3-wire to DS1302 RTC
-  #define DS1302_SCLK  (GPIO_NUM_22)
-  #define DS1302_IO    (GPIO_NUM_19)
-  #define DS1302_CE    (GPIO_NUM_21)
+  #define DS1302_SCLK  (GPIO_NUM_22) // pin 39 is GPIO22
+  #define DS1302_IO    (GPIO_NUM_19) // pin 38 is GPIO19
+  #define DS1302_CE    (GPIO_NUM_21) // pin 42 is GPIO21
 
   // Chip Select shift register, to select the display
   // No shift register on this board - Chip Select of the displays is directly connected to the ESP32
@@ -357,7 +357,7 @@
   // #define CSSR_LATCH_PIN (-1)
 
   // The H401 has the enable pin of the LCDs connectected to the VCC, so Always On.
-  //#define TFT_ENABLE_PIN (GPIO_NUM_4)
+  //#define TFT_ENABLE_PIN (GPIO_NUM_4) // pin 24 is GPIO4
 
   // configure library \TFT_eSPI\User_Setup.h
   // ST7789 135 x 240 display with no chip select line
@@ -370,12 +370,12 @@
   #define TFT_SDA_READ      // Read and write on the MOSI/SDA pin, no separate MISO pin
 
   #define TFT_MISO  -1 // No MISO
-  #define TFT_MOSI (GPIO_NUM_32)
-  #define TFT_SCLK (GPIO_NUM_33)
+  #define TFT_MOSI (GPIO_NUM_32) // pin 12 is GPIO32
+  #define TFT_SCLK (GPIO_NUM_33) // pin 13 is GPIO33
 
   #define TFT_CS   (-1) // MUST be -1 for H401 -> chipselect class does the magic also without a shift register
-  #define TFT_DC   (GPIO_NUM_25)  // Data Command, aka Register Select or RS
-  #define TFT_RST  (GPIO_NUM_26)  // Connect reset to ensure display initialises
+  #define TFT_DC   (GPIO_NUM_25)  // pin 14 is GPIO25 - Data Command, aka Register Select or RS
+  #define TFT_RST  (GPIO_NUM_26)  // pin 15 is GPIO26 - Connect reset to ensure display initialises
 
   #define TOUCH_CS  -1 // No Touch
 

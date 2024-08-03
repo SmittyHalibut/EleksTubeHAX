@@ -2,6 +2,13 @@
 
 #ifdef HARDWARE_IPSTUBE_H401_CLOCK
 // Define the pins for each LCD's enable wire
+// The order is from left to right, so the first pin is for the seconds ones, the last for the hours tens
+// LCD2 is the leftmost one         - seconds one - pin 21 as GPIO15
+// LCD3 is the second from the left - seconds ten - pin 22 as GPIO2
+// LCD4 is the third from the left  - minutes one - pin 23 as GPIO27
+// LCD5 is the fourth from the left - minutes ten - pin 17 as GPIO14
+// LCD6 is the fifth from the left  - hours one   - pin 18 as GPIO12
+// LCD7 is the rightmost one        - hours ten   - pin 20 as GPIO13
 const int lcdEnablePins[NUM_DIGITS] = {GPIO_NUM_15,GPIO_NUM_2,GPIO_NUM_27,GPIO_NUM_14,GPIO_NUM_12,GPIO_NUM_13};
 const int numLCDs = NUM_DIGITS;
 #endif
