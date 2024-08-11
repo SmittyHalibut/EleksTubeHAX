@@ -52,25 +52,75 @@ IPSTUBE - H401
 
 ## Main clock features
 
+- Show the actual time on the LCDs of the clock with the selected clock face
 - Multiple clock faces can be loaded into the clocks flash memory. Switchable via clock menu (or via MQTT messages)
+- 12/24 hour view (switchable via clock menu)
+- On-Screen menu to change settings/configuration of the clock
 - WiFi connectivity with NTP server synchronization
 - Supports either WPS connection or hardcoded WiFi credentials  
 - Manual time zone adjust in 15 minute/1 h slots
 - RGB backlights (wall lights) for nice ambient light with multiple modes ("Off", "Test", "Constant", "Rainbow", "Pulse", "Breath")
 - Dimming of the clock and backlights during the night time (configurable in code)
-- Switching the displays on and off (not supported on all clocks)
-- Different bitmap image files supported (BMP classic or palettized) and proprietary compressed files (CLK)
-- Max image size is 135x240 (WxH) pixels
-- Supports smaller images - will be automatically centered
+- Turning displays on and off (not supported on all clocks)
+- Keeping time even when power is off by using battery-powered real-time clock (not supported on all clocks)
+- Saving and loading clock configuration from the flash, so storing all settings, even when power is off
+- Supports various bitmap image files (classic or palletized BMP) and proprietary compressed files (CLK)
+- Maximum image size is 135 x 240 (Width x Height) pixels
+- Supports smaller images – they will be automatically centered
 - Advanced error handling for best user experience
-- WiFi and MQTT errors are displayed below clock faces
-- Optional MQTT client for remote controlling - clock faces switch and displays on/off can be controlled via MQTT messages. So with a broker, also via mobile phone (SmartNest, SmartThings, Google assistant, Alexa, etc.) or can be included into existing home automation network.
+- WiFi and MQTT errors are displayed below the digits
+- Optional MQTT client for remote control - Switch clock faces and turn displays on/off can be controlled via MQTT messages
+- With a MQTT broker (SmartNest, SmartThings, Mosquitto etc.), this can also be integrated via a mobile phones app, a web site or into an existing home automation network (and can be controlled via Google assistant, Alexa, etc.)
 - Optional IP-based geolocation for automatic timezone and DST adjustments (only supported geolocation provider is "[Abstract](https://www.abstractapi.com/)")
 - Optional DS18B20 temperature sensor to display temperature on the clock
 
 ## Work in progress
 
 - Integrated web server to remote control the clock (and/or maybe load new clock faces)
+
+## Clock specific features
+
+Some clock models have specific functionatlities which are only available for this model
+
+#### NovelLife SE Clock with gesture sensor
+
+- No buttons on the clock, only a gesture sensor
+- Gesture sensor is supported by simulating the buttons like the other clocks have
+
+|  gesture | button |
+|--|--|
+| down, near | Power |
+| up, far | Mode |
+| left | Left |
+| right | Right |
+
+- The movement of the finger/hand from behind the glass tubes of the watch, over the glass tubes, directly and closely over the sensor to the front of the watch is the “down” gesture.
+- The movement of the finger/hand from in front of the watch, directly and closely over the sensor, further over the glass tubes and behind it is the “up” gesture.
+- Moving the finger/hand from directly above the sensor (from 5-8 cm away) toward the sensor (up to about 1 cm away) is the “near” gesture.
+- Moving from close by the sensor (coming from the front and putting the finger/hand in 1cm distance over the sensor) to a bit more far away (5-7cm distance) is the "far" gesture.
+
+#### IPSTUBE Clock - Model H401
+
+- This model has a 8MB flash memory, so either more clock faces can be stored on the clock or in a better quality (i.e. no palettization/conversion needed).
+
+##### One button menu
+
+- The clock has only one button.
+- So there is a special menu mode active for this model.
+- Short pressing the button brings up the menu.
+- Short pressing while in the menu changes the menu scope.
+- Long pressing (1-1.5 sec at least) changes the value of the actual selected menu scope.
+- This makes navigating through the menus a bit "unhandy".
+- The values always changes "to the right", because the long button press is emulating a "right button" press in the menu.
+- This limits the selection of values (like in for timezone values or absolut color values).
+- The selection is looping to the first value after reaching the last value.
+
+##### LCD stripe
+
+- Some versions of this model have a LED stripe with 28 RGB LEDs installed on the bottom.
+- The stripe is a continuation of the 6 LED on the bottom of the LCDs, called "backlight".
+- In the moment, the stripe is following the configuration of the backlight (modes, colour etc.).
+- All models have a 3-pin socket on the board, so theoratically the stripe is retrofittable.
 
 ## How to use this firmware
 
@@ -84,26 +134,32 @@ If you want more features and configure the firmware, check also section "How to
 
 ### Backup first
 
+**Always backup YOUR clocks firmware version as first step!**
+
 If you mess-up your clock, it's only your fault!
 
-Backup images from other users **DO NOT WORK** as the original EleksTube firmware is locked by MAC address of ESP32.
+Note for original EleksTube clocks: Backup images from other users **DO NOT WORK** as the original EleksTube firmware is locked to the MAC address of the ESP32.
 
 For other clocks it MAY work, but don't assume it!
-
-**Always backup YOUR clocks firmware version as first step!**
 
 ### Install the USB Serial Port Device Driver
 
 Windows
 
-- On Windows, plug-in the cable into the clock and connect it to an USB port of your PC. Then run Windows Update. It will find and install the driver and generate an virtual COM port.
-- Only if Windows Update is not working for you, see the chinese manufacturers website for newest [CH340 driver](https://www.wch-ic.com/downloads/CH341SER_ZIP.html) and install them manually.
+- On Windows, plug-in the cable into the clock and connect it to an USB port of your PC. Then run Windows Update. It will find and install the driver and generate an virtual COM port.<br>
+Windows device manager COM port example:<br>
+![Windows device manager COM port example](/documentation/ImagesMD/WindowsDeviceManagerCOMport.png)
+- Only if Windows Update is not working for you, see the chinese manufacturers website for newest [CH340 driver](https://www.wch-ic.com/downloads/CH341SER_ZIP.html) for Windows and install them manually.
 
 Linux
 
-- On an up-to-date Linux it works out of the box.
+- On an up-to-date Linux it works out of the box. COM port should be something like `/dev/ttyUSB0`.
+- If it is not working, see this [tutorial](https://learn.sparkfun.com/tutorials/how-to-install-ch340-drivers/linux) and see the chinese manufacturers website for newest [CH340 driver](https://www.wch-ic.com/downloads/CH341SER_ZIP.html) for Linux.
 
 ### Save your original firmware
+
+To read from (or write to) the clock, it needs to be in the "download mode". Most clocks will go into this mode automatically, when the ESPTool tries to read or write to them.
+Some clocks needs a button pressed while the powering phase (plugging the USB cable), like the IPSTUBEs.
 
 Windows users:
 
@@ -119,6 +175,15 @@ Linux users:
 - You probably already know where to get `Esptool` and how to use it. :)
 - If not, this guide from the Tasmota project is very easy to follow: [ESPTool](https://tasmota.github.io/docs/Esptool/#put-device-in-firmware-upload-mode)
 - Adopt the settings for your connected clock and save the firmware file to your device.
+
+### Restore backup
+
+You can write back your original firmware by modyfing the file `_ESP32 write flash.cmd`.
+
+- Set correct COM port and the name of your firmware backup file
+- If needed, set the size to be written
+- Run the CMD file and flash the firmware file
+- Check if clock is working
 
 ## How to build this firmware
 
@@ -149,14 +214,16 @@ If you don't have Python already installed it will be automatically added by Pla
 The EspressIF 32 development platform for PlatformIO is required to support the ESP32 microcontroller. It will be installed automatically when this project is opened in VSCode/PlatformIO or if the first build is triggered. It will take a while - observe status messages in the bottom right corner.
 
 Tested on version 6.0.7 from the [PlatformIO registry](https://registry.platformio.org/platforms/platformio/espressif32).
-The default environment for this project are using the "board" definition of the orginal "ESP32 development board" named "esp32dev".
+
+The default environment for this project (and most clocks) are using the "board" definition of the orginal "Espressif ESP32 Dev Module" named "esp32dev".
+The IPSTUBE needs to use the "esp32dev8MB" environment with a custom board definition ("Espressif ESP32 Dev Module 8MB").
 
 Flash size settings are already configured in the following files.
 
-| filename | flash size | app part size | data part size |
-|----------|------------|---------------|----------------|
-| `partition_noOta_1Mapp_3Mspiffs.csv` | 4.0 MB | 1.2 MB | 2.8 MB |
-| `partition_noOta_1Mapp_7Mspiffs.csv` | 8.0 MB | 1.2 MB | 6.8 MB |
+| filename | environment | flash size | app part size | data part size |
+|----------|-------------|------------|---------------|----------------|
+| `partition_noOta_1Mapp_3Mspiffs.csv` | esp32dev | 4.0 MB | 1.2 MB | 2.8 MB |
+| `partition_noOta_1Mapp_7Mspiffs.csv` | esp32dev8MB | 8.0 MB | 1.2 MB | 6.8 MB |
 
 No OTA partition, one app partition, one data partition as SPIFFS to store the images of the clock faces.
 
@@ -167,7 +234,9 @@ Upload port is set to 921600 baud in the `platformio.ini` file.
 
 #### Libraries in use
 
-All the listed libraries are in use. The most recent versions are automatically installed from the [PlatformIO registry](https://registry.platformio.org) (or the given source location) as soon as the project is opened or before first compilation. 
+All the listed libraries are in use (see `platform.ini` file).
+
+The most recent versions are automatically installed from the [PlatformIO registry](https://registry.platformio.org) (or the given source location) as soon as the project is opened or before first compilation.
 
 It will take a while to initally install them - observe status messages in build log screen.
 
@@ -194,21 +263,23 @@ If you have issues with automatic installation, here are locations of the origin
 
 `IPgeolocation` and `NTPclient` libraries were copied into the project and heavily updated (mostly bug fixes and error-catching).
 
+`DS1307RTC` is only available in version "0.0.0-alpha+sha.c2590c0033" from the PlatformIO registry. This version is working and should be compiled from the latest code version in the original repo of the lib. But to have a "nicer" version number (1.4.1), add `https://github.com/PaulStoffregen/DS1307RTC.git#1.4.1` instead of `paulstoffregen/DS1307RTC` into the `platform.ini`.
+
 #### Configure the `TFT_eSPI` library
 
-The supplied `script_configure_tft_lib.py` takes care for library configuration. It copies two files (`_USER_DEFINES.h` and `GLOBAL_DEFINES.h`) into the library folder before building. This makes sure, the TFT_eSPI library is initalized with the correct values for each clock type.
+The supplied `script_configure_tft_lib.py` takes care of the library configuration. It copies two files (`_USER_DEFINES.h` and `GLOBAL_DEFINES.h`) into the library folder before building. This makes sure, the TFT_eSPI library is initalized with the correct values for each clock type.
 
 If you have issues with the scripts, copy the files manually every time the `TFT_eSPI` library is updated.
 
 Note: For IPSTUBE clocks use "esp32dev8MB" environment, then `script_configure_tft_lib_8MB.py` is used.
 
-#### Configure the `APDS9960` library (NovelLife SE only)
+#### Configure the `APDS9960` library
 
-The supplied `script_adjust_gesture_sensor_lib.py` modifies some files of the APDS9960 library  before building. It adds the support for the ID of the used (cloned) gesture chip.
+The supplied `script_adjust_gesture_sensor_lib.py` modifies some files of the APDS9960 library before building. It adds the support for the ID of the used (cloned) gesture chip (needed for NovelLife SE with gesture sensor only).
 
 Note: For IPSTUBE clocks use "esp32dev8MB" environment, then `script_adjust_gesture_sensor_lib_8MB.py` is used.
 
-### Configure, Build and Upload New Firmware
+### Configure, Build and Upload new firmware
 
 Make sure you configured everything in `_USER_DEFINES.h`:
 
@@ -233,9 +304,9 @@ Some clocks needs a button pressed while the powering phase (plugging the USB ca
 
  **Note**: If you have Bluetooth virtual ports on your machine, it might hang and you must manually select the COM port in the `platformio.ini`, see [Upload options](https://docs.platformio.org/en/latest/projectconf/sections/env/options/upload/index.html).
 
-#### 1) Compile the code and upload the firmware file (to the app partition)
+#### 1st Compile the code and upload the firmware file (to the app partition)
 
-Compile the code via the "Build" command of PlatformIO extension and upload the code via the "Upload" command in the matching environment for your clock (esp32dev is right for all clocks, except from IPSTUBE)
+Compile the code via the "Build" command of PlatformIO extension and upload the code via the "Upload" command in the matching environment for your clock (esp32dev is right for all clocks, except IPSTUBE)
 
 ![alt text](/documentation/ImagesMD/PlatformIOBuild.png)
 
@@ -249,11 +320,16 @@ Uploading:
 
 Note: For IPSTUBE clocks use "esp32dev8MB" environment
 
-**Note**: On auto-reset clocks, you'll see the clock boot up after upload. It will go into the setup routine and ask for WPS (if configured in the `_USER_DEFINES.H`) or connecting to the configrued Wifi, but it doesn't have any bitmaps to display on the screen yet!
+**Note**: On auto-reset clocks, you'll see the clock boot up after upload. It will go into the setup routine and ask for WPS or connecting to the configured WiFi network. On some clocks, you need to to a manual reset (power off/on cylce)
 
-The screens will stay blank until you upload data!
+**Note**: After the initally flash, your clock will **NOT SHOW ANYTHING** on the displays after the setup phase!
+This is, because it doesn't have any bitmaps to display on the flash memory yet!
 
-#### 2) Fill data partition (SPIFFS) with images
+**The screens will stay blank until you upload data!**
+
+See "2nd Fill data partition (SPIFFS) with images".
+
+#### 2nd Fill data partition (SPIFFS) with images
 
 The repository comes with a "predefined" set of BMP files in the `data` subdirectory of the `EleksTubeHAX_pio` folder.
 
@@ -266,13 +342,16 @@ Note: All files in the `data` directory will be packed into the SPIFFS flash ima
 
 ##### Generate and upload
 
-In PlatformIO extension go to "Project Tasks" and expand: esp32dev -> Platform
-Select "Build Filesystem Image" first, then connect the clock and click "Upload Filesystem Image".
+- In PlatformIO extension go to "Project Tasks" and expand: esp32dev -> Platform
+- Select "Build Filesystem Image" first 
+- Then connect the clock
+- Click "Upload Filesystem Image"
 
 ![alt text](/documentation/ImagesMD/PlatformIOBuildFilesystem.png)
 
 This will upload the files to the SPIFFS filesystem on the ESP32 (flash of the clock).
-They'll stay there, even if you re-upload the firmware to the app partition, because the data partition is not overriden or modified by that.
+
+Note: The data will stay there, even if you re-upload the real firmware to the app partition, because the data partition is not overriden or modified by that.
 
 Note: For IPSTUBE clocks use "esp32dev8MB" environment
 
@@ -281,8 +360,8 @@ Note: For IPSTUBE clocks use "esp32dev8MB" environment
 If you want to change the uploaded clock faces for the clock:
 
 - Create your own set of BMP files or select and copy some from the provided sets in the `data - other graphics` folder of this repo or download some from the internet (see below).
-- Max resolution of each image is 135 x 240 pixels (HxW). They can be smaller, then the picture will be centered on the display.
-- Max color depth is 24 bit RGB. But recommended is palettized Bitmaps with 256 colors palette.
+- Maximum resolution of each image is 135 x 240 pixels (HxW). They can be smaller, then the picture will be centered on the display.
+- Maximum color depth is 24 bit RGB. But recommended is palettized Bitmaps with 256 colors palette.
 - Name them `10.bmp` (for digit Zero) through `19.bmp` (for digit Nine); `20.bmp` to `29.bmp`, and so on. Note: There is no set 00-09.bmp!
 - You can add max 8 clock face sets in the moment (Due to a problem in the detection meachanism - will be fixed soon).
 
@@ -321,6 +400,28 @@ If you have your own clock face that'll work and want it listed here, please fil
 
 - For WPS: When prompted by the clock, press WPS button on your router (or in web-interface of your router). Clock will automatically connect to the WiFi and save data for future use. No need to input your credentials anywhere in the source code. The clock will remember WiFi connection details even if you unplug the clock.
 - Without WPS: Add your WiFi credentials into `_USER_DEFINES.h` file before building the firmware.
+
+## Known problems
+
+##### No RTC for SI HAI IPS Clock
+
+There is no battery on the SI HAI IPS clock, so the clock will loose the time, if powered of.
+
+##### One Button menu
+
+The value always changes "to the right", on a long button press.
+Values smaller then the starting value ("to the left") can never be seleted (like in for timezone values or absolut color values).
+
+##### No display turn off for IPSTUBE clock
+
+The TFT LCDs can not turned on or turned off on the device by software without modifing the hardware!
+The pin 1 and pin 7 of each FPC for each TFT LCD are connected together directly to the +V3.3 line of the PCB.
+Pin 1 is the general VCC power (LED Anode) and pin 7 is the VDD (Power Supply for Analog).
+So there is no way to control the VDD on pin 7 seperately or to turn on or turn off power to pin 1.
+
+##### Precision gesture sensor
+
+The accuracy of the gesture sensor on the Novellife clock is not very good. It needs some 'training' to be able to control the clock.
 
 ## Development Process/History
 
