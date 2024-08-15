@@ -21,7 +21,7 @@
 
 // ************* Version Infomation  *************
 #define DEVICE_NAME       "IPS-clock"
-#define FIRMWARE_VERSION  "SmittyHalibut & aly-fly IPS clock v0.8"
+#define FIRMWARE_VERSION  "SmittyHalibut & aly-fly IPS clock v0.8 HA Edition victorvuelma & gamba69"
 #define SAVED_CONFIG_NAMESPACE  "configs"
 
 
@@ -34,7 +34,7 @@
 
 // ************ MQTT config *********************
 #define MQTT_RECONNECT_WAIT_SEC  30  // how long to wait between retries to connect to broker
-#define MQTT_REPORT_STATUS_EVERY_SEC  71 // How often report status to MQTT Broker
+#define MQTT_REPORT_STATUS_EVERY_SEC  15 // How often report status to MQTT Broker
 
 
 // ************ Temperature config *********************
