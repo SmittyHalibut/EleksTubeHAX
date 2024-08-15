@@ -184,7 +184,7 @@ void MqttReportState(bool force) {
       JsonDocument state;
       state["state"] =  MqttStatusMainPower == 0 ? MQTT_STATE_OFF : MQTT_STATE_ON;
       state["brightness"] = MqttStatusMainBrightness;
-      state["effect"] = MqttStatusMainGraphic;
+      state["effect"] = tfts.clockFaceToName(MqttStatusMainGraphic);
       // state["Last seen"] = last_seen;
 
       char buffer[256];
@@ -497,7 +497,7 @@ void callback(char* topic, byte* payload, unsigned int length) {  //A new messag
        MqttCommandMainBrightnessReceived = true;
      }
     if(doc.containsKey("effect")) {
-      MqttCommandMainGraphic = doc["effect"];   
+      MqttCommandMainGraphic = tfts.nameToClockFace(doc["effect"]);   
       MqttCommandMainGraphicReceived = true;
       }
 
@@ -705,7 +705,7 @@ void MqttReportDiscovery() {
   discovery["effect"] = true;
   for (size_t i = 1; i <= tfts.NumberOfClockFaces; i++)
   {
-    discovery["effect_list"][i-1] = i;
+    discovery["effect_list"][i-1] = tfts.clockFaceToName(i);
   }
   size_t main_n = serializeJson(discovery, json_buffer);
   const char* main_topic = concat3("homeassistant/light/", MQTT_CLIENT, "_main/light/config");

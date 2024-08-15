@@ -40,6 +40,7 @@ Firmware supports and was tested on different clock versions. Note that "EleksTu
 
 - Device detected as two different lights, main and back
 - Supported on/off, brightness, effects (main and back), color (back)
+- Main light clock faces may be named, see clockfaces.txt on SPIFFS
 - Supported 12/24 hours and blank zeroes settings switches
 - Supported effect's speed change for backlight
 - All options are discoverable via Home Assistant MQTT

@@ -24,6 +24,7 @@ void TFTs::begin() {
   }
 
   NumberOfClockFaces = CountNumberOfClockFaces();
+  loadClockFacesNames();
 }
 
 void TFTs::reinit() {
@@ -43,6 +44,23 @@ void TFTs::clear() {
   // Start with all displays selected.
   chip_select.setAll();
   enableAllDisplays();
+}
+
+void TFTs::loadClockFacesNames() {
+  int8_t i = 0;
+  const char* filename = "/clockfaces.txt";
+  Serial.println("Load clock face's names");
+  fs::File f = SPIFFS.open(filename);
+  if(!f) {
+    Serial.println("SPIFFS clockfaces.txt not found.");
+    return;
+  }
+  while(f.available() && i<9) {
+      patterns_str[i] = f.readStringUntil('\n');
+      Serial.println(patterns_str[i]);
+      i++;
+    }
+  f.close();
 }
 
 void TFTs::showNoWifiStatus() {
@@ -479,5 +497,18 @@ uint32_t TFTs::read32(fs::File &f) {
   ((uint8_t *)&result)[2] = f.read();
   ((uint8_t *)&result)[3] = f.read(); // MSB
   return result;
+}
+
+String TFTs::clockFaceToName(uint8_t clockFace) {
+  return patterns_str[clockFace -1];
+}
+
+uint8_t TFTs::nameToClockFace(String name) {
+  for(int i=0; i<9; i++) {
+    if(patterns_str[i] == name) {
+      return i+1;
+    }
+  }
+  return 1;
 }
 //// END STOLEN CODE
