@@ -1,6 +1,8 @@
 # EleksTubeHAX - An aftermarket custom firmware for the desk clock
 ![EleksTube IPS clock](/Photos/Clock1.jpg)
 
+### This is Home Assistant Edition with extensive MQTT support, see below
+
 Supported hardware models:
 ### "EleksTube IPS clock", "SI HAI IPS clock", "NovelLife SE clock", "PunkCyber clock", "RGB Glow Tube DIY clock"
 
@@ -33,6 +35,15 @@ Firmware supports and was tested on different clock versions. Note that "EleksTu
 - WiFi and MQTT errors are displayed below clock faces
 - Supported hardware: original "EleksTube IPS clock"; "SI HAI clock" (chinese cknockoff); NovelLife SE clock (without gesture sensor); "PunkCyber" or "RGB Glow Tube DIY" clock (from pcbway). NOTE: EleksTube IPS Gen 2 was not tested. If someone owns it, please test this firmware and contact us (best to open Issue on GitHub and report back)
 - (in works: ) Integrated web server to input configuration (or maybe load new clock faces)
+
+# Home Assistant Edition with extensive MQTT features
+
+- Device detected as two different lights, main and back
+- Supported on/off, brightness, effects (main and back), color (back)
+- Main light clock faces may be named, see clockfaces.txt on SPIFFS
+- Supported 12/24 hours and blank zeroes settings switches
+- Supported effect's speed change for backlight
+- All options are discoverable via Home Assistant MQTT
 
 # How to use this firmware
 If you just want to use new firmware without setting up all the tools and libraries and everything, navigate to folder `\pre-built-firmware\` and modify `_ESP32 write flash.cmd` to upload selected version to your clock. If you want more features, continue reading below.
