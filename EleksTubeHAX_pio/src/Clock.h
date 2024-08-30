@@ -81,8 +81,9 @@ public:
   uint8_t getSecondsTens()  { return getSecond()/10; }
   uint8_t getSecondsOnes()  { return getSecond()%10; }
   
-private:
   time_t loop_time, local_time;
+
+private:
   bool time_valid;
   StoredConfig::Config::Clock *config;
 
@@ -93,6 +94,6 @@ private:
   const static uint32_t refresh_ntp_every_ms = 3600000; // Get new NTP every hour, use RTC in between.
 };
 
-
+extern Clock uclock;
 
 #endif // CLOCK_H

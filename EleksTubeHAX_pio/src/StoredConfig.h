@@ -33,6 +33,7 @@ public:
       uint8_t  intensity;
       uint8_t  pulse_bpm;
       uint8_t  breath_per_min;
+      float    rainbow_sec;
       uint8_t  is_valid;       // Write StoredConfig::valid here when valid data is loaded.
     } backlights;
   

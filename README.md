@@ -1,6 +1,11 @@
 # EleksTubeHAX - An aftermarket custom firmware for the desk clock
 
+
 ![EleksTube IPS clock](/documentation/ImagesMD/EleksTube_IPS_Classic_Edition.jpg)
+
+Supported hardware models:
+### "EleksTube IPS clock", "SI HAI IPS clock", "NovelLife SE clock", "PunkCyber clock", "RGB Glow Tube DIY clock"
+
 
 ## Supported hardware models
 
@@ -69,14 +74,25 @@ IPSTUBE - H401
 - Supports smaller images – they will be automatically centered
 - Advanced error handling for best user experience
 - WiFi and MQTT errors are displayed below the digits
+- Supports Home Assistant integration with extensive MQTT support (see below for details)
+
 - Optional MQTT client for remote control - Switch clock faces and turn displays on/off can be controlled via MQTT messages
 - With a MQTT broker (SmartNest, SmartThings, Mosquitto etc.), this can also be integrated via a mobile phones app, a web site or into an existing home automation network (and can be controlled via Google assistant, Alexa, etc.)
 - Optional IP-based geolocation for automatic timezone and DST adjustments (only supported geolocation provider is "[Abstract](https://www.abstractapi.com/)")
 - Optional DS18B20 temperature sensor to display temperature on the clock
 
-## Work in progress
 
-- Integrated web server to remote control the clock (and/or maybe load new clock faces)
+# Home Assistant integration with extensive MQTT features
+
+- Device detected as two different lights, main and back
+- Supported on/off, brightness, effects (main and back), color (back)
+- Main light clock faces may be named, see clockfaces.txt on SPIFFS
+- Supported 12/24 hours and blank zeroes settings switches
+- Supported effect's speed change for backlight
+- All options are discoverable via Home Assistant MQTT
+
+# How to use this firmware
+If you just want to use new firmware without setting up all the tools and libraries and everything, navigate to folder `\pre-built-firmware\` and modify `_ESP32 write flash.cmd` to upload selected version to your clock. If you want more features, continue reading below.
 
 ## Clock specific features
 
