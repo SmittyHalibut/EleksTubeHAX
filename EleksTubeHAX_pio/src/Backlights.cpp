@@ -12,7 +12,7 @@ void Backlights::begin(StoredConfig::Config::Backlights *config_)  {
     setIntensity(max_intensity-1);
     setPulseRate(60);
     setBreathRate(20);
-    setRainbowDuration(2);
+    setRainbowDuration(DEFAULT_BL_RAINBOW_DURATION_SEC);
     config->is_valid = StoredConfig::valid;
   }
   off = false;

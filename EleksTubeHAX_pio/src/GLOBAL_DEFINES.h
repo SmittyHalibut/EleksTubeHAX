@@ -40,6 +40,8 @@
 // ************ Temperature config *********************
 #define TEMPERATURE_READ_EVERY_SEC 60  // how often to read the temperature sensor (if present)
 
+// ************ Backlight config *********************
+#define DEFAULT_BL_RAINBOW_DURATION_SEC 8
 
 // ************ Hardware definitions *********************
 
