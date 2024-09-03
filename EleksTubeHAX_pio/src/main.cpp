@@ -46,6 +46,8 @@ uint8_t       hour_old        = 255;
 bool          DstNeedsUpdate  = false;
 uint8_t       yesterday       = 0;
 
+uint32_t lastMqttCommandExecuted = (uint32_t) -1;
+
 // Helper function, defined below.
 void updateClockDisplay(TFTs::show_t show=TFTs::yes);
 void setupMenu(void);
@@ -146,10 +148,28 @@ void loop() {
   uint32_t millis_at_top = millis();
   // Do all the maintenance work
   WifiReconnect(); // if not connected attempt to reconnect
-
-  MqttStatusPower = tfts.isEnabled();
-  MqttStatusState = (uclock.getActiveGraphicIdx()+1) * 5;   // 10 
+  
   MqttLoopFrequently();
+
+  bool MqttCommandReceived = 
+    MqttCommandPowerReceived || 
+    MqttCommandMainPowerReceived ||
+    MqttCommandBackPowerReceived ||
+    MqttCommandStateReceived ||
+    MqttCommandBrightnessReceived ||
+    MqttCommandMainBrightnessReceived ||
+    MqttCommandBackBrightnessReceived ||
+    MqttCommandPatternReceived ||
+    MqttCommandBackPatternReceived ||
+    MqttCommandBackColorPhaseReceived || 
+    MqttCommandGraphicReceived ||
+    MqttCommandMainGraphicReceived ||
+    MqttCommandUseTwelveHoursReceived ||
+    MqttCommandBlankZeroHoursReceived ||
+    MqttCommandPulseBpmReceived ||
+    MqttCommandBreathBpmReceived ||
+    MqttCommandRainbowSecReceived;
+  
   if (MqttCommandPowerReceived) {
     MqttCommandPowerReceived = false;
     if (MqttCommandPower) {
@@ -163,6 +183,30 @@ void loop() {
       backlights.PowerOn();
     } else {
       tfts.disableAllDisplays();
+      backlights.PowerOff();
+    }
+  }
+
+  if (MqttCommandMainPowerReceived) {
+    MqttCommandMainPowerReceived = false;
+    if (MqttCommandMainPower) {
+ #ifndef HARDWARE_SI_HAI_CLOCK
+      if (!tfts.isEnabled()) {
+        tfts.reinit();  // reinit (original EleksTube HW: after a few hours in OFF state the displays do not wake up properly)
+        updateClockDisplay(TFTs::force);
+      }
+ #endif
+      tfts.enableAllDisplays();
+    } else {
+      tfts.disableAllDisplays();
+    }
+  }
+
+  if (MqttCommandBackPowerReceived) {
+    MqttCommandBackPowerReceived = false;
+    if (MqttCommandBackPower) {
+      backlights.PowerOn();
+    } else {
       backlights.PowerOff();
     }
   }
@@ -181,11 +225,128 @@ void loop() {
     uclock.setClockGraphicsIdx(idx);  
     tfts.current_graphic = uclock.getActiveGraphicIdx();
     updateClockDisplay(TFTs::force);   // redraw everything
-    /* do not save to flash everytime mqtt changes; can be frequent
-    Serial.print("Saving config...");
-    stored_config.save();
-    Serial.println(" Done.");
-    */
+  }
+
+  if(MqttCommandMainBrightnessReceived) {
+    MqttCommandMainBrightnessReceived = false;
+    tfts.dimming = MqttCommandMainBrightness;
+    tfts.InvalidateImageInBuffer();
+    updateClockDisplay(TFTs::force);
+  }
+
+  if(MqttCommandBackBrightnessReceived) {
+    MqttCommandBackBrightnessReceived = false;   
+    backlights.setIntensity(uint8_t(MqttCommandBackBrightness));
+  }
+
+  if(MqttCommandPatternReceived) {
+    MqttCommandPatternReceived = false;
+
+    for(int8_t i = 0; i < Backlights::num_patterns; i++){
+        Serial.print("New pattern ");
+        Serial.print(MqttCommandPattern);
+        Serial.print(", check pattern ");
+        Serial.println(Backlights::patterns_str[i]);
+      if(strcmp(MqttCommandPattern, (Backlights::patterns_str[i]).c_str()) == 0) {
+        backlights.setPattern(Backlights::patterns(i));
+        break;
+      }
+    } 
+  }
+
+  if(MqttCommandBackPatternReceived) {
+    MqttCommandBackPatternReceived = false;
+    for(int8_t i = 0; i < Backlights::num_patterns; i++){
+        Serial.print("new pattern ");
+        Serial.print(MqttCommandBackPattern);
+        Serial.print(", check pattern ");
+        Serial.println(Backlights::patterns_str[i]);
+      if(strcmp(MqttCommandBackPattern, (Backlights::patterns_str[i]).c_str()) == 0) {
+        backlights.setPattern(Backlights::patterns(i));
+        break;
+      }
+    } 
+  }
+
+  if(MqttCommandBackColorPhaseReceived) {
+    MqttCommandBackColorPhaseReceived = false;
+    
+    backlights.setColorPhase(MqttCommandBackColorPhase);
+  } 
+
+  if(MqttCommandGraphicReceived) {
+    MqttCommandGraphicReceived = false;
+
+    uclock.setClockGraphicsIdx(MqttCommandGraphic);
+    tfts.current_graphic = uclock.getActiveGraphicIdx();
+    updateClockDisplay(TFTs::force);   // redraw everything
+  }
+
+  if(MqttCommandMainGraphicReceived) {
+    MqttCommandMainGraphicReceived = false;
+    uclock.setClockGraphicsIdx(MqttCommandMainGraphic);
+    tfts.current_graphic = uclock.getActiveGraphicIdx();
+    updateClockDisplay(TFTs::force);   // redraw everything
+  }
+
+  if(MqttCommandUseTwelveHoursReceived) {
+    MqttCommandUseTwelveHoursReceived = false;
+    uclock.setTwelveHour(MqttCommandUseTwelveHours);
+  }
+
+  if(MqttCommandBlankZeroHoursReceived) {
+    MqttCommandBlankZeroHoursReceived = false;
+    uclock.setBlankHoursZero(MqttCommandBlankZeroHours);
+  }
+
+  if(MqttCommandPulseBpmReceived) {
+    MqttCommandPulseBpmReceived = false;
+    backlights.setPulseRate(MqttCommandPulseBpm);
+  }
+
+  if(MqttCommandBreathBpmReceived) {
+    MqttCommandBreathBpmReceived = false;
+    backlights.setBreathRate(MqttCommandBreathBpm);
+  }
+
+  if(MqttCommandRainbowSecReceived) {
+    MqttCommandRainbowSecReceived = false;
+    backlights.setRainbowDuration(MqttCommandRainbowSec);
+  }
+
+  MqttStatusPower = tfts.isEnabled();
+  MqttStatusMainPower = tfts.isEnabled();
+  MqttStatusBackPower = backlights.getPower();
+  MqttStatusState = (uclock.getActiveGraphicIdx()+1) * 5;   // 10 
+  MqttStatusBrightness = backlights.getIntensity();
+  MqttStatusMainBrightness = tfts.dimming;
+  MqttStatusBackBrightness = backlights.getIntensity();
+  strcpy(MqttStatusPattern, backlights.getPatternStr().c_str());
+  strcpy(MqttStatusBackPattern, backlights.getPatternStr().c_str());
+  backlights.getPatternStr().toCharArray(MqttStatusBackPattern, backlights.getPatternStr().length() + 1);
+  MqttStatusBackColorPhase = backlights.getColorPhase();
+  MqttStatusGraphic = uclock.getActiveGraphicIdx();
+  MqttStatusMainGraphic = uclock.getActiveGraphicIdx();
+  MqttStatusUseTwelveHours = uclock.getTwelveHour();
+  MqttStatusBlankZeroHours = uclock.getBlankHoursZero();
+  MqttStatusPulseBpm = backlights.getPulseRate();
+  MqttStatusBreathBpm = backlights.getBreathRate();
+  MqttStatusRainbowSec = backlights.getRainbowDuration();
+
+  if(MqttCommandReceived) {
+    lastMqttCommandExecuted = millis();
+
+    MqttReportBackEverything(true);
+  }
+
+  if(lastMqttCommandExecuted != -1) {
+    if (((millis() - lastMqttCommandExecuted) > (MQTT_SAVE_PREFERENCES_AFTER_SEC * 1000)) && menu.getState() == Menu::idle) {
+      lastMqttCommandExecuted = -1;
+
+      Serial.print("Saving config...");
+      stored_config.save();
+      Serial.println(" Done.");
+    }
   }
 
   buttons.loop();
@@ -512,11 +673,12 @@ bool isNightTime(uint8_t current_hour) {
 
 void EveryFullHour(bool loopUpdate) {
   // dim the clock at night
+  #ifdef DIMMING
   uint8_t current_hour = uclock.getHour24();
   FullHour = current_hour != hour_old;
   if (FullHour) {
-  Serial.print("current hour = ");
-  Serial.println(current_hour);
+    Serial.print("current hour = ");
+    Serial.println(current_hour);
     if (isNightTime(current_hour)) {
       Serial.println("Setting night mode (dimmed)");
       tfts.dimming = TFT_DIMMED_INTENSITY;
@@ -535,7 +697,8 @@ void EveryFullHour(bool loopUpdate) {
       }
     }
     hour_old = current_hour;
-  }   
+  }
+  #endif   
 }
 
 void UpdateDstEveryNight() {
