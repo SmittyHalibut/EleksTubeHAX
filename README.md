@@ -2,12 +2,14 @@
 
 ![EleksTube IPS clock](/documentation/ImagesMD/EleksTube_IPS_Classic_Edition.jpg)
 
+### This is the "Home Assistant Edition" with extendent MQTT support, more info see below!
+
 ## Supported hardware models
 
 ### Original EleksTube Models
 
 1. **EleksTube IPS Clock (Original Version)**
-2. **EleksTube IPS Clock Gen2** (now officially called "**EleksTube IPS Classic Edition**")
+2. **EleksTube IPS Clock Gen2**
 
 ### Other Supported Models
 
@@ -24,7 +26,7 @@
 
 - All "Original EleksTube" clocks sold after July 2022 are "Gen2" versions. Refer to the [Blog post on EleksTube website](https://elekstube.com/blogs/news/instructions-on-elekstube-clock-for-gen2-systems) for more details .
 - **EleksTube IPS Clock** is the original model created by the inventor in 2021. There are now many similar designs and clones on the market with varying hardware modifications.
-- Newer versions from EleksTube, such as PR1 and PR2, are also available.
+- Newer versions from EleksTube, such as PR1 and PR2, are also available and called Gen3 and the base version is now officially called "**EleksTube IPS Classic Edition**"
 
 ### Purchasing Information
 
@@ -73,6 +75,24 @@ IPSTUBE - H401
 - With a MQTT broker (SmartNest, SmartThings, Mosquitto etc.), this can also be integrated via a mobile phones app, a web site or into an existing home automation network (and can be controlled via Google assistant, Alexa, etc.)
 - Optional IP-based geolocation for automatic timezone and DST adjustments (only supported geolocation provider is "[Abstract](https://www.abstractapi.com/)")
 - Optional DS18B20 temperature sensor to display temperature on the clock
+
+## Home Assistant Edition with extensive MQTT features
+
+- Device detected as two different lights, main and back
+- Supported on/off, brightness, effects (main and back), color (back)
+- Main light clock faces may be named, see clockfaces.txt on SPIFFS
+- Supported 12/24 hours and blank zeroes settings switches
+- Supported effect's speed change for backlight
+- All options are discoverable via Home Assistant MQTT
+
+Detailed description:
+Interaction with Home Assistant occurs according to the MQTT integration documentation:
+https://www.home-assistant.io/integrations/light.mqtt/
+https://www.home-assistant.io/integrations/switch.mqtt/
+https://www.home-assistant.io/integrations/number.mqtt/
+https://www.home-assistant.io/integrations/mqtt/#mqtt-discovery
+It is preferable (but not mandatory) to use MQTT Discovery (#define MQTT_HOME_ASSISTANT_DISCOVERY), in which case the device and all entities will be found by the MQTT integration without user intervention. Otherwise, all settings will need to be done manually.
+#define MQTT_CLIENT is used as a unique device name (i.e. it should be different if you have several IPS clocks) and is the "root" part of the topic for all entities that will be interacted with via MQTT. Further analysis is easier to perform using, for example, "MQTT Explorer", a common add-on for users who prefer manual configuration.
 
 ## Work in progress
 
@@ -452,6 +472,7 @@ The CH340 chip, used for USB-UART conversion, can operate both on 5V and 3.3V. O
 - Mark Smith, aka Smitty ... @SmittyHalibut on GitHub, Twitter, and YouTube.
 - Aljaz Ogrin, aka aly-fly ... @aly-fly on GitHub and Instagram
 - Misc code snips either commited by or copied from: @icebreaker-ch, @meddle99, @OggyP, @bitrot-alpha
+- Home Assistant support by @victorvuelma and @gamba69
 - in future (on to-do list) also from: @RedNax67, @wfdudley, @judge2005
 
 _Happy hacking!_
