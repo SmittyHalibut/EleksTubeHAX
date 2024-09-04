@@ -3,9 +3,11 @@
 #
 # examples: https://github.com/espressif/arduino-esp32/tree/master/tools/partitions
 #
+# app0 must be aligned on 0x10000 (!)
+#
 # Name,   Type, SubType, Offset,  Size, Flags
-nvs,      data, nvs,     0x9000,  0x5000,
-otadata,  data, ota,     0xe000,  0x2000,
-app0,     app,  factory, 0x10000, 0x120000,
-spiffs,   data, spiffs,  0x130000,0x2C0000,
-coredump, data, coredump,0x3F0000,0x10000,
+# partition table          0x0000,   0x9000,  <- automatically generated, do not un-comment.
+nvs,      data, nvs,       0x9000,   0x7000,
+app0,     app,  factory,  0x10000, 0x120000,
+spiffs,   data, spiffs,  0x130000, 0x2D0000,
+# end of 4 MB flash      0x400000
