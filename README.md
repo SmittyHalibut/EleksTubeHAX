@@ -108,6 +108,15 @@ It is preferable (but not mandatory) to use MQTT Discovery (#define MQTT_HOME_AS
 - Supported effect's speed change for backlight
 - All options are discoverable via Home Assistant MQTT
 
+Detailed description:
+Interaction with Home Assistant occurs according to the MQTT integration documentation:
+https://www.home-assistant.io/integrations/light.mqtt/
+https://www.home-assistant.io/integrations/switch.mqtt/
+https://www.home-assistant.io/integrations/number.mqtt/
+https://www.home-assistant.io/integrations/mqtt/#mqtt-discovery
+It is preferable (but not mandatory) to use MQTT Discovery (#define MQTT_HOME_ASSISTANT_DISCOVERY), in which case the device and all entities will be found by the MQTT integration without user intervention. Otherwise, all settings will need to be done manually.
+#define MQTT_CLIENT is used as a unique device name (i.e. it should be different if you have several IPS clocks) and is the "root" part of the topic for all entities that will be interacted with via MQTT. Further analysis is easier to perform using, for example, "MQTT Explorer", a common add-on for users who prefer manual configuration.
+
 # How to use this firmware
 If you just want to use new firmware without setting up all the tools and libraries and everything, navigate to folder `\pre-built-firmware\` and modify `_ESP32 write flash.cmd` to upload selected version to your clock. If you want more features, continue reading below.
 
