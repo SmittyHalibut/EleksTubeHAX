@@ -33,6 +33,7 @@ public:
   void togglePower() { off = !off; pattern_needs_init = true; }
   void PowerOn()  { off = false; pattern_needs_init = true; }
   void PowerOff() { off = true; pattern_needs_init = true; }
+  bool getPower() { return !off; }
 
   void setPattern(patterns p)      { config->pattern = uint8_t(p); pattern_needs_init = true; }
   patterns getPattern()            { return patterns(config->pattern); }
@@ -43,8 +44,12 @@ public:
 
   // Configure the patterns
   void setPulseRate(uint8_t bpm)              { config->pulse_bpm = bpm; }
+  uint8_t getPulseRate()                      { return config->pulse_bpm; }
   void setBreathRate(uint8_t per_min)         { config->breath_per_min = per_min; }
-  
+  uint8_t getBreathRate()                     { return config->breath_per_min; }
+  void setRainbowDuration(float seconds)      { config->rainbow_sec = seconds; }
+  float getRainbowDuration()                  { return config->rainbow_sec; }
+
   // Used by all constant color patterns.
   void setColorPhase(uint16_t phase)          { config->color_phase = phase % max_phase; pattern_needs_init = true; }
   void adjustColorPhase(int16_t adj);
@@ -56,7 +61,16 @@ public:
   uint8_t getIntensity()                      { return config->intensity; }
 
   bool dimming = false;
-  
+
+  // Helper methods
+  uint32_t phaseToColor(uint16_t phase);
+  uint32_t hueToPhase(float hue);
+  float phaseToHue(uint32_t phase);
+  uint8_t phaseToIntensity(uint16_t phase);
+
+  const uint16_t max_phase = 768;   // 256 up, 256 down, 256 off
+  const uint8_t max_intensity = 8;  // 0 to 7
+
 private:
   bool pattern_needs_init;
   bool off;
@@ -69,15 +83,10 @@ private:
   void rainbowPattern();
   void pulsePattern();
   void breathPattern();
-
-  // Helper methods
-  uint8_t phaseToIntensity(uint16_t phase);
-  uint32_t phaseToColor(uint16_t phase);
-
-  const uint16_t max_phase = 768;   // 256 up, 256 down, 256 off
-  const uint8_t max_intensity = 8;  // 0 to 7
+  
   const uint32_t test_ms_delay = 250; 
-
 };
+
+extern Backlights backlights;
 
 #endif // BACKLIGHTS_H

@@ -27,6 +27,7 @@
 
 
 // ************* Display Dimming / Night time operation *************
+#define DIMMING // uncomment to enable hardware dimming
 #define NIGHT_TIME  22 // dim displays at 10 pm 
 #define DAY_TIME     7 // full brightness after 7 am
 #define BACKLIGHT_DIMMED_INTENSITY  1  // 0..7
@@ -49,12 +50,18 @@
 
 // ************* MQTT config *************
 //#define MQTT_ENABLED  // enable after creating an account, setting up the Thermostat device on www.smartnest.cz and filling in all the data below:
+//#define MQTT_HOME_ASSISTANT // enable if you want Home Assistant support
+//#define MQTT_HOME_ASSISTANT_DISCOVERY
+//#define MQTT_HOME_ASSISTANT_DISCOVERY_DEVICE_MANUFACTURER "EleksMaker"
+//#define MQTT_HOME_ASSISTANT_DISCOVERY_DEVICE_MODEL "Elekstube IPS PR2"
+//#define MQTT_HOME_ASSISTANT_DISCOVERY_SW_VERSION "0.8 Home Assistant Edition"
+//#define MQTT_HOME_ASSISTANT_DISCOVERY_HW_VERSION "2.3.04"
 #define MQTT_BROKER "smartnest.cz"             // Broker host
 #define MQTT_PORT 1883                         // Broker port
 #define MQTT_USERNAME "__enter_your_username_here__"             // Username from Smartnest
 #define MQTT_PASSWORD "__enter_your_api_key_here__"              // Password from Smartnest or API key (under MY Account)
 #define MQTT_CLIENT "__enter_your_device_id_here__"              // Device Id from Smartnest
-
+#define MQTT_SAVE_PREFERENCES_AFTER_SEC 60
 
 // ************* Optional temperature sensor *************
 //#define ONE_WIRE_BUS_PIN   4  // DS18B20 connected to GPIO4; comment this line if sensor is not connected

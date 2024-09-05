@@ -56,6 +56,9 @@ public:
   void LoadNextImage();
   void InvalidateImageInBuffer(); // force reload from Flash with new dimming settings
 
+  String clockFaceToName(uint8_t clockFace);
+  uint8_t nameToClockFace(String name);
+
 private:
   uint8_t digits[NUM_DIGITS];
   bool enabled;
@@ -69,7 +72,10 @@ private:
 
   static uint16_t UnpackedImageBuffer[TFT_HEIGHT][TFT_WIDTH];
   uint8_t FileInBuffer=255; // invalid, always load first image
-  uint8_t NextFileRequired = 0; 
+  uint8_t NextFileRequired = 0;
+
+  String patterns_str[9] = {"1", "2", "3", "4", "5", "6", "7", "8", "9"};
+  void loadClockFacesNames();
 };
 
 extern TFTs tfts;

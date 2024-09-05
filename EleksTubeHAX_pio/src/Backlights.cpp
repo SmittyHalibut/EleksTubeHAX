@@ -10,11 +10,11 @@ void Backlights::begin(StoredConfig::Config::Backlights *config_)  {
     setPattern(rainbow);
     setColorPhase(0);
     setIntensity(max_intensity-1);
-    setPulseRate(72);
-    setBreathRate(10);
+    setPulseRate(60);
+    setBreathRate(20);
+    setRainbowDuration(DEFAULT_BL_RAINBOW_DURATION_SEC);
     config->is_valid = StoredConfig::valid;
   }
-
   off = false;
 }
 
@@ -87,26 +87,23 @@ void Backlights::loop() {
 }
 
 void Backlights::pulsePattern() {
-  if (pattern_needs_init) {
-    fill(phaseToColor(config->color_phase));
-  }
+  fill(phaseToColor(config->color_phase));
 
-  float pulse_length_millis = (60.0f * 1000) / config->breath_per_min;
+  float pulse_length_millis = (60.0f * 1000) / config->pulse_bpm;
   float val = 1 + abs(sin(2 * M_PI * millis() / pulse_length_millis)) * 254;
   if (dimming) {
     val = val * BACKLIGHT_DIMMED_INTENSITY / 7;
-  }  
+  } else {
+    val = val * config->intensity / 7;
+  }
   setBrightness((uint8_t)val);
 
   show();
-
 }
 
 void Backlights::breathPattern() {
-  if (pattern_needs_init) {
-    fill(phaseToColor(config->color_phase));
-  }
-
+  fill(phaseToColor(config->color_phase));
+  
   // https://sean.voisen.org/blog/2011/10/breathing-led-with-arduino/
   // Avoid a 0 value as it shuts off the LEDs and we have to re-initialize.
   float pulse_length_millis = (60.0f * 1000) / config->breath_per_min;
@@ -114,7 +111,9 @@ void Backlights::breathPattern() {
 
   if (dimming) {
     val = val * BACKLIGHT_DIMMED_INTENSITY / 7;
-  }  
+  } else {
+    val = val * config->intensity / 7;
+  }
 
   uint8_t brightness = (uint8_t)val;
   if (brightness < 1) { brightness = 1; }
@@ -133,8 +132,14 @@ void Backlights::testPattern() {
   
   clear();
   setPixelColor(digit, color);
-  show();
 
+  if (dimming) {
+    setBrightness(0xFF >> max_intensity - (uint8_t) BACKLIGHT_DIMMED_INTENSITY - 1);
+  }  else {
+    setBrightness(0xFF >> max_intensity - config->intensity - 1);  
+  }
+
+  show();
 }
 
 uint8_t Backlights::phaseToIntensity(uint16_t phase) {
@@ -164,16 +169,35 @@ uint32_t Backlights::phaseToColor(uint16_t phase) {
   return(uint32_t(red) << 16 | uint32_t(green) << 8 | uint32_t(blue));
 }
 
+uint32_t Backlights::hueToPhase(float hue) {
+  hue = hue - 120.f;
+  if (hue < 0) {
+   hue = hue + 360.f;
+  }
+  uint32_t phase = uint32_t(round(768.f * (1.f - hue/360.f)));
+  phase = phase % max_phase;
+  return(phase);
+}
+
+float Backlights::phaseToHue(uint32_t phase) {
+  float hue = 120.f + ((768.f - float(phase))/768.f)*360.f;
+  //h = 120 + (1 - p/768)*360
+  if( hue >= 360.f ) {
+    hue = hue - 360.f;
+  }
+  return(round(hue));
+}
+
 void Backlights::rainbowPattern() {
   // Divide by 3 to spread it out some, so the whole rainbow isn't displayed at once.
   // TODO Make this /3 a parameter
   const uint16_t phase_per_digit = (max_phase/NUM_BACKLIGHT_LEDS)/3;
 
-  // Divide by 10 to slow down the rainbow rotation rate.
-  // TODO Make this /10 a parameter
-  uint16_t phase = millis()/16 % max_phase;  
-  
-  for (uint8_t digit=0; digit < NUM_BACKLIGHT_LEDS; digit++) {
+  // Rainbow roatation speed now configurable
+  uint16_t duration = uint16_t(round(getRainbowDuration() * 1000));
+  uint16_t phase = uint16_t(round(float(millis() % duration) / duration * max_phase));
+
+  for (uint8_t digit=0; digit < NUM_DIGITS; digit++) {
     // Shift the phase for this LED.
     uint16_t my_phase = (phase + digit*phase_per_digit) % max_phase;
     setPixelColor(digit, phaseToColor(my_phase));
