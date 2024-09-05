@@ -25,9 +25,9 @@
 
 ### Notes
 
-- All "Original EleksTube" clocks sold after July 2022 are "Gen2" versions. Refer to the [Blog post on EleksTube website](https://elekstube.com/blogs/news/instructions-on-elekstube-clock-for-gen2-systems) for more details .
+- All "Original EleksTube" clocks sold after July 2022 are "Gen2" versions. Refer to the [Blog post on EleksTube website](https://elekstube.com/blogs/news/instructions-on-elekstube-clock-for-gen2-systems) for more details.
 - **EleksTube IPS Clock** is the original model created by the inventor in 2021. There are now many similar designs and clones on the market with varying hardware modifications.
-- Newer versions from EleksTube, such as PR1 and PR2, are also available and called Gen3 and the base version is now officially called "**EleksTube IPS Classic Edition**"
+- Newer versions from EleksTube, such as PR1 and PR2 or Pro, are also available and called Gen3 and the base version is now officially called "**EleksTube IPS Classic Edition**"
 
 ### Purchasing Information
 
@@ -153,7 +153,7 @@ Some clock models have specific functionatlities which are only available for th
 - Some versions of this model have a LED stripe with 28 RGB LEDs installed on the bottom.
 - The stripe is a continuation of the 6 LED on the bottom of the LCDs, called "backlight".
 - In the moment, the stripe is following the configuration of the backlight (modes, colour etc.).
-- All models have a 3-pin socket on the board, so theoratically the stripe is retrofittable.
+- All models have a 3-pin socket on the board, so theoratically the stripe is retrofittable with any LED stripe made of WS2812B LEDs and some work.
 
 ## How to use this firmware
 
@@ -445,12 +445,20 @@ There is no battery on the SI HAI IPS clock, so the clock will loose the time, i
 The value always changes "to the right", on a long button press.
 Values smaller then the starting value ("to the left") can never be seleted (like in for timezone values or absolut color values).
 
-##### No display turn off for IPSTUBE clock
+##### No display turn off for some IPSTUBE clocks
 
-The TFT LCDs can not turned on or turned off on the device by software without modifing the hardware!
-The pin 1 and pin 7 of each FPC for each TFT LCD are connected together directly to the +V3.3 line of the PCB.
+Depending on the board version of the IPSTUBEs models H401 and H402, the transistor Q1 is present on the board or not.
+If the transistor (marked A19TF, seems a 3401) is present, the displays can be turned on and off like on other clocks.
+If the transistor is not present, the TFT LCDs can NOT turned on or off by software without modifing the hardware!
+The ground pin for the LCDs is connected directly to ground on these boards.
+
+It should be possible to solder a transistor on position Q1, to bring the switching funcionality to the boards.
+Not tried yet!
+
+In general, the pin 1 and pin 7 of each FPC for each TFT LCD are connected together directly to the +V3.3 line of the PCB.
 Pin 1 is the general VCC power (LED Anode) and pin 7 is the VDD (Power Supply for Analog).
-So there is no way to control the VDD on pin 7 seperately or to turn on or turn off power to pin 1.
+So there is no way to control the VDD on pin 7 seperately (real dimming) or to turn on or turn off power to pin 1, even if the transistor is present.
+But turning on an off via ground pin is possible.
 
 ##### Precision gesture sensor
 
