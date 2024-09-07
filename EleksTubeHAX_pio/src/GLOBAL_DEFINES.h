@@ -75,7 +75,7 @@
 #define HOURS_TENS_MAP   (0x01 << HOURS_TENS)
 
 // Define the activate and deactivate state for the diplay power transistor
-#ifndef HARDWARE_IPSTUBE_H401_CLOCK
+#ifndef HARDWARE_IPSTUBE_CLOCK
   #define ACTIVATEDISPLAYS      HIGH    // Activate is HIGH for the IPSTUBEs
   #define DEACTIVATEDISPLAYS    LOW     // Deactivate is LOW for the IPSTUBEs
 #else
