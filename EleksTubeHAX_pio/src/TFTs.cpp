@@ -8,10 +8,8 @@ void TFTs::begin() {
   chip_select.begin();
   chip_select.setAll();
 
-  // Turn power on to displays. Except for H401. Always On
-  #ifndef HARDWARE_IPSTUBE_CLOCK
-  pinMode(TFT_ENABLE_PIN, OUTPUT);  
-  #endif
+  // Turn power on to displays. 
+  pinMode(TFT_ENABLE_PIN, OUTPUT);
   enableAllDisplays();
   InvalidateImageInBuffer();
 
@@ -35,9 +33,7 @@ void TFTs::reinit() {
   chip_select.setAll();
 
   // Turn power on to displays.
-  #ifndef HARDWARE_IPSTUBE_CLOCK
-  pinMode(TFT_ENABLE_PIN, OUTPUT);  
-  #endif
+  pinMode(TFT_ENABLE_PIN, OUTPUT);
   enableAllDisplays();
 
   // Initialize the super class.
@@ -83,23 +79,19 @@ void TFTs::showNoMqttStatus() {
   print("NO MQTT !");
 }
 
-void TFTs::enableAllDisplays() {  
+void TFTs::enableAllDisplays() {
   // Turn power on to displays.
-  #ifndef HARDWARE_IPSTUBE_CLOCK
-    digitalWrite(TFT_ENABLE_PIN, HIGH);
-  #endif
+  digitalWrite(TFT_ENABLE_PIN, ACTIVATEDISPLAYS);
   enabled = true;
 }
 
-void TFTs::disableAllDisplays() {  
+void TFTs::disableAllDisplays() {
   // Turn power off to displays.
-  #ifndef HARDWARE_IPSTUBE_CLOCK
-    digitalWrite(TFT_ENABLE_PIN, LOW);
-  #endif
+  digitalWrite(TFT_ENABLE_PIN, DEACTIVATEDISPLAYS);
   enabled = false;
 }
 
-void TFTs::toggleAllDisplays() {  
+void TFTs::toggleAllDisplays() {
   if (enabled) {
     disableAllDisplays();
   }

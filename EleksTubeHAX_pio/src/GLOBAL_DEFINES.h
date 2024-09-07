@@ -74,6 +74,16 @@
 #define HOURS_ONES_MAP   (0x01 << HOURS_ONES)
 #define HOURS_TENS_MAP   (0x01 << HOURS_TENS)
 
+// Define the activate and deactivate state for the diplay power transistor
+#ifndef HARDWARE_IPSTUBE_H401_CLOCK
+  #define ACTIVATEDISPLAYS      HIGH    // Activate is HIGH for the IPSTUBEs
+  #define DEACTIVATEDISPLAYS    LOW     // Deactivate is LOW for the IPSTUBEs
+#else
+  #define ACTIVATEDISPLAYS      LOW     // Activate is LOW for the Elekstube
+  #define DEACTIVATEDISPLAYS    HIGH    // Deactivate is HIGH for the Elekstube
+#endif
+
+
 #ifdef HARDWARE_SI_HAI_CLOCK // SI HAI IPS Clock XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
   //#define ONE_WIRE_BUS_PIN (xx)  // DS18B20 connected to GPIOxx; comment this line if sensor is not connected
@@ -358,8 +368,8 @@
   // #define CSSR_CLOCK_PIN (-1)
   // #define CSSR_LATCH_PIN (-1)
 
-  // The H401 has the enable pin of the LCDs connectected to the VCC, so Always On.
-  //#define TFT_ENABLE_PIN (GPIO_NUM_4) // pin 24 is GPIO4
+  // The H401 has the enable pin of the LCDs connectected to the VCC, so Always On.  
+  #define TFT_ENABLE_PIN (GPIO_NUM_4) // pin 24 is GPIO4  
 
   // configure library \TFT_eSPI\User_Setup.h
   // ST7789 135 x 240 display with no chip select line
