@@ -127,6 +127,10 @@ void setup() {
     uclock.setActiveGraphicIdx(tfts.NumberOfClockFaces);
     Serial.println("Last selected index of clock face is larger than currently available number of image sets.");
   }
+  if (uclock.getActiveGraphicIdx() < 1) {
+    uclock.setActiveGraphicIdx(1);
+    Serial.println("Last selected index of clock face is less than 1.");
+  }
   tfts.current_graphic = uclock.getActiveGraphicIdx();
 
   tfts.println("Done with setup.");
