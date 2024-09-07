@@ -321,16 +321,16 @@
   #define USER_SETUP_LOADED
 #endif // original EleksTube IPS clock Gen2 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
-#ifdef HARDWARE_IPSTUBE_H401_CLOCK // IPSTUBE Model H401 Clone XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+#ifdef HARDWARE_IPSTUBE_CLOCK // IPSTUBE clock models (H401 and H402) XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
   // WS2812 (or compatible) LEDs on the back of the display modules.
   #define BACKLIGHTS_PIN (GPIO_NUM_5) //pin 35 is GPIO5
 
-  // ATTENTION: SOME IPSTUBE H401 has a LED stripe on the bottom of the clock! SOME NOT! Define the number of LEDs here!
-  #define NUM_BACKLIGHT_LEDS  (34) // 6 LEDs on the bottom of every LCD. For IPSTUBE H401 with LED stripe: 28 LEDs in a stripe on the bottom of the clock = 34 LEDs in total.
-  //#define NUM_BACKLIGHT_LEDS  (6) // 6 LEDs on the bottom of every LCD. For IPSTUBE H401 without LED stripe.
+  // ATTENTION: SOME IPSTUBE clocks has a LED stripe on the bottom of the clock! SOME NOT! Define the number of LEDs here!
+  #define NUM_BACKLIGHT_LEDS  (34) // 6 LEDs on the bottom of every LCD. For IPSTUBE clock with LED stripe: 28 LEDs in a stripe on the bottom of the clock = 34 LEDs in total.
+  //#define NUM_BACKLIGHT_LEDS  (6) // 6 LEDs on the bottom of every LCD. For IPSTUBE clock without LED stripe.
 
-  // Only one Button on H401 version!!!
+  // Only one Button on IPSTUBE clocks!
   #define ONE_BUTTON_ONLY_MENU
 
   // Set the other pins, to pins, which should always be in a defined, non changing state like Always HIGH or Always LOW!
@@ -375,7 +375,7 @@
   #define TFT_MOSI (GPIO_NUM_32) // pin 12 is GPIO32
   #define TFT_SCLK (GPIO_NUM_33) // pin 13 is GPIO33
 
-  #define TFT_CS   (-1) // MUST be -1 for H401 -> chipselect class does the magic also without a shift register
+  #define TFT_CS   (-1) // MUST be -1 for IPSTUBE clocks -> chipselect class does the magic also without a shift register
   #define TFT_DC   (GPIO_NUM_25)  // pin 14 is GPIO25 - Data Command, aka Register Select or RS
   #define TFT_RST  (GPIO_NUM_26)  // pin 15 is GPIO26 - Connect reset to ensure display initialises
 
@@ -402,6 +402,6 @@
    */
   #define USER_SETUP_LOADED
 
-#endif  // IPSTUBE Model H401 Clone XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+#endif  // IPSTUBE clock models (H401 and H402) XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
 #endif /* GLOBAL_DEFINES_H_ */

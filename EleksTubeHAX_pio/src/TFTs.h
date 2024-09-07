@@ -16,7 +16,7 @@ class TFTs : public TFT_eSPI {
 public:
   TFTs() : TFT_eSPI(), chip_select(), enabled(false)
   { 
-    #ifndef HARDWARE_IPSTUBE_H401_CLOCK
+    #ifndef HARDWARE_IPSTUBE_CLOCK
       for (uint8_t digit=0; digit < NUM_DIGITS; digit++) digits[digit] = 0;
     #endif
   }

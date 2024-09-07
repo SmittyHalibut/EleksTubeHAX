@@ -1,7 +1,7 @@
 #include "Clock.h"
 #include "WiFi_WPS.h"
 
-#if defined(HARDWARE_SI_HAI_CLOCK) || defined(HARDWARE_IPSTUBE_H401_CLOCK) // for Clocks with DS1302 chip #SI HAI or H401 XXXXXXXXXXXXXXXXXX
+#if defined(HARDWARE_SI_HAI_CLOCK) || defined(HARDWARE_IPSTUBE_CLOCK) // for Clocks with DS1302 chip #SI HAI or IPSTUBE XXXXXXXXXXXXXXXXXX
   // If it is a SI HAI Clock, use differnt RTC chip drivers
   #include <ThreeWire.h>  
   #include <RtcDS1302.h>

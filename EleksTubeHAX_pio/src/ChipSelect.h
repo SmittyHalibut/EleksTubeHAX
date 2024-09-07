@@ -26,8 +26,8 @@ public:
   // Helper functions
   // Sets just the one digit by digit number
   void setDigit(uint8_t digit, bool update_=true);
-  void enableDigitCSPinsH401(uint8_t digit);
-  void disableDigitCSPinsH401(uint8_t digit);
+  void enableDigitCSPins(uint8_t digit);
+  void disableDigitCSPins(uint8_t digit);
   
   void setAll(bool update_=true);
   void clear(bool update_=true);
@@ -45,8 +45,8 @@ public:
   bool isHoursOnes();
   bool isHoursTens();
 
-  void enableAllCSPinsH401();
-  void disableAllCSPinsH401();
+  void enableAllCSPins();
+  void disableAllCSPins();
 private:
   uint8_t digits_map;
   const uint8_t all_on = 0x3F;

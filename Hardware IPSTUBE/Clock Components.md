@@ -1,4 +1,4 @@
-# IPSTUBE Clock - Model H401
+# IPSTUBE Clock - Model H401 and H402
 
 ## Identified components
 
@@ -9,3 +9,4 @@
 - **ME6118** as ME6118A33(2121/33) with Package SOT223, see [datasheet](https://datasheetspdf.com/download_new.php?id=1330628)
 - **TFT Display** with FPC ST7789 as ER-TFT1.14-2, see [datasheet](https://www.buydisplay.com/download/manual/ER-TFT1.14-2_Datasheet.pdf)
 - **RGB-LEDs** as WS2812B, see [datasheet](https://cdn-shop.adafruit.com/datasheets/WS2812B.pdf)
+- **Transistor** on position Q1 (if present), marked A19TF. Seems to be a 3401 model like [datasheet](https://wmsc.lcsc.com/wmsc/upload/file/pdf/v2/lcsc/1811131826_KIA-Semicon-Tech-KIA3401_C116049.pdf)

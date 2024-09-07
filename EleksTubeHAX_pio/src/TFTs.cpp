@@ -9,7 +9,7 @@ void TFTs::begin() {
   chip_select.setAll();
 
   // Turn power on to displays. Except for H401. Always On
-  #ifndef HARDWARE_IPSTUBE_H401_CLOCK
+  #ifndef HARDWARE_IPSTUBE_CLOCK
   pinMode(TFT_ENABLE_PIN, OUTPUT);  
   #endif
   enableAllDisplays();
@@ -35,7 +35,7 @@ void TFTs::reinit() {
   chip_select.setAll();
 
   // Turn power on to displays.
-  #ifndef HARDWARE_IPSTUBE_H401_CLOCK
+  #ifndef HARDWARE_IPSTUBE_CLOCK
   pinMode(TFT_ENABLE_PIN, OUTPUT);  
   #endif
   enableAllDisplays();
@@ -85,7 +85,7 @@ void TFTs::showNoMqttStatus() {
 
 void TFTs::enableAllDisplays() {  
   // Turn power on to displays.
-  #ifndef HARDWARE_IPSTUBE_H401_CLOCK
+  #ifndef HARDWARE_IPSTUBE_CLOCK
     digitalWrite(TFT_ENABLE_PIN, HIGH);
   #endif
   enabled = true;
@@ -93,7 +93,7 @@ void TFTs::enableAllDisplays() {
 
 void TFTs::disableAllDisplays() {  
   // Turn power off to displays.
-  #ifndef HARDWARE_IPSTUBE_H401_CLOCK
+  #ifndef HARDWARE_IPSTUBE_CLOCK
     digitalWrite(TFT_ENABLE_PIN, LOW);
   #endif
   enabled = false;
@@ -166,7 +166,7 @@ void TFTs::showDigit(uint8_t digit) {
     if (NextNumber > 9) NextNumber = 0; // pre-load only seconds, because they are drawn first
     NextFileRequired = current_graphic * 10 + NextNumber;
   }
-  #ifdef HARDWARE_IPSTUBE_H401_CLOCK
+  #ifdef HARDWARE_IPSTUBE_CLOCK
     chip_select.update();
   #endif
   }
