@@ -57,6 +57,7 @@ void TFTs::loadClockFacesNames() {
   }
   while(f.available() && i<9) {
       patterns_str[i] = f.readStringUntil('\n');
+      patterns_str[i].replace(String(char(13)), "");
       Serial.println(patterns_str[i]);
       i++;
     }
