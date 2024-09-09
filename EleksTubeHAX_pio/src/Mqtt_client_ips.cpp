@@ -618,7 +618,8 @@ void MqttReportPowerState() {
 void MqttReportWiFiSignal() {
   char signal[5];
   int SignalLevel = WiFi.RSSI();
-  if (SignalLevel != LastSentSignalLevel) {
+  // ignore deviations smaller than 3 dBm
+  if (abs(SignalLevel - LastSentSignalLevel) > 2) {
     sprintf(signal, "%d", SignalLevel);
     sendToBroker("report/signal", signal);  // Reports the signal strength
     LastSentSignalLevel = SignalLevel;
