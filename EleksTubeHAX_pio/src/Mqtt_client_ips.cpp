@@ -11,7 +11,7 @@
  */
 
 #include "Mqtt_client_ips.h"
-#include "WiFi.h"       // for ESP32
+#include "WiFi.h"  // for ESP32
 #include <PubSubClient.h>  // Download and install this library first from: https://www.arduinolibraries.info/libraries/pub-sub-client
 #include <ArduinoJson.h>
 #include "TempSensor.h"
@@ -57,7 +57,7 @@ uint32_t lastTimeSent = (uint32_t)(MQTT_REPORT_STATUS_EVERY_SEC * -1000);
 uint8_t LastNotificationChecksum = 0;
 uint32_t LastTimeTriedToConnect = 0;
 
-bool MqttConnected = true; // skip error meggase if disabled
+bool MqttConnected = true; // skip error message if disabled
 // commands from server    // = "directive/status"
 bool MqttCommandPower = true;
 bool MqttCommandMainPower = true;
@@ -71,12 +71,12 @@ bool MqttCommandUseTwelveHoursReceived = false;
 bool MqttCommandBlankZeroHours = false;
 bool MqttCommandBlankZeroHoursReceived = false;
 
-int  MqttCommandState = 1;  
+int  MqttCommandState = 1;
 bool MqttCommandStateReceived = false;
 
 uint8_t MqttCommandBrightness = -1;
 uint8_t MqttCommandMainBrightness = -1;
-uint8_t MqttCommandBackBrightness = -1;    
+uint8_t MqttCommandBackBrightness = -1;
 bool MqttCommandBrightnessReceived = false;
 bool MqttCommandMainBrightnessReceived = false;
 bool MqttCommandBackBrightnessReceived = false;
@@ -89,18 +89,18 @@ bool MqttCommandBackPatternReceived = false;
 uint16_t MqttCommandBackColorPhase = -1;
 bool MqttCommandBackColorPhaseReceived = false;
 
-uint8_t MqttCommandGraphic = -1;  
+uint8_t MqttCommandGraphic = -1;
 bool MqttCommandGraphicReceived = false;
-uint8_t MqttCommandMainGraphic = -1;  
+uint8_t MqttCommandMainGraphic = -1;
 bool MqttCommandMainGraphicReceived = false;
 
-uint8_t MqttCommandPulseBpm = -1;  
+uint8_t MqttCommandPulseBpm = -1;
 bool MqttCommandPulseBpmReceived = false;
 
-uint8_t MqttCommandBreathBpm = -1;  
+uint8_t MqttCommandBreathBpm = -1;
 bool MqttCommandBreathBpmReceived = false;
 
-float MqttCommandRainbowSec = -1;  
+float MqttCommandRainbowSec = -1;
 bool MqttCommandRainbowSecReceived = false;
 
 // status to server
@@ -143,7 +143,7 @@ uint8_t LastSentBreathBpm = -1;
 float LastSentRainbowSec = -1;
 
 double round1(double value) {
-   return (int)(value * 10 + 0.5) / 10.0;
+  return (int)(value * 10 + 0.5) / 10.0;
 }
 
 void sendToBroker(const char* topic, const char* message) {
@@ -161,20 +161,14 @@ void sendToBroker(const char* topic, const char* message) {
     Serial.print(topicArr);
     Serial.print(" ");
     Serial.println(message);
-#endif    
-    delay (120);  
+#endif
+    delay (120);
   }
 }
 
 void MqttReportState(bool force) {
 #ifdef MQTT_HOME_ASSISTANT
   if(MQTTclient.connected()) {
-    // time_t rawtime;
-    // struct tm * timeinfo;
-    // char last_seen [80];
-    // rawtime = uclock.local_time;
-    // timeinfo = localtime (&rawtime);
-    // strftime (last_seen, 80, "%Y-%m-%dT%H:%M:%SZ", timeinfo);
 
     if(force 
       || MqttStatusMainPower != LastSentMainPowerState 
@@ -185,7 +179,6 @@ void MqttReportState(bool force) {
       state["state"] =  MqttStatusMainPower == 0 ? MQTT_STATE_OFF : MQTT_STATE_ON;
       state["brightness"] = MqttStatusMainBrightness;
       state["effect"] = tfts.clockFaceToName(MqttStatusMainGraphic);
-      // state["Last seen"] = last_seen;
 
       char buffer[256];
       size_t n = serializeJson(state, buffer);
@@ -205,17 +198,21 @@ void MqttReportState(bool force) {
       || MqttStatusBackPower != LastSentBackPowerState 
       || MqttStatusBackBrightness != LastSentBackBrightness 
       || strcmp(MqttStatusBackPattern, LastSentBackPattern) != 0
-      || MqttStatusBackColorPhase != LastSentBackColorPhase ) {
+      || MqttStatusBackColorPhase != LastSentBackColorPhase 
+      || MqttStatusPulseBpm != LastSentPulseBpm
+      || MqttStatusBreathBpm != LastSentBreathBpm
+      || MqttStatusRainbowSec != LastSentRainbowSec ) {
       
       JsonDocument state;
       state["state"] =  MqttStatusBackPower == 0 ? MQTT_STATE_OFF : MQTT_STATE_ON;
-      state["brightness"] = MqttStatusBackBrightness; //map(MqttStatusBackBrightness, MQTT_ITENSITY_MIN, MQTT_ITENSITY_MAX, MQTT_BRIGHTNESS_MIN, MQTT_BRIGHTNESS_MAX);
+      state["brightness"] = MqttStatusBackBrightness;
       state["effect"] = MqttStatusBackPattern;
       state["color_mode"] = "hs";
-      state["color"]["h"] =  backlights.phaseToHue(MqttStatusBackColorPhase);
+      state["color"]["h"] = backlights.phaseToHue(MqttStatusBackColorPhase);
       state["color"]["s"] = 100.f;
-      // state["color"]["b"] =  backlights.phaseToIntensity((MqttStatusBackColorPhase + 512) % backlights.max_phase);
-      // state["Last seen"] = last_seen;
+      state["pulse_bpm"] = MqttStatusPulseBpm;
+      state["beath_bpm"] = MqttStatusBreathBpm;
+      state["rainbow_sec"] = round1(MqttStatusRainbowSec);
 
       char buffer[256];
       size_t n = serializeJson(state, buffer);
@@ -237,7 +234,6 @@ void MqttReportState(bool force) {
       
       JsonDocument state;
       state["state"] =  MqttStatusUseTwelveHours ? MQTT_STATE_ON : MQTT_STATE_OFF;
-      // state["Last seen"] = last_seen;
 
       char buffer[256];
       size_t n = serializeJson(state, buffer);
@@ -256,7 +252,6 @@ void MqttReportState(bool force) {
       
       JsonDocument state;
       state["state"] =  MqttStatusBlankZeroHours ? MQTT_STATE_ON : MQTT_STATE_OFF;
-      // state["Last seen"] = last_seen;
 
       char buffer[256];
       size_t n = serializeJson(state, buffer);
@@ -275,7 +270,6 @@ void MqttReportState(bool force) {
       
       JsonDocument state;
       state["state"] =  MqttStatusPulseBpm;
-      // state["Last seen"] = last_seen;
 
       char buffer[256];
       size_t n = serializeJson(state, buffer);
@@ -294,7 +288,6 @@ void MqttReportState(bool force) {
       
       JsonDocument state;
       state["state"] =  MqttStatusBreathBpm;
-      // state["Last seen"] = last_seen;
 
       char buffer[256];
       size_t n = serializeJson(state, buffer);
@@ -313,7 +306,6 @@ void MqttReportState(bool force) {
       
       JsonDocument state;
       state["state"] =  round1(MqttStatusRainbowSec);
-      // state["Last seen"] = last_seen;
 
       char buffer[256];
       serializeJson(state, buffer);
@@ -423,7 +415,7 @@ void checkMqtt() {
   }
 }
 
-void callback(char* topic, byte* payload, unsigned int length) {  //A new message has been received
+void callback(char* topic, byte* payload, unsigned int length) {  // A new message has been received
   #ifdef DEBUG_OUTPUT
   Serial.print("Received MQTT topic: ");
   Serial.print(topic);                       // long output
@@ -456,7 +448,7 @@ void callback(char* topic, byte* payload, unsigned int length) {  //A new messag
     return; 
   }
     
-    //------------------Decide what to do depending on the topic and message---------------------------------
+  //------------------Decide what to do depending on the topic and message---------------------------------
   if (strcmp(command[0], "directive") == 0 && strcmp(command[1], "powerState") == 0) {  // Turn On or OFF
     if (strcmp(message, "ON") == 0) {
       MqttCommandPower = true;
@@ -512,7 +504,7 @@ void callback(char* topic, byte* payload, unsigned int length) {  //A new messag
       MqttCommandBackPowerReceived = true;
     }
     if(doc.containsKey("brightness")) {
-      MqttCommandBackBrightness = doc["brightness"]; //map(doc["brightness"], MQTT_BRIGHTNESS_MIN, MQTT_BRIGHTNESS_MAX, MQTT_ITENSITY_MIN, MQTT_ITENSITY_MAX);
+      MqttCommandBackBrightness = doc["brightness"];
       MqttCommandBackBrightnessReceived = true;
     }
     if(doc.containsKey("effect")) {
@@ -626,7 +618,8 @@ void MqttReportPowerState() {
 void MqttReportWiFiSignal() {
   char signal[5];
   int SignalLevel = WiFi.RSSI();
-  if (SignalLevel != LastSentSignalLevel) {
+  // ignore deviations smaller than 3 dBm
+  if (abs(SignalLevel - LastSentSignalLevel) > 2) {
     sprintf(signal, "%d", SignalLevel);
     sendToBroker("report/signal", signal);  // Reports the signal strength
     LastSentSignalLevel = SignalLevel;
