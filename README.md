@@ -10,7 +10,8 @@
 ### Original EleksTube Models
 
 1. **EleksTube IPS Clock (Original Version)**
-2. **EleksTube IPS Clock Gen2**
+2. **EleksTube IPS Clock Gen2** 
+   - EleksTube IPS Classic Edition/Pro/PR1/PR2
 
 ### Other Supported Models
 
@@ -18,8 +19,8 @@
 4. **NovelLife SE Clock**
    - With gesture sensor
    - Without gesture sensor
-5. **PunkCyber Clock/RGB Glow Tube DIY Clock** from PCBWay
-6. **IPSTUBE Clock - Model H401**
+5. **PunkCyber Clock/RGB Glow Tube DIY Clock**
+6. **IPSTUBE Clock - Model H401 and H402**
    - With bottom LED stripe
    - Without bottom LED stripe
 
@@ -27,13 +28,13 @@
 
 - All "Original EleksTube" clocks sold after July 2022 are "Gen2" versions. Refer to the [Blog post on EleksTube website](https://elekstube.com/blogs/news/instructions-on-elekstube-clock-for-gen2-systems) for more details.
 - **EleksTube IPS Clock** is the original model created by the inventor in 2021. There are now many similar designs and clones on the market with varying hardware modifications.
-- Newer versions from EleksTube, such as PR1 and PR2 or Pro, are also available and called Gen3 and the base version is now officially called "**EleksTube IPS Classic Edition**"
+- Newer versions from EleksTube, such as PR1 and PR2 or Pro, are based on the base Gen2 version and sometimes called Gen3, because the original firmware version is already at 3.x for them. The base version is now officially called "**EleksTube IPS Classic Edition**"
 
 ### Purchasing Information
 
 You can buy the "EleksTube IPS Clock" or its clones from eBay, Banggood, AliExpress, the EleksTube website, and other retailers.
 
-Ensure the seller offers at least a 30-day guarantee to avoid purchasing fake products.
+Ensure the seller offers at least a 30-day guarantee to avoid purchasing fake products or beeing tricked.
 
 ### Firmware Compatibility
 
@@ -56,7 +57,7 @@ IPSTUBE - H401
 ## Main clock features
 
 - Show the actual time on the LCDs of the clock with the selected clock face
-- Multiple clock faces can be loaded into the clocks flash memory. Switchable via clock menu (or via MQTT messages)
+- Multiple clock faces can be loaded into the clocks flash memory. Switchable via clock menu
 - 12/24 hour view (switchable via clock menu)
 - On-Screen menu to change settings/configuration of the clock
 - WiFi connectivity with NTP server synchronization
@@ -64,7 +65,7 @@ IPSTUBE - H401
 - Manual time zone adjust in 15 minute/1 h slots
 - RGB backlights (wall lights) for nice ambient light with multiple modes ("Off", "Test", "Constant", "Rainbow", "Pulse", "Breath")
 - Dimming of the clock and backlights during the night time (configurable in code)
-- Turning displays on and off (not supported on all clocks)
+- Turning displays on and off (not supported on all clock versions)
 - Keeping time even when power is off by using battery-powered real-time clock (not supported on all clocks)
 - Saving and loading clock configuration from the flash, so storing all settings, even when power is off
 - Supports various bitmap image files (classic or palletized BMP) and proprietary compressed files (CLK)
@@ -73,29 +74,41 @@ IPSTUBE - H401
 - Advanced error handling for best user experience
 - WiFi and MQTT errors are displayed below the digits
 - Supports Home Assistant integration with extensive MQTT support (see below for details)
-
 - Optional MQTT client for remote control - Switch clock faces and turn displays on/off can be controlled via MQTT messages
-- With a MQTT broker (SmartNest, SmartThings, Mosquitto etc.), this can also be integrated via a mobile phones app, a web site or into an existing home automation network (and can be controlled via Google assistant, Alexa, etc.)
+- With a MQTT broker (SmartNest, SmartThings, Mosquitto etc.), this can also be integrated via a mobile phones app, a website or into an existing home automation network (and can be controlled via Google assistant, Alexa, etc.)
 - Optional IP-based geolocation for automatic timezone and DST adjustments (only supported geolocation provider is "[Abstract](https://www.abstractapi.com/)")
-- Optional DS18B20 temperature sensor to display temperature on the clock
 
 ## Home Assistant Edition with extensive MQTT features
 
-- Device detected as two different lights, main and back
-- Supported on/off, brightness, effects (main and back), color (back)
-- Main light clock faces may be named, see clockfaces.txt on SPIFFS
-- Supported 12/24 hours and blank zeroes settings switches
-- Supported effect's speed change for backlight
-- All options are discoverable via Home Assistant MQTT
+If activated in the code, this version of the firmware can be remote controlled via Home Assistant. One of the leading free home automation solutions (see [Home Assistant Homepage](https://www.home-assistant.io))
+
+Features:
+
+- Device detected as two different lights - main and back
+- Turn displays on/off
+- Control brightness level
+- Change modes/effects of the LEDs (main and back)
+- Change the color of the LEDs (in constant mode)
+- Switching 12/24 hours mode
+- Switching blank zeroes setting
+- Modes/Effects speed change for backlight
+- All options are discoverable via Home Assistant MQTT (if switched on)
+
+Note: Main light clock faces may be named and needs to be changed, if other clock faces are used. See `clockfaces.txt` in the `data` folder.
 
 Detailed description:
 Interaction with Home Assistant occurs according to the MQTT integration documentation:
+
 https://www.home-assistant.io/integrations/light.mqtt/
 https://www.home-assistant.io/integrations/switch.mqtt/
 https://www.home-assistant.io/integrations/number.mqtt/
 https://www.home-assistant.io/integrations/mqtt/#mqtt-discovery
-It is preferable (but not mandatory) to use MQTT Discovery (#define MQTT_HOME_ASSISTANT_DISCOVERY), in which case the device and all entities will be found by the MQTT integration without user intervention. Otherwise, all settings will need to be done manually.
-#define MQTT_CLIENT is used as a unique device name (i.e. it should be different if you have several IPS clocks) and is the "root" part of the topic for all entities that will be interacted with via MQTT. Further analysis is easier to perform using, for example, "MQTT Explorer", a common add-on for users who prefer manual configuration.
+
+It is preferable (but not mandatory) to use MQTT Discovery (`#define MQTT_HOME_ASSISTANT_DISCOVERY`), in which case the device and all entities will be found by the MQTT integration without user intervention. Otherwise, all settings will need to be done manually.
+
+`#define MQTT_CLIENT` is used as a unique device name (i.e. it should be different if you have several IPS clocks) and is the "root" part of the topic for all entities that will be interacted with via MQTT.
+
+Further analysis is easier to perform using, for example, "MQTT Explorer", a common add-on for users who prefer manual configuration.
 
 # How to use this firmware
 If you just want to use new firmware without setting up all the tools and libraries and everything, navigate to folder `\pre-built-firmware\` and modify `_ESP32 write flash.cmd` to upload selected version to your clock. If you want more features, continue reading below.
@@ -121,7 +134,7 @@ Some clock models have specific functionatlities which are only available for th
 - Moving the finger/hand from directly above the sensor (from 5-8 cm away) toward the sensor (up to about 1 cm away) is the “near” gesture.
 - Moving from close by the sensor (coming from the front and putting the finger/hand in 1cm distance over the sensor) to a bit more far away (5-7cm distance) is the "far" gesture.
 
-#### IPSTUBE Clock - Model H401
+#### IPSTUBE Clock - Model H401 and H402
 
 - This model has a 8MB flash memory, so either more clock faces can be stored on the clock or in a better quality (i.e. no palettization/conversion needed).
 
@@ -312,10 +325,11 @@ Make sure you configured everything in `_USER_DEFINES.h`:
 
 Optionally:
 
-- Enable integrated MQTT service (uncomment '#define MQTT_ENABLED' line and enter your MQTT credentials. From your local broker or from an internet-based broker.
+- Enable integrated MQTT service (uncomment `#define MQTT_ENABLED` line and enter your MQTT credentials. From your local broker or from an internet-based broker.
 E.g. register on [SmartNest.cz](https://www.smartnest.cz/), create a Thermostat device, copy your username, API key and Thermostat Device ID.
-- Use IP-based geolocation by Abstract (uncomment #define GEOLOCATION_ENABLED and enter your geolocation API key: Register on [Abstract API](https://www.abstractapi.com/), select Geolocation API and copy your API key.
+- Use IP-based geolocation by Abstract (uncomment `#define GEOLOCATION_ENABLED` and enter your geolocation API key: Register on [Abstract API](https://www.abstractapi.com/), select Geolocation API and copy your API key.
 - Enable temperature sensor (uncomment and define pin for external DS18B20 temperature sensor) - not available for most of the clocks.
+- Enable Home Assistant support by uncomment `#define MQTT_HOME_ASSISTANT` and the following block of comments for Auto-Discovery in HA.
 
 Connect the clock to your computer via a USB cable. You'll see, that a new serial port is detected and showing up in the device configuration. If not, check the section "Install the USB Serial Port Device Driver".
 
@@ -427,7 +441,7 @@ If you have your own clock face that'll work and want it listed here, please fil
 
 ##### No RTC for SI HAI IPS Clock
 
-There is no battery on the SI HAI IPS clock, so the clock will loose the time, if powered of.
+There is no battery on the SI HAI IPS clock, so the clock will loose the time, if powered off.
 
 ##### One Button menu
 
@@ -439,6 +453,7 @@ Values smaller then the starting value ("to the left") can never be seleted (lik
 Depending on the board version of the IPSTUBEs models H401 and H402, the transistor Q1 is present on the board or not.
 If the transistor (marked A19TF, seems a 3401) is present, the displays can be turned on and off like on other clocks.
 If the transistor is not present, the TFT LCDs can NOT turned on or off by software without modifing the hardware!
+
 The ground pin for the LCDs is connected directly to ground on these boards.
 
 It should be possible to solder a transistor on position Q1, to bring the switching funcionality to the boards.
