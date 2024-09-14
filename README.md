@@ -26,9 +26,9 @@
 
 ### Notes
 
-- All "Original EleksTube" clocks sold after July 2022 are "Gen2" versions. Refer to the [Blog post on EleksTube website](https://elekstube.com/blogs/news/instructions-on-elekstube-clock-for-gen2-systems) for more details.
 - **EleksTube IPS Clock** is the original model created by the inventor in 2021. There are now many similar designs and clones on the market with varying hardware modifications.
-- Newer versions from EleksTube, such as PR1 and PR2 or Pro, are based on the base Gen2 version and sometimes called Gen3, because the original firmware version is already at 3.x for them. The base version is now officially called "**EleksTube IPS Classic Edition**"
+- All "Original EleksTube" clocks sold after July 2022 are "Gen2" versions. Refer to the [Blog post on EleksTube website](https://elekstube.com/blogs/news/instructions-on-elekstube-clock-for-gen2-systems) for more details.
+- Newer versions from EleksTube, such as PR1 and PR2, Pro and special editions (Pink etc.), are based on the base Gen2 version and sometimes called Gen3, because the original firmware version is already at Version 3.x for them. The "basic" version is now officially called "**EleksTube IPS Classic Edition**"
 
 ### Purchasing Information
 
@@ -45,6 +45,8 @@ Ensure the seller offers at least a 30-day guarantee to avoid purchasing fake pr
 
 EleksTube IPS - Orginal Version - with hardware modification
 ![EleksTube IPS clock](/documentation/ImagesMD/EleksTube_original_PCB.jpg)
+EleksTube IPS - Gen2 (EleksTube IPS Classic Edition/Pro/PR1/PR2)
+![EleksTube IPS clock - Gen2](/documentation/ImagesMD/EleksTube_Gen2_PCB.jpg)
 SI HAI IPS
 ![SI HAI IPS clock](/documentation/ImagesMD/SI_HAI_ips_clock.jpg)
 NovelLife SE
@@ -52,7 +54,9 @@ NovelLife SE
 PunkCyber
 ![PunkCyber / RGB Glow tube](/documentation/ImagesMD/PunkCyber_ips_clock.jpg)
 IPSTUBE - H401
-![IPSTUBE clock - Model H401](/documentation/ImagesMD/IPSTUBE_H401_PCB2.jpg)
+![IPSTUBE clock - Model H401](/documentation/ImagesMD/IPSTUBE_H401_PCB.jpg)
+IPSTUBE - H402
+![IPSTUBE clock - Model H402](/documentation/ImagesMD/IPSTUBE_H402_PCB.jpg)
 
 ## Main clock features
 
@@ -80,7 +84,7 @@ IPSTUBE - H401
 
 ## Home Assistant Edition with extensive MQTT features
 
-If activated in the code, this version of the firmware can be remote controlled via Home Assistant. One of the leading free home automation solutions (see [Home Assistant Homepage](https://www.home-assistant.io))
+If activated in the code, this version of the firmware can be remote controlled via Home Assistant. One of the leading free home automation solutions (see [Home Assistant Homepage](https://www.home-assistant.io)).
 
 Features:
 
@@ -96,19 +100,20 @@ Features:
 
 Note: Main light clock faces may be named and needs to be changed, if other clock faces are used. See `clockfaces.txt` in the `data` folder.
 
-Detailed description:
-Interaction with Home Assistant occurs according to the MQTT integration documentation:
+### Detailed description:
 
-https://www.home-assistant.io/integrations/light.mqtt/
-https://www.home-assistant.io/integrations/switch.mqtt/
-https://www.home-assistant.io/integrations/number.mqtt/
-https://www.home-assistant.io/integrations/mqtt/#mqtt-discovery
+Interactions between the firmware of the clock and Home Assistant is possible like descriped in the MQTT integration documentations:
 
-It is preferable (but not mandatory) to use MQTT Discovery (`#define MQTT_HOME_ASSISTANT_DISCOVERY`), in which case the device and all entities will be found by the MQTT integration without user intervention. Otherwise, all settings will need to be done manually.
+- [MQTT Discovery](https://www.home-assistant.io/integrations/mqtt/#mqtt-discovery)
+- [MQTT Light integration](https://www.home-assistant.io/integrations/light.mqtt/)
+- [MQTT Switch integration](https://www.home-assistant.io/integrations/switch.mqtt/)
+- [MQTT Number integration](https://www.home-assistant.io/integrations/number.mqtt/)
+
+It is preferable (but not mandatory) to use MQTT Discovery (uncomment `#define MQTT_HOME_ASSISTANT_DISCOVERY` and the following define statements), in which case the device and all entities will be found by the MQTT integration without user intervention. Otherwise, all settings will need to be done manually.
 
 `#define MQTT_CLIENT` is used as a unique device name (i.e. it should be different if you have several IPS clocks) and is the "root" part of the topic for all entities that will be interacted with via MQTT.
 
-Further analysis is easier to perform using, for example, "MQTT Explorer", a common add-on for users who prefer manual configuration.
+Further analysis is easier to perform using an MQTT message reader tool, for example, "MQTT Explorer", a common HA Add-On for users who prefer manual configuration. See [HA forum post for MQTT Explorer Add-On](https://community.home-assistant.io/t/addon-mqtt-explorer-new-version/603739). It can be also used as a stand-alone application. See [Homepage of MQTT Explorer project](https://mqtt-explorer.com/)
 
 # How to use this firmware
 If you just want to use new firmware without setting up all the tools and libraries and everything, navigate to folder `\pre-built-firmware\` and modify `_ESP32 write flash.cmd` to upload selected version to your clock. If you want more features, continue reading below.
