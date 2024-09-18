@@ -270,7 +270,7 @@ bool TFTs::LoadImageIntoBuffer(uint8_t file_index) {
   {
     read32(bmpFS); read32(bmpFS); read32(bmpFS); // size, w resolution, h resolution
     paletteSize = read32(bmpFS);
-    if (paletteSize == 0) paletteSize = bitDepth * bitDepth; // if 0, size is 2^bitDepth
+    if (paletteSize == 0) paletteSize = pow(2, bitDepth); // if 0, size is 2^bitDepth
     bmpFS.seek(14 + headerSize); // start of color palette
     for (uint16_t i = 0; i < paletteSize; i++) {
       palette[i] = read32(bmpFS);
