@@ -15,6 +15,8 @@ void TFTs::begin() {
 
   // Initialize the super class.
   init();
+  //to avoid flickering patterns on the screens
+  fillScreen(TFT_BLACK);
 
   // Set SPIFFS ready
   if (!SPIFFS.begin()) {
