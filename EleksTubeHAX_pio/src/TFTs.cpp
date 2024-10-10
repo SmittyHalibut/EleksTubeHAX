@@ -8,13 +8,15 @@ void TFTs::begin() {
   chip_select.begin();
   chip_select.setAll();
 
-  // Turn power on to displays.
+  // Turn power on to displays. 
   pinMode(TFT_ENABLE_PIN, OUTPUT);
   enableAllDisplays();
   InvalidateImageInBuffer();
 
   // Initialize the super class.
   init();
+  //to avoid flickering patterns on the screens
+  fillScreen(TFT_BLACK);
 
   // Set SPIFFS ready
   if (!SPIFFS.begin()) {
@@ -70,7 +72,7 @@ void TFTs::showNoWifiStatus() {
   fillRect(0, TFT_HEIGHT - 27, TFT_WIDTH, 27, TFT_BLACK);
   setCursor(5, TFT_HEIGHT - 27, 4);  // Font 4. 26 pixel high
   print("NO WIFI !");
-  }
+}
 
 void TFTs::showNoMqttStatus() {
   chip_select.setSecondsTens();
@@ -78,7 +80,28 @@ void TFTs::showNoMqttStatus() {
   fillRect(0, TFT_HEIGHT - 27, TFT_WIDTH, 27, TFT_BLACK);
   setCursor(5, TFT_HEIGHT - 27, 4);
   print("NO MQTT !");
+}
+
+void TFTs::enableAllDisplays() {
+  // Turn power on to displays.
+  digitalWrite(TFT_ENABLE_PIN, ACTIVATEDISPLAYS);
+  enabled = true;
+}
+
+void TFTs::disableAllDisplays() {
+  // Turn power off to displays.
+  digitalWrite(TFT_ENABLE_PIN, DEACTIVATEDISPLAYS);
+  enabled = false;
+}
+
+void TFTs::toggleAllDisplays() {
+  if (enabled) {
+    disableAllDisplays();
   }
+  else {
+    enableAllDisplays();
+  }
+}
 
 void TFTs::showTemperature() { 
   #ifdef ONE_WIRE_BUS_PIN
@@ -138,7 +161,10 @@ void TFTs::showDigit(uint8_t digit) {
     if (NextNumber > 9) NextNumber = 0; // pre-load only seconds, because they are drawn first
     NextFileRequired = current_graphic * 10 + NextNumber;
   }
-}
+  #ifdef HARDWARE_IPSTUBE_CLOCK
+    chip_select.update();
+  #endif
+  }
 
 void TFTs::LoadNextImage() {
   if (NextFileRequired != FileInBuffer) {

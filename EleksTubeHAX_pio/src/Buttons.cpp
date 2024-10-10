@@ -5,12 +5,9 @@ void Button::begin() {
   millis_at_last_loop = millis_at_last_transition;
 
 #ifdef DEBUG_OUTPUT
-    Serial.print("init button ");
-    Serial.println(bpin);
+    Serial.print("init button: ");Serial.println(bpin);
 #endif
-
-  pinMode(bpin, INPUT);
-  
+  pinMode(bpin, INPUT);  
   down_last_time = isButtonDown();
   if (down_last_time) {
     button_state = down_edge;
@@ -22,14 +19,11 @@ void Button::begin() {
 void Button::loop() {
   millis_at_last_loop = millis();
   bool down_now = isButtonDown();
-
-#ifdef DEBUG_OUTPUT
+  #ifdef DEBUG_OUTPUT
   if (down_now) {
-    Serial.print("[B ");
-    Serial.print(bpin);
-    Serial.print("]");
-  }  
-#endif
+    Serial.print("[B ");Serial.print(bpin);Serial.println("]");
+  }
+  #endif
 
   state previous_state = button_state;
   
@@ -43,33 +37,33 @@ void Button::loop() {
     millis_at_last_transition = millis_at_last_loop;
   } 
   else if (down_last_time == true && down_now == true) {
-    // Been pressed. For how long?
+    // Been pressed. For how long?    
     if (millis_at_last_loop - millis_at_last_transition >= long_press_ms) {
-      // Long pressed. Did we just transition?
+      // Long pressed. Did we just transition?      
       if (previous_state == down_long_edge || previous_state == down_long) {
-        // No, we already detected the edge.
+        // No, we already detected the edge.        
         button_state = down_long;
       }
       else {
         // Previous state was something else, so this is the transition.
         // down -> down_long_edge does NOT update millis_at_last_transition.
-        // We'd rather know how long it's been down than been down_long.
+        // We'd rather know how long it's been down than been down_long.        
         button_state = down_long_edge;
       }
     }
     else {
-      // Not yet long pressed
+      // Not yet long pressed      
       button_state = down;
     }
   }
   else if (down_last_time == true && down_now == false) {
-    // Just released.  From how long?
-    if (previous_state == down_long_edge || previous_state == down_long) {
+    // Just released.  From how long?    
+    if (previous_state == down_long_edge || previous_state == down_long) {      
       // Just released from a long press.
       button_state = up_long_edge;
     }
     else {
-      // Just released from a short press.
+      // Just released from a short press.      
       button_state = up_edge;
     }
     millis_at_last_transition = millis_at_last_loop;
@@ -88,4 +82,46 @@ const String Button::state_str[Button::num_states] =
     "up_edge", 
     "up_long_edge"
   };
-  
+
+//--------------------------------------------
+
+#ifdef ONE_BUTTON_ONLY_MENU
+//One Button in Buttons only
+void Buttons::begin() {
+  mode.begin();
+}
+
+void Buttons::loop() {
+  mode.loop();
+}
+
+bool Buttons::stateChanged() {
+  return mode.stateChanged();
+}
+
+#endif
+
+#ifndef ONE_BUTTON_ONLY_MENU
+//Buttons
+void Buttons::begin() { 
+  left.begin();
+  mode.begin();
+  right.begin();
+  power.begin();
+}
+
+void Buttons::loop() {
+  left.loop();
+  mode.loop();
+  right.loop();
+  power.loop();
+}
+
+bool Buttons::stateChanged() {
+  return 
+    left.stateChanged() ||
+    mode.stateChanged() ||
+    right.stateChanged() ||
+    power.stateChanged();
+}
+#endif

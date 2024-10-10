@@ -1,33 +1,63 @@
 # EleksTubeHAX - An aftermarket custom firmware for the desk clock
-![EleksTube IPS clock](/Photos/Clock1.jpg)
 
-Supported hardware models:
-### "EleksTube IPS clock", "SI HAI IPS clock", "NovelLife SE clock", "PunkCyber clock", "RGB Glow Tube DIY clock"
+## Pre-built firmware files
 
-In this folder you can find pre-built firmware images that you can upload to your clock.
+In this folder you can find pre-built firmware image files that you can directly upload to your clock.
 
-Note that these firmwares may have limited functionality.
+These firmwares may have limited functionality compared to a self-built firmware, because not all available features are enabled or can be pre-configured.
 
-## Enabled functions:
-- WPS connectivity (press WPS button on your router for WiFi setup).
-- DEBUG_OUTPUT - it will produce diagnostic messages on the serial port.
-- DCORE_DEBUG_LEVEL=5 - it will produce diagnostic messages from the operating system.
-- Night time from 22h in the evening to 7h in the morning.
-- No geolocation (time zone & DST must be set manually).
-- No MQTT (without remote control).
-- No thermometer.
-- Image files are fixed and can't be changed without development tools.
+These image files are fixed and can't be changed without development tools!
 
-### Select appropriate .bin file that fits your hardware and upload it using the `_ESP32 write flash.cmd` file. 
-Available files:
-- original Elekstube clock - `FW_Elekstube_HAX_1.0_original.bin`
-- original Elekstube clock Gen2.1 (ESP32 Pico D4 Chip) - `FW_Elekstube_HAX_1.0_Gen2-1.bin`
-- SI HAI copy of the clock - `FW_SI_HAI_CLOCK_HAX_1.0.bin`
-- NovelLife SE version (non-SE not tested) - `FW_NovelLife_SE_HAX_1.0.bin`
-- PunkCyber / RGB Glow tube / PCBway clock - `FW_PunkCyber_Glow_PCBway_HAX_1.0.bin`
+## Pre-configured functionality
 
-Make sure to edit it and write correct COM port and file name into it before running.
+- WiFi connectivity via WPS (While clock is in boot phase, press WPS button on your router for WiFi setup).
+- Night time dimming enabled - from 22:00h (10 pm) in the evening to 07:00h (7 am) in the morning.
+- IP-based geolocation disabled - time zone & DST must be set manually via the clocks menu.
+- MQTT disabled - no 'remote control'.
+- External thermometer sensor disabled.
+- DEBUG_OUTPUT enabled - This produces diagnostic messages from the firmware over the serial port.
+- DCORE_DEBUG_LEVEL=5 - This produces diagnostic messages from the ESP32 operating system in case of an error over the serial port.
 
-## Save your original firmware using the `_ESP32 save flash 4MB.cmd` before tinkering.
+### Available image files
 
-## There is no warranty of any type.
+| clock model | firmware image file |
+|--|--|  
+| EleksTube IPS - Orginal Version | `FW_Elekstube_HAX_1.0_original.bin` |
+| EleksTube IPS - Gen2 models | `FW_Elekstube_HAX_1.0_Gen2-1.bin` |
+| SI HAI IPS | `FW_SI_HAI_CLOCK_HAX_1.0.bin` |
+| NovelLife SE version | `FW_NovelLife_SE_HAX_1.0.bin` |
+| PunkCyber/RGB Glow Tube DIY | `FW_PunkCyber_Glow_PCBway_HAX_1.0.bin` |
+| IPSTUBE - Model H401 | TBD |
+
+Note: All "Original" EleksTube clocks, sold after July 2022 are "Gen2" versions. See [Note on EleksTube website](https://elekstube.com/blogs/news/instructions-on-elekstube-clock-for-gen2-systems). But always check the PCB version of your clock!
+
+## Backup your original firmware
+
+**Always backup YOUR clocks firmware version as first step!**
+
+Note for original EleksTube clocks: Backup images from other users **DO NOT WORK** as the original EleksTube firmware is locked to the MAC address of the ESP32.
+
+For other clocks it MAY work, but don't assume it!
+
+Save your original firmware using the `_ESP32 save flash 4MB.cmd` (or 8MB version for the IPSTUBE) by changing the COM port to the number, your clock uses.
+
+Rename and store the `backup1.bin` on a save location.
+
+See also the section "Backup first" and following in the `README.MD` file in the root.
+
+## Write the EleksTubeHAX firmware file
+
+- Choose the right pre-built firmware file for your clock.
+- Edit the file `_ESP32 write flash.cmd` with an editor.
+- Write the correct COM port of your clock.
+- Write the correct firmware file name for your clock.
+- Run the CMD file.
+
+Note: Most clocks will go into to the "download mode" automatically when esptool is trying to write to it.
+Some clocks needs a button pressed while the powering phase (plugging the USB cable) to enter this mode, like the IPSTUBE ones. 
+
+## There is no warranty of any type
+
+Use at your own risk!
+
+If you mess-up your clock, it's only your fault!
