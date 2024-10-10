@@ -19,7 +19,7 @@
 4. **NovelLife SE Clock**
    - With gesture sensor
    - Without gesture sensor
-5. **PunkCyber Clock/RGB Glow Tube DIY Clock**
+5. **PunkCyber IPS Clock f/k/a RGB Glow Tube DIY Clock**
 6. **IPSTUBE Clock - Model H401 and H402**
    - With bottom LED stripe
    - Without bottom LED stripe
@@ -29,6 +29,7 @@
 - **EleksTube IPS Clock** is the original model created by the inventor in 2021. There are now many similar designs and clones on the market with varying hardware modifications.
 - All "Original EleksTube" clocks sold after July 2022 are "Gen2" versions. Refer to the [Blog post on EleksTube website](https://elekstube.com/blogs/news/instructions-on-elekstube-clock-for-gen2-systems) for more details.
 - Newer versions from EleksTube, such as PR1 and PR2, Pro and special editions (Pink etc.), are based on the base Gen2 version and sometimes called Gen3, because the original firmware version is already at Version 3.x for them. The "basic" version is now officially called "**EleksTube IPS Classic Edition**"
+- In 2024 the IPSTUBE clocks become the cheapest and most available "clone" variant of the EleksTube clocks on the market. They are offered by a wide range of seller and under a lot of different names, but they all have the "IPSTUBE" logo printed in front. Most of the offers have words like Nixie, Tube, Clock, LED, Light, RGB, IPS and Glow in description.
 
 ### Purchasing Information
 
@@ -51,12 +52,14 @@ SI HAI IPS
 ![SI HAI IPS clock](/documentation/ImagesMD/SI_HAI_ips_clock.jpg)
 NovelLife SE
 ![NovelLife SE clock](/documentation/ImagesMD/NovelLife_SE.jpg)
-PunkCyber
-![PunkCyber / RGB Glow tube](/documentation/ImagesMD/PunkCyber_ips_clock.jpg)
+PunkCyber IPS
+![PunkCyber / RGB Glow tube](/documentation/ImagesMD/PunkCyber_IPS_clock_PCB.jpg)
 IPSTUBE - H401
 ![IPSTUBE clock - Model H401](/documentation/ImagesMD/IPSTUBE_H401_PCB.jpg)
 IPSTUBE - H402
 ![IPSTUBE clock - Model H402](/documentation/ImagesMD/IPSTUBE_H402_PCB.jpg)
+
+For detailed pictures for most of the clocks see the `documentation` subfolder.
 
 ## Main clock features
 
@@ -65,19 +68,20 @@ IPSTUBE - H402
 - 12/24 hour view (switchable via clock menu)
 - On-Screen menu to change settings/configuration of the clock
 - WiFi connectivity with NTP server synchronization
-- Supports either WPS connection or hardcoded WiFi credentials  
-- Manual time zone adjust in 15 minute/1 h slots
-- RGB backlights (wall lights) for nice ambient light with multiple modes ("Off", "Test", "Constant", "Rainbow", "Pulse", "Breath")
-- Dimming of the clock and backlights during the night time (configurable in code)
+- Supports either WPS connection or hardcoded WiFi credentials
+- Manual time zone adjustment in 1 h and 15 minute slots
+- RGB backlights (wall lights) for nice ambient light with multiple modes ("Off", "Test", "Constant", "Rainbow", "Pulse" and "Breath")
+- Dimming of the displays (via alpha blending) and backlights (hardware) during the night time (start and end time configurable in code)
 - Turning displays on and off (not supported on all clock versions)
 - Keeping time even when power is off by using battery-powered real-time clock (not supported on all clocks)
 - Saving and loading clock configuration from the flash, so storing all settings, even when power is off
-- Supports various bitmap image files (classic or palletized BMP) and proprietary compressed files (CLK)
+- Supports various bitmap image file variants (classic or palletized BMP) and proprietary compressed files (CLK)
 - Maximum image size is 135 x 240 (Width x Height) pixels
 - Supports smaller images – they will be automatically centered
 - Advanced error handling for best user experience
 - WiFi and MQTT errors are displayed below the digits
 - Supports Home Assistant integration with extensive MQTT support (see below for details)
+- Debug outputs via the serial port
 - Optional MQTT client for remote control - Switch clock faces and turn displays on/off can be controlled via MQTT messages
 - With a MQTT broker (SmartNest, SmartThings, Mosquitto etc.), this can also be integrated via a mobile phones app, a website or into an existing home automation network (and can be controlled via Google assistant, Alexa, etc.)
 - Optional IP-based geolocation for automatic timezone and DST adjustments (only supported geolocation provider is "[Abstract](https://www.abstractapi.com/)")
@@ -120,7 +124,7 @@ If you just want to use new firmware without setting up all the tools and librar
 
 ## Clock specific features
 
-Some clock models have specific functionatlities which are only available for this model
+Some clock models have specific functionatlities or hardware specials which are only available for this model
 
 #### NovelLife SE Clock with gesture sensor
 
@@ -136,6 +140,8 @@ Some clock models have specific functionatlities which are only available for th
 
 - The movement of the finger/hand from behind the glass tubes of the watch, over the glass tubes, directly and closely over the sensor to the front of the watch is the “down” gesture.
 - The movement of the finger/hand from in front of the watch, directly and closely over the sensor, further over the glass tubes and behind it is the “up” gesture.
+- The movement of the finger/hand starting left side from the sensor and moving over the sensor to the right side is the “right” gesture.
+- The movement of the finger/hand starting right side from the sensor and moving over the sensor to the left side is the “left” gesture.
 - Moving the finger/hand from directly above the sensor (from 5-8 cm away) toward the sensor (up to about 1 cm away) is the “near” gesture.
 - Moving from close by the sensor (coming from the front and putting the finger/hand in 1cm distance over the sensor) to a bit more far away (5-7cm distance) is the "far" gesture.
 
@@ -172,7 +178,7 @@ See also the `README.MD` in the `pre-built-firmware` subfolder of the repo.
 
 If you want more features and configure the firmware, check also section "How to build this firmware".
 
-### Backup first
+### Backup first!
 
 **Always backup YOUR clocks firmware version as first step!**
 
@@ -181,6 +187,8 @@ If you mess-up your clock, it's only your fault!
 Note for original EleksTube clocks: Backup images from other users **DO NOT WORK** as the original EleksTube firmware is locked to the MAC address of the ESP32.
 
 For other clocks it MAY work, but don't assume it!
+Most clocks have MAC address binding!
+Surely known for EleksTubes and IPSTUBEs!
 
 ### Install the USB Serial Port Device Driver
 
@@ -212,7 +220,7 @@ Windows users:
 
 Linux users:
 
-- You probably already know where to get `Esptool` and how to use it. :)
+- You probably already know where to get `ESPTool` and how to use it. :)
 - If not, this guide from the Tasmota project is very easy to follow: [ESPTool](https://tasmota.github.io/docs/Esptool/#put-device-in-firmware-upload-mode)
 - Adopt the settings for your connected clock and save the firmware file to your device.
 
@@ -224,6 +232,29 @@ You can write back your original firmware by modyfing the file `_ESP32 write fla
 - If needed, set the size to be written
 - Run the CMD file and flash the firmware file
 - Check if clock is working
+
+### Known backup problems
+
+#### COM port problems
+
+There are a lot of possible issues known with so called "virtual COM ports".
+Some common ones are listed below.
+
+- On Windows: No COM port at all, but "unknown device" in the device manager -> Try to install the CH340 drivers manually.
+- ESPTool fails to read or write all of the firmware -> Check your cable and if possible try another and a shorter one. Try to reduce the baud rate of the connection (like to 115200 or even below). Try to use an external powered USB hub, to avoid under powering.
+- ESPTool is giving an error like "device is not in the download mode" -> Try to hold the power button while plugging the USB-C (power) cable. If this doesn't help, you may have a timing problem with the USB-UART chip. This is known for some combinations of USB controllers (especially 3.x) and the CH340. Try to use a USB2.x HUB with external USB power supply or, if nothing helps, try to use another computer.
+
+For more info ask your favorite search engine or AI Chatbot :)
+
+#### Lost firmware file
+
+If you lost your orginal firmware file and wants to restore the orginal firmware you normaly have a problem, because even if you get a backup file from another user, it is locked to the MAC address of the other ESP32 MAC.
+Under some conditions, it should be possible to change the encoded MAC address in the firmware. This worked for EleksTube Gen1 clocks. See [Issue 8]('https://github.com/SmittyHalibut/EleksTubeHAX/issues/8').
+
+Note: There is no gurantee, that you are able to change the MAC address in the firmware file successfully! If the orginal manufacturer decides to encode the MAC address or hide it, the descriped method will not work!
+
+So remember:
+**Always backup your original firmware!**
 
 ## How to build this firmware
 
@@ -253,7 +284,7 @@ If you don't have Python already installed it will be automatically added by Pla
 
 The EspressIF 32 development platform for PlatformIO is required to support the ESP32 microcontroller. It will be installed automatically when this project is opened in VSCode/PlatformIO or if the first build is triggered. It will take a while - observe status messages in the bottom right corner.
 
-Tested on version 6.0.7 from the [PlatformIO registry](https://registry.platformio.org/platforms/platformio/espressif32).
+Tested on version 6.0.9 from the [PlatformIO registry](https://registry.platformio.org/platforms/platformio/espressif32).
 
 The default environment for this project (and most clocks) are using the "board" definition of the orginal "Espressif ESP32 Dev Module" named "esp32dev".
 The IPSTUBE needs to use the "esp32dev8MB" environment with a custom board definition ("Espressif ESP32 Dev Module 8MB").
@@ -311,20 +342,16 @@ The supplied `script_configure_tft_lib.py` takes care of the library configurati
 
 If you have issues with the scripts, copy the files manually every time the `TFT_eSPI` library is updated.
 
-Note: For IPSTUBE clocks use "esp32dev8MB" environment, then `script_configure_tft_lib_8MB.py` is used.
-
 #### Configure the `APDS9960` library
 
 The supplied `script_adjust_gesture_sensor_lib.py` modifies some files of the APDS9960 library before building. It adds the support for the ID of the used (cloned) gesture chip (needed for NovelLife SE with gesture sensor only).
-
-Note: For IPSTUBE clocks use "esp32dev8MB" environment, then `script_adjust_gesture_sensor_lib_8MB.py` is used.
 
 ### Configure, Build and Upload new firmware
 
 Make sure you configured everything in `_USER_DEFINES.h`:
 
 - Rename/Copy `_USER_DEFINES - empty.h` to `_USER_DEFINES.h`
-- Select the target hardware platform (Elekstube, NovelLife, SI_HAI, PunkCyber/RGB Glow tube, IPSTUBE) by uncommenting the appropriate hardware define (only ONE clock type can be defined at a time, so comment out the unwanted)
+- Select the target hardware platform (Elekstube, NovelLife, SI_HAI, PunkCyber, IPSTUBE) by uncommenting the appropriate hardware define (only ONE clock type can be defined at a time, so comment out the unwanted)
 - Select if you prefer WPS or hardcoded credentials for WiFi (comment '#define WIFI_USE_WPS' line and enter your WiFi network credentials to the other lines and uncomment them)
 - Select image type for the clock faces to store: Bitmap files (.BMP) or .CLK files (uncomment #define USE_CLK_FILES)
 
@@ -377,7 +404,7 @@ The repository comes with a "predefined" set of BMP files in the `data` subdirec
 Each set of 10 images (one image for each digit) is called a "clock face" and can be chosen from the clock menu. Each set represents normally a different design or 'fonts' for the clock.
 See below if you want to make your own.
 
-Note: If MQTT is enabled clock face switching can also be done via the MQTT "set temperature" topic.
+Note: If MQTT is enabled, clock face switching can also be done via the MQTT "set temperature" topic.
 
 Note: All files in the `data` directory will be packed into the SPIFFS flash image! Make sure to tidy it up regulary.
 
@@ -442,13 +469,15 @@ If you have your own clock face that'll work and want it listed here, please fil
 - For WPS: When prompted by the clock, press WPS button on your router (or in web-interface of your router). Clock will automatically connect to the WiFi and save data for future use. No need to input your credentials anywhere in the source code. The clock will remember WiFi connection details even if you unplug the clock.
 - Without WPS: Add your WiFi credentials into `_USER_DEFINES.h` file before building the firmware.
 
-## Known problems
+Note: The `_USER_DEFINES.h` is included in the default `.gitignore` file, so that your personal credentials will not be pushed to a git repo by default, if you are using a forked git repo.
+
+## Known problems/limitations
 
 ##### No RTC for SI HAI IPS Clock
 
 There is no battery on the SI HAI IPS clock, so the clock will loose the time, if powered off.
 
-##### One Button menu
+##### One Button menu for IPSTUBE clocks
 
 The value always changes "to the right", on a long button press.
 Values smaller then the starting value ("to the left") can never be seleted (like in for timezone values or absolut color values).
@@ -488,14 +517,95 @@ There was an offical "manual" and software package avaiable for the original Ele
 The website is not maintained anymore, so just for archive purpose:
 See [EleksTube instructions](https://wiki.eleksmaker.com/doku.php?id=ips)
 
-### Hardware modification
+### Hardware modifications
 
-The "Original Version" of the EleksTube clock has a few problems in the hardware design. Most notably it forces 5V signals into ESP32 which is not happy about it. And it is outside of safe operating limits. This significantly reduces the lifetime of the ESP322. Mine (orignal Author) died because of this...
+#### PunkCyber IPS clock: No CH340 chip soldered on PCB of newer editions
 
-_Conversion:_
-The CH340 chip, used for USB-UART conversion, can operate both on 5V and 3.3V. On the board it is powered by 5V. Cut one trace on the bottom side of the board that supplies the chip with 5V and route the 3.3V over the resistors / capacitors to VDD and VREF.
+##### Problem
 
-![Hardware modification](/documentation/ImagesMD/EleksTube_IPS_CH340C_mod.jpg)
+Short story: CH340 chip is missing.
+
+Long story: The original version of the "PunkCyber IPS Clock" was buyable from PCBWay as "RGB Glow Tube DIY Clock" and is no longer available from there (see [PCBWay | RGB Glow Clock]('https://www.pcbway.com/project/gifts_detail/RGB_Glow_Tube_Clock_907ad35c.html')). This version had a CH340 chip soldered and two USB-C ports, where the right one was working, to communicate with a PC via the USB-UART chip.
+
+The clock is still available to buy from other resellers. It is already assembled and in a box, sold as "PunkCyber IPS Clock".
+
+All these newer versions of the clock do NOT have the CH340 chip and the components for the "auto download mode circuit" soldered! Just empty soldering header.
+So both USB-C ports are only for giving power to the clock.
+
+A communication (like downloading or uploading firmware) is not possible easily without this chip!
+
+The original manufacturer has an 'interesting' way to update the firmware "over-the-air", by connecting your mobile phone to the Wifi-Access-Point of the clock and joining a WeChat channel and let them control the clock from there (see the discussion on the PCBWay site).
+
+##### Solution
+
+If you want to bring the EleksTubeHAX firmware to the clock, we need either to solder a CH340 chip and the transistors and resistors on there designated places, or use an "external" USB-UART bridge/board.
+
+The "easiser" way is the external board solution IMO.
+
+Below the missing chip are some soldering headers:
+
+![PunkCyber / RGB Glow tube](/documentation/ImagesMD/PunkCyber_PCB_CH340_header.jpg)
+
+BOOT is connected to GPIO0 (pin 25) on the ESP32
+EN is connected to EN (pin 3) on the ESP32
+G is connected to Ground (pins 1/38/15) on the ESP32
+R is connected to GPIO1 / TxD (pin 35) on the ESP32
+T is connected to GPIO3 / RxD (pin 34) on the ESP32
+
+So we just need to connect
+G on the PCB to Ground on the UART bridge/board
+R on the PCB to Rx on the UART bridge/board
+T on the PCB to Tx on the UART bridge/board
+
+| Pin PCB | Pin UART |
+| ------ | ------ |
+| G | GND |
+| R | Rx |
+| T | Tx |
+
+We also need a way to put the clock into the download mode, so we need some kind of a switch between
+left header of BOOT 1 (to ESP32) and
+right header of BOOT 1 (Ground).
+
+Best way is to solder "sockets" to the existing headers, so that there longer pin side is pointing downwards from the not printed side of the PCB. Reason is easy, there is enough space between the backplate and the PCB to leave them soldered on for re-usage and they are not visible from the upper side.
+
+![soldered sockets with backplate](/documentation/ImagesMD/PunkCyber_soldered_sockets.jpg)
+Soldered sockets
+
+![soldered sockets with backplate](/documentation/ImagesMD/PunkCyber_soldered_sockets_with_backplate.jpg)
+Soldered sockets with backplate
+
+BOOT needs to be shorted, while the USB-C cable is connected to one of the USB-C ports (while powering) and then released to go into the download mode.
+
+Normally, all USB-UART bridges/boards should work, but for me, the UART bridge mode of the Flipper Zero (STM chip) didn't work properly! I have no idea why.
+
+So I successfully used an old FT232 board, which was still flying around (with Mini-USB :)) to read/backup the orginal firmware and write the EleksTubeHAX version.
+
+To get one on your own, search for "USB to UART" on your favorite seller platform, like the ones with A from US or PRC. Costs should not exceed 2-7 EUR/USD.
+
+![PunkCyber connected via FT232](/documentation/ImagesMD/PunkCyber_connected_UART-USB_bridge_and_reset_button.jpg)
+Working solution
+
+![PunkCyber successfull backup](/documentation/ImagesMD/PunkCyber_backup_successful.jpg)
+Successful backup
+
+Thanks to @Fastdruid for finding a good way to overcome this problem! (see [Issue 62]('https://github.com/SmittyHalibut/EleksTubeHAX/issues/62'))
+
+#### EleksTube Gen1: 5V on CH340 and ESP32
+
+##### Problem
+
+The "Original Version" (Gen1) of the Elekstube clock has a few issues in the hardware design. Most notably, it forces 5V signals from the USB-UART chip into the ESP32, which is not happy about it. This is outside of the safe operating limits and significantly reduces the lifetime of the ESP32. Mine (from the original author) died because of this...
+
+##### Solution
+
+The CH340 chip, used for USB-UART conversion, can operate both on 5V and 3.3V. On the Gen1 board it is powered by 5V.
+We can switch it to 3.3V.
+Cut one trace on the bottom side of the board that supplies the chip with 5V and route the 3.3V over the resistors / capacitors to VDD and VREF of the CH340.
+
+![EleksStube Gen1 hardware modification](/documentation/ImagesMD/EleksTube_IPS_CH340C_mod.jpg)
+
+Note: This problem does not appear on Gen2 hardware from Elekstube! All clocks sold today (Autumn 2024) do not require any hardware modification!
 
 ## Main Contributors
 
