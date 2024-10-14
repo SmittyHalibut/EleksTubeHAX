@@ -92,7 +92,7 @@ bool NTPClient::forceUpdate() {
     return false;
   }
   
-  #ifdef DEBUG_NTPClient
+#ifdef DEBUG_NTPClient
     Serial.print("NTP Data:");
     char s1[4];
     for (int i = 0; i < NTP_PACKET_SIZE; i++) {
@@ -100,7 +100,7 @@ bool NTPClient::forceUpdate() {
       Serial.print(s1);
       }
     Serial.println(".");
-  #endif
+#endif
 
 /*
   unsigned char version = _packetBuffer[0];
@@ -117,34 +117,34 @@ bool NTPClient::forceUpdate() {
 	//Perform a few validity checks on the packet
 	if((_packetBuffer[0] & 0b11000000) == 0b11000000)		//Check for LI=UNSYNC
     {
-    #ifdef DEBUG_NTPClient
+#ifdef DEBUG_NTPClient
       Serial.println("err: NTP UnSync");
-    #endif
-    return false;
+#endif
+      return false;
     }
   
 	if((_packetBuffer[0] & 0b00111000) >> 3 < 0b100)		//Check for Version >= 4
     {
-    #ifdef DEBUG_NTPClient
+#ifdef DEBUG_NTPClient
       Serial.println("err: Incorrect NTP Version");
-    #endif
-    return false;
+#endif
+      return false;
     }
 
 	if((_packetBuffer[0] & 0b00000111) != 0b100)			//Check for Mode == Server
     {
-    #ifdef DEBUG_NTPClient
+#ifdef DEBUG_NTPClient
       Serial.println("err: NTP mode is not Server");
-    #endif
-    return false;
+#endif
+      return false;
     }
 
 	if((_packetBuffer[1] < 1) || (_packetBuffer[1] > 15))		//Check for valid Stratum
     {
-    #ifdef DEBUG_NTPClient
+#ifdef DEBUG_NTPClient
       Serial.println("err: Incorrect NTP Stratum");
-    #endif
-    return false;
+#endif
+      return false;
     }
 
 	if(	_packetBuffer[16] == 0 && _packetBuffer[17] == 0 && 
@@ -152,10 +152,10 @@ bool NTPClient::forceUpdate() {
 		_packetBuffer[20] == 0 && _packetBuffer[21] == 0 &&
 		_packetBuffer[22] == 0 && _packetBuffer[22] == 0)		//Check for ReferenceTimestamp != 0
     {
-    #ifdef DEBUG_NTPClient
+#ifdef DEBUG_NTPClient
       Serial.println("err: Incorrect NTP Ref Timestamp");
-    #endif
-    return false;
+#endif
+      return false;
     }
 
   

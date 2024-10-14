@@ -55,6 +55,7 @@ public:
   uint8_t NumberOfClockFaces = 0;
   void LoadNextImage();
   void InvalidateImageInBuffer(); // force reload from Flash with new dimming settings
+  void ProcessUpdatedDimming();
 
   String clockFaceToName(uint8_t clockFace);
   uint8_t nameToClockFace(String name);

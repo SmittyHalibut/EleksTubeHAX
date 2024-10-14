@@ -27,7 +27,7 @@
 
 
 // ************* Display Dimming / Night time operation *************
-#define DIMMING                         // uncomment to enable hardware dimming
+#define NIGHTTIME_DIMMING               // uncomment to enable dimming in the given time period between NIGHT_TIME and DAY_TIME
 #define NIGHT_TIME                  22  // dim displays at 10 pm 
 #define DAY_TIME                    7   // full brightness after 7 am
 #define BACKLIGHT_DIMMED_INTENSITY  1   // 0..7

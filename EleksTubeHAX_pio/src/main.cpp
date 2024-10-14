@@ -234,12 +234,12 @@ void loop() {
   if(MqttCommandMainBrightnessReceived) {
     MqttCommandMainBrightnessReceived = false;
     tfts.dimming = MqttCommandMainBrightness;
-    tfts.InvalidateImageInBuffer();
+    tfts.ProcessUpdatedDimming();
     updateClockDisplay(TFTs::force);
   }
 
   if(MqttCommandBackBrightnessReceived) {
-    MqttCommandBackBrightnessReceived = false;   
+    MqttCommandBackBrightnessReceived = false;
     backlights.setIntensity(uint8_t(MqttCommandBackBrightness));
   }
 
@@ -674,13 +674,13 @@ bool isNightTime(uint8_t current_hour) {
     }
     else {
       // "Night" starts after midnight, entirely contained within the day
-      return (current_hour >= NIGHT_TIME) && (current_hour < DAY_TIME);  
+      return (current_hour >= NIGHT_TIME) && (current_hour < DAY_TIME);
     }
 }
 
 void EveryFullHour(bool loopUpdate) {
-  // dim the clock at night
-  #ifdef DIMMING
+  // dim the clock in the night
+#ifdef NIGHTTIME_DIMMING
   uint8_t current_hour = uclock.getHour24();
   FullHour = current_hour != hour_old;
   if (FullHour) {
@@ -689,23 +689,23 @@ void EveryFullHour(bool loopUpdate) {
     if (isNightTime(current_hour)) {
       Serial.println("Setting night mode (dimmed)");
       tfts.dimming = TFT_DIMMED_INTENSITY;
-      tfts.InvalidateImageInBuffer(); // invalidate; reload images with new dimming value
-      backlights.dimming = true;
+      tfts.ProcessUpdatedDimming();
+      backlights.setDimming(true);
       if (menu.getState() == Menu::idle || !loopUpdate) { // otherwise erases the menu
         updateClockDisplay(TFTs::force); // update all
       }
     } else {
-      Serial.println("Setting daytime mode (normal brightness)");
+      Serial.println("Setting daytime mode (max brightness)");
       tfts.dimming = 255; // 0..255
-      tfts.InvalidateImageInBuffer(); // invalidate; reload images with new dimming value
-      backlights.dimming = false;
+      tfts.ProcessUpdatedDimming();
+      backlights.setDimming(false);
       if (menu.getState() == Menu::idle || !loopUpdate) { // otherwise erases the menu
         updateClockDisplay(TFTs::force); // update all
       }
     }
     hour_old = current_hour;
   }
-  #endif   
+#endif   
 }
 
 void UpdateDstEveryNight() {

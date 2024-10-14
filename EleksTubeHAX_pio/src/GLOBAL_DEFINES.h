@@ -75,12 +75,15 @@
 #define HOURS_TENS_MAP   (0x01 << HOURS_TENS)
 
 // Define the activate and deactivate state for the diplay power transistor
+// also define, how the dimming value is calculated
 #ifndef HARDWARE_IPSTUBE_CLOCK
   #define ACTIVATEDISPLAYS      HIGH    // Activate is HIGH for the IPSTUBEs
   #define DEACTIVATEDISPLAYS    LOW     // Deactivate is LOW for the IPSTUBEs
+  #define CALCDIMVALUE(x)       (x)     // Dimming value is directly used for software dimming
 #else
   #define ACTIVATEDISPLAYS      LOW     // Activate is LOW for the Elekstube
   #define DEACTIVATEDISPLAYS    HIGH    // Deactivate is HIGH for the Elekstube
+  #define CALCDIMVALUE(x)       (255 - x) // Dimming value is inverted for hardware dimming
 #endif
 
 
@@ -337,8 +340,8 @@
   #define BACKLIGHTS_PIN (GPIO_NUM_5) //pin 35 is GPIO5
 
   // ATTENTION: SOME IPSTUBE clocks has a LED stripe on the bottom of the clock! SOME NOT! Define the number of LEDs here!
-  #define NUM_BACKLIGHT_LEDS  (34) // 6 LEDs on the bottom of every LCD. For IPSTUBE clock with LED stripe: 28 LEDs in a stripe on the bottom of the clock = 34 LEDs in total.
-  //#define NUM_BACKLIGHT_LEDS  (6) // 6 LEDs on the bottom of every LCD. For IPSTUBE clock without LED stripe.
+  //#define NUM_BACKLIGHT_LEDS  (34) // 6 LEDs on the bottom of every LCD. For IPSTUBE clock with LED stripe: 28 LEDs in a stripe on the bottom of the clock = 34 LEDs in total.
+  #define NUM_BACKLIGHT_LEDS  (6) // 6 LEDs on the bottom of every LCD. For IPSTUBE clock without LED stripe.
 
   // Only one Button on IPSTUBE clocks!
   #define ONE_BUTTON_ONLY_MENU
@@ -355,8 +358,7 @@
     #define BUTTON_POWER_PIN (3)
     #define BUTTON_MODE_PIN (GPIO_NUM_0) // Only ONE Button on the back of the clock - pin 23 is GPIO0 = BOOT Button
   #endif
-  
-   
+     
   // 3-wire to DS1302 RTC
   #define DS1302_SCLK  (GPIO_NUM_22) // pin 39 is GPIO22
   #define DS1302_IO    (GPIO_NUM_19) // pin 38 is GPIO19
@@ -368,8 +370,45 @@
   // #define CSSR_CLOCK_PIN (-1)
   // #define CSSR_LATCH_PIN (-1)
 
-  // The H401 has the enable pin of the LCDs connectected to the VCC, so Always On.  
-  #define TFT_ENABLE_PIN (GPIO_NUM_4) // pin 24 is GPIO4  
+  // All IPSTUBEs has the LCDs pins VCC power (LED Anode) and VDD (Power Supply for Analog) connectected to the VCC (3.3V) and Ground to Ground (PCB), so the displays are Always-On!
+  // EXCEPT: The Q1 transistor is present!
+  // Then the GPIO4 pin is connected to the transistor and Ground of the LCDs is running through the transistor, so the LCDs can be turned on and off AND dimmed!
+  #define TFT_ENABLE_PIN (GPIO_NUM_4) // pin 24 is GPIO4
+  //if transistor is present and we want hardware dimming, we need to choose a PWM channel for this, can always be defines, even if not used
+  #define TFT_PWM_CHANNEL 0
+
+  // Skip reinitialization
+  // This feature is only for IPSTUBE clocks by now!!! Can also be used on other clocks, but not tested yet!
+  // Always skip reinitialization for IPSTUBE clocks, because the displays are either always on (versions without Q1 transistor) 
+  // and a reinit just shows strange patterns on the displays and forces an unnecessary redraw of the clock digits.
+  // or seems to don't need a reinit (with Q1) -> this is an assumption, because the display came back on after a few hours without problems
+  // NOTE: If this causes wake up issues for you, disable it by commenting the following line out and go back to full reinit after display power off
+  #define TFT_SKIP_REINIT
+
+  // Hardware dimming!
+  // This feature is only supported by IPSTUBE clocks by now!!!
+  // DON'T USE IT WITH OTHER CLOCKS! IT MAY DAMAGE YOUR CLOCK!
+
+  // In case you have an IPSTUBE clock that does not support hardware dimming because of missing Q1 transistor:
+  // This will NOT damage your clock, but the dimming of the displays will be totally disabled! Also the LCD power switch will not work!
+  // If you notice, that the night time dimming or manual dimming does not work, you will have a clock without the Q1 transistor 
+  // and you can/should comment the following line out to get back to the software dimming!
+
+  // Comment the next line out, to DISABLE hardware dimming with GPIO4 pin (TFT_ENABLE_PIN) for a IPSTUBE clock  
+  #define DIM_WITH_ENABLE_PIN_PWM
+    
+  //NOTE: If NIGTHTIME_DIMMING is enabled: 
+  // For the main LCDs: The dimming will be set to the hard coded value TFT_DIMMED_INTENSITY in the given time period EVERY HOUR beginning at NIGHT_TIME
+  //    and will set back to the maximum brightness at DAY_TIME...Disable NIGHTTIME_DIMMING if you want to use the manual set dimming value all the time
+  // For the backlight dimming: The dimming will ALWAYS stay to the hard coded value BACKLIGHT_DIMMED_INTENSITY in the given night time period! 
+  //    The check for it is done and the value is apply every loop...Disable NIGHTTIME_DIMMING if you want to use the manual set dimming value all the time
+
+  // TODO: Store the dimming values and dimming times in the NVS partition to keep the last dimming value and not use the hard coded values
+  // make the times and values adjustable in the menu and/or via MQTT for both main and backlight dimming
+
+  // TODO: Save the values changed via MQTT/in HA in the NVS partition to keep the values after a reboot. Maybe define a "save command" in HA or trigger after 
+  // a few minutes of inactivity only if changed something or in the "free time" of the loop cycle...
+  // Save it every time receiving MQTT commands is a BAD idea, we know that already ;)
 
   // configure library \TFT_eSPI\User_Setup.h
   // ST7789 135 x 240 display with no chip select line
