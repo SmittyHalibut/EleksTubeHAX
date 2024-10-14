@@ -349,9 +349,9 @@ void MqttStart() {
     }
       
   #ifndef MQTT_HOME_ASSISTANT
-    char subscibeTopic[100];
-    sprintf(subscibeTopic, "%s/#", MQTT_CLIENT);
-    MQTTclient.subscribe(subscibeTopic);  //Subscribes to all messages send to the device
+    char subscribeTopic[100];
+    sprintf(subscribeTopic, "%s/#", MQTT_CLIENT);
+    MQTTclient.subscribe(subscribeTopic);  //Subscribes to all messages send to the device
 
     sendToBroker("report/online", "true");  // Reports that the device is online
     sendToBroker("report/firmware", FIRMWARE_VERSION);  // Reports the firmware version
@@ -361,27 +361,27 @@ void MqttStart() {
   #endif
 
   #ifdef MQTT_HOME_ASSISTANT
-    char subscibeTopic[100];
-    sprintf(subscibeTopic, "%s/main/set", MQTT_CLIENT);
-    MQTTclient.subscribe(subscibeTopic);
+    char subscribeTopic[100];
+    sprintf(subscribeTopic, "%s/main/set", MQTT_CLIENT);
+    MQTTclient.subscribe(subscribeTopic);
 
-    sprintf(subscibeTopic, "%s/back/set", MQTT_CLIENT);
-    MQTTclient.subscribe(subscibeTopic);
+    sprintf(subscribeTopic, "%s/back/set", MQTT_CLIENT);
+    MQTTclient.subscribe(subscribeTopic);
 
-    sprintf(subscibeTopic, "%s/use_twelve_hours/set", MQTT_CLIENT);
-    MQTTclient.subscribe(subscibeTopic);
+    sprintf(subscribeTopic, "%s/use_twelve_hours/set", MQTT_CLIENT);
+    MQTTclient.subscribe(subscribeTopic);
 
-    sprintf(subscibeTopic, "%s/blank_zero_hours/set", MQTT_CLIENT);
-    MQTTclient.subscribe(subscibeTopic);
+    sprintf(subscribeTopic, "%s/blank_zero_hours/set", MQTT_CLIENT);
+    MQTTclient.subscribe(subscribeTopic);
 
-    sprintf(subscibeTopic, "%s/pulse_bpm/set", MQTT_CLIENT);
-    MQTTclient.subscribe(subscibeTopic);
+    sprintf(subscribeTopic, "%s/pulse_bpm/set", MQTT_CLIENT);
+    MQTTclient.subscribe(subscribeTopic);
 
-    sprintf(subscibeTopic, "%s/breath_bpm/set", MQTT_CLIENT);
-    MQTTclient.subscribe(subscibeTopic);
+    sprintf(subscribeTopic, "%s/breath_bpm/set", MQTT_CLIENT);
+    MQTTclient.subscribe(subscribeTopic);
 
-    sprintf(subscibeTopic, "%s/rainbow_duration/set", MQTT_CLIENT);
-    MQTTclient.subscribe(subscibeTopic);
+    sprintf(subscribeTopic, "%s/rainbow_duration/set", MQTT_CLIENT);
+    MQTTclient.subscribe(subscribeTopic);
   #endif
   }
 #endif
@@ -480,15 +480,15 @@ void callback(char* topic, byte* payload, unsigned int length) {  // A new messa
     JsonDocument doc;
     deserializeJson(doc, payload, length);
     
-    if(doc.containsKey("state")) {
+    if(doc["state"].is<const char*>()) {
       MqttCommandMainPower = doc["state"] == MQTT_STATE_ON;
       MqttCommandMainPowerReceived = true;
     }
-    if(doc.containsKey("brightness")) {
+    if(doc["brightness"].is<int>()) {
        MqttCommandMainBrightness = doc["brightness"];
        MqttCommandMainBrightnessReceived = true;
      }
-    if(doc.containsKey("effect")) {
+    if(doc["effect"].is<const char*>()) {
       MqttCommandMainGraphic = tfts.nameToClockFace(doc["effect"]);   
       MqttCommandMainGraphicReceived = true;
       }
@@ -499,69 +499,74 @@ void callback(char* topic, byte* payload, unsigned int length) {  // A new messa
     JsonDocument doc;
     deserializeJson(doc, payload, length);
     
-    if(doc.containsKey("state")) {
+    if(doc["state"].is<const char*>()) {
       MqttCommandBackPower = doc["state"] == MQTT_STATE_ON;
       MqttCommandBackPowerReceived = true;
     }
-    if(doc.containsKey("brightness")) {
+    if(doc["brightness"].is<int>()) {
       MqttCommandBackBrightness = doc["brightness"];
       MqttCommandBackBrightnessReceived = true;
     }
-    if(doc.containsKey("effect")) {
+    if(doc["effect"].is<const char*>()) {
       strcpy(MqttCommandBackPattern, doc["effect"]);
       MqttCommandBackPatternReceived = true;
-      }
-    if(doc.containsKey("color")) {
+    }
+    if(doc["color"].is<JsonObject>()) {
       MqttCommandBackColorPhase = backlights.hueToPhase(doc["color"]["h"]);   
       MqttCommandBackColorPhaseReceived = true;
-      }
+    }
+
     doc.clear();
   }
   if (strcmp(command[0], "use_twelve_hours") == 0 && strcmp(command[1], "set") == 0) {
     JsonDocument doc;
     deserializeJson(doc, payload, length);
     
-    if(doc.containsKey("state")) {
+    if(doc["state"].is<const char*>()) {
       MqttCommandUseTwelveHours = doc["state"] == MQTT_STATE_ON;
       MqttCommandUseTwelveHoursReceived = true;
     }
+
     doc.clear();
   }
   if (strcmp(command[0], "blank_zero_hours") == 0 && strcmp(command[1], "set") == 0) {
     JsonDocument doc;
     deserializeJson(doc, payload, length);
     
-    if(doc.containsKey("state")) {
+    if(doc["state"].is<const char*>()) {
       MqttCommandBlankZeroHours = doc["state"] == MQTT_STATE_ON;
       MqttCommandBlankZeroHoursReceived = true;
     }
+
     doc.clear();
   }
   if (strcmp(command[0], "pulse_bpm") == 0 && strcmp(command[1], "set") == 0) {
     JsonDocument doc;
     deserializeJson(doc, payload, length);
     
-    if(doc.containsKey("state")) {
+    if(doc["state"].is<int>()) {
       MqttCommandPulseBpm = uint8_t(doc["state"]);
       MqttCommandPulseBpmReceived = true;
     }
+
     doc.clear();
   }
   if (strcmp(command[0], "breath_bpm") == 0 && strcmp(command[1], "set") == 0) {
     JsonDocument doc;
     deserializeJson(doc, payload, length);
     
-    if(doc.containsKey("state")) {
+    if(doc["state"].is<int>()) {
       MqttCommandBreathBpm = uint8_t(doc["state"]);
       MqttCommandBreathBpmReceived = true;
     }
+
     doc.clear();
   }
   if (strcmp(command[0], "rainbow_duration") == 0 && strcmp(command[1], "set") == 0) {
     JsonDocument doc;
     deserializeJson(doc, payload, length);
     
-    if(doc.containsKey("state")) {
+    if(doc["state"].is<float>()) {
       MqttCommandRainbowSec = float(doc["state"]);
       MqttCommandRainbowSecReceived = true;
     }

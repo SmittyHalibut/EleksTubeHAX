@@ -74,18 +74,18 @@ void setup() {
   buttons.begin();
   menu.begin();
 
-#ifdef HARDWARE_NovelLife_SE_CLOCK // NovelLife_SE Clone XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-  //Init the Gesture sensor
-  tfts.println("Gesture sensor start");
-  GestureStart(); //TODO put into class
-#endif
-
   // Setup the displays (TFTs) initaly and show bootup message(s)
-  tfts.begin();  // and count number of clock faces available
+  tfts.begin();
   tfts.fillScreen(TFT_BLACK);
   tfts.setTextColor(TFT_WHITE, TFT_BLACK);
   tfts.setCursor(0, 0, 2);  // Font 2. 16 pixel high
   tfts.println("setup...");
+
+#ifdef HARDWARE_NovelLife_SE_CLOCK // NovelLife_SE Clone XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+  //Init the Gesture sensor
+  tfts.println("Gesture sensor start");Serial.println("Gesture sensor start");
+  GestureStart(); //TODO put into class
+#endif
 
   // Setup WiFi connection. Must be done before setting up Clock.
   // This is done outside Clock so the network can be used for other things.
@@ -234,12 +234,12 @@ void loop() {
   if(MqttCommandMainBrightnessReceived) {
     MqttCommandMainBrightnessReceived = false;
     tfts.dimming = MqttCommandMainBrightness;
-    tfts.InvalidateImageInBuffer();
+    tfts.ProcessUpdatedDimming();
     updateClockDisplay(TFTs::force);
   }
 
   if(MqttCommandBackBrightnessReceived) {
-    MqttCommandBackBrightnessReceived = false;   
+    MqttCommandBackBrightnessReceived = false;
     backlights.setIntensity(uint8_t(MqttCommandBackBrightness));
   }
 
@@ -360,22 +360,25 @@ void loop() {
 #endif // NovelLife_SE Clone XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
   // Power button: If in menu, exit menu. Else turn off displays and backlight.
-  if (buttons.power.isDownEdge() && (menu.getState() == Menu::idle)) {
+#ifndef ONE_BUTTON_ONLY_MENU
+  if (buttons.power.isUpEdge() && (menu.getState() == Menu::idle)) {
+    #ifdef DEBUG_OUTPUT
+      Serial.println("Power button pressed.");
+    #endif
     tfts.chip_select.setAll();
     tfts.fillScreen(TFT_BLACK);
-
     tfts.toggleAllDisplays();
     if (tfts.isEnabled()) {
-#ifndef HARDWARE_SI_HAI_CLOCK
+    #ifndef HARDWARE_SI_HAI_CLOCK
       tfts.reinit();  // reinit (original EleksTube HW: after a few hours in OFF state the displays do not wake up properly)
-#endif
+    #endif
       tfts.chip_select.setAll();
       tfts.fillScreen(TFT_BLACK);
-
       updateClockDisplay(TFTs::force);
     }
     backlights.togglePower();
   }
+#endif
  
   menu.loop(buttons);  // Must be called after buttons.loop()
   backlights.loop();
@@ -602,7 +605,7 @@ void GestureStart()
   }
 }
 
-//Handle Interrupt from gesture sensor and simulate a short button press (state down_edge) of the corresponding button, if a gesture is detected 
+//Handle Interrupt from gesture sensor and simulate a short button press of the corresponding button, if a gesture is detected 
 void HandleGestureInterupt()
 {
   if( isr_flag == 1 ) {
@@ -626,30 +629,30 @@ void HandleGesture() {
     if ( apds.isGestureAvailable() ) {
     switch ( apds.readGesture() ) {
       case DIR_UP:
-        buttons.left.setDownEdgeState();
+        buttons.left.setUpEdgeState();
         Serial.println("Gesture detected! LEFT");
         break;
       case DIR_DOWN:
-        buttons.right.setDownEdgeState();
+        buttons.right.setUpEdgeState();
         Serial.println("Gesture detected! RIGHT");
         break;
       case DIR_LEFT:
-        buttons.power.setDownEdgeState();
+        buttons.power.setUpEdgeState();
         Serial.println("Gesture detected! DOWN");
         break;
       case DIR_RIGHT:
-        buttons.mode.setDownEdgeState();
+        buttons.mode.setUpEdgeState();
         Serial.println("Gesture detected! UP");
         break;
       case DIR_NEAR:
-        buttons.mode.setDownEdgeState();
+        buttons.mode.setUpEdgeState();
         Serial.println("Gesture detected! NEAR");
         break;
       case DIR_FAR:
-        buttons.power.setDownEdgeState();
+        buttons.power.setUpEdgeState();
         Serial.println("Gesture detected! FAR");
         break;
-      default:        
+      default:
         Serial.println("Movement detected but NO gesture detected!");
     }
   }
@@ -671,13 +674,13 @@ bool isNightTime(uint8_t current_hour) {
     }
     else {
       // "Night" starts after midnight, entirely contained within the day
-      return (current_hour >= NIGHT_TIME) && (current_hour < DAY_TIME);  
+      return (current_hour >= NIGHT_TIME) && (current_hour < DAY_TIME);
     }
 }
 
 void EveryFullHour(bool loopUpdate) {
-  // dim the clock at night
-  #ifdef DIMMING
+  // dim the clock in the night
+#ifdef NIGHTTIME_DIMMING
   uint8_t current_hour = uclock.getHour24();
   FullHour = current_hour != hour_old;
   if (FullHour) {
@@ -686,23 +689,23 @@ void EveryFullHour(bool loopUpdate) {
     if (isNightTime(current_hour)) {
       Serial.println("Setting night mode (dimmed)");
       tfts.dimming = TFT_DIMMED_INTENSITY;
-      tfts.InvalidateImageInBuffer(); // invalidate; reload images with new dimming value
-      backlights.dimming = true;
+      tfts.ProcessUpdatedDimming();
+      backlights.setDimming(true);
       if (menu.getState() == Menu::idle || !loopUpdate) { // otherwise erases the menu
         updateClockDisplay(TFTs::force); // update all
       }
     } else {
-      Serial.println("Setting daytime mode (normal brightness)");
+      Serial.println("Setting daytime mode (max brightness)");
       tfts.dimming = 255; // 0..255
-      tfts.InvalidateImageInBuffer(); // invalidate; reload images with new dimming value
-      backlights.dimming = false;
+      tfts.ProcessUpdatedDimming();
+      backlights.setDimming(false);
       if (menu.getState() == Menu::idle || !loopUpdate) { // otherwise erases the menu
         updateClockDisplay(TFTs::force); // update all
       }
     }
     hour_old = current_hour;
   }
-  #endif   
+#endif   
 }
 
 void UpdateDstEveryNight() {

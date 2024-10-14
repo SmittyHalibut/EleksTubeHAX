@@ -21,7 +21,7 @@
 class Backlights: public Adafruit_NeoPixel {
 public:
   Backlights() : config(NULL), pattern_needs_init(true), off(true),
-    Adafruit_NeoPixel(NUM_DIGITS, BACKLIGHTS_PIN, NEO_GRB + NEO_KHZ800)
+    Adafruit_NeoPixel(NUM_BACKLIGHT_LEDS, BACKLIGHTS_PIN, NEO_GRB + NEO_KHZ800)
     {}
 
   enum patterns { dark, test, constant, rainbow, pulse, breath, num_patterns };
@@ -60,7 +60,7 @@ public:
   void adjustIntensity(int16_t adj);
   uint8_t getIntensity()                      { return config->intensity; }
 
-  bool dimming = false;
+  void setDimming(bool dim)                   { dimming = dim; pattern_needs_init = true; }
 
   // Helper methods
   uint32_t phaseToColor(uint16_t phase);
@@ -72,6 +72,7 @@ public:
   const uint8_t max_intensity = 8;  // 0 to 7
 
 private:
+  bool dimming = false;
   bool pattern_needs_init;
   bool off;
 
