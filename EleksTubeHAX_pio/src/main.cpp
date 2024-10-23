@@ -74,26 +74,30 @@ void setup() {
   buttons.begin();
   menu.begin();
 
-#ifdef HARDWARE_NovelLife_SE_CLOCK // NovelLife_SE Clone XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-  //Init the Gesture sensor
-  tfts.println("Gesture sensor start");
-  GestureStart(); //TODO put into class
-#endif
-
   // Setup the displays (TFTs) initaly and show bootup message(s)
   tfts.begin();  // and count number of clock faces available
   tfts.fillScreen(TFT_BLACK);
   tfts.setTextColor(TFT_WHITE, TFT_BLACK);
   tfts.setCursor(0, 0, 2);  // Font 2. 16 pixel high
-  tfts.println("setup...");
+  tfts.println("Starting Setup...");
+
+#ifdef HARDWARE_NovelLife_SE_CLOCK // NovelLife_SE Clone XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+  //Init the Gesture sensor
+  tfts.setTextColor(TFT_ORANGE, TFT_BLACK);
+  tfts.print("Gest start..."); Serial.print("Gesture Sensor start...");
+  GestureStart(); //TODO put into class
+  tfts.println("Done!"); Serial.println("Done!");
+  tfts.setTextColor(TFT_WHITE, TFT_BLACK);
+#endif
 
   // Setup WiFi connection. Must be done before setting up Clock.
   // This is done outside Clock so the network can be used for other things.
-//  WiFiBegin(&stored_config.config.wifi);
-  tfts.println("WiFi start");
+  tfts.setTextColor(TFT_DARKGREEN, TFT_BLACK);
+  tfts.println("WiFi start..."); Serial.println("WiFi start...");
   WifiBegin();
-  
-  // wait for a bit before querying NTP
+  tfts.setTextColor(TFT_WHITE, TFT_BLACK);
+
+  // wait a bit (5x100ms = 0.5 sec) before querying NTP
   for (uint8_t ndx=0; ndx < 5; ndx++) {
     tfts.print(">");
     delay(100);
@@ -101,25 +105,35 @@ void setup() {
   tfts.println("");
 
   // Setup the clock.  It needs WiFi to be established already.
-  tfts.println("Clock start");
+  tfts.setTextColor(TFT_MAGENTA, TFT_BLACK);
+  tfts.print("Clock start..."); Serial.print("Clock start...");
   uclock.begin(&stored_config.config.uclock);
+  tfts.println("Done!"); Serial.println("Done!");
+  tfts.setTextColor(TFT_WHITE, TFT_BLACK);
 
   // Setup MQTT
-  tfts.println("MQTT start");
+  tfts.setTextColor(TFT_YELLOW, TFT_BLACK);
+  tfts.print("MQTT start..."); Serial.print("MQTT start...");
   MqttStart();
+  tfts.println("Done!"); Serial.println("Done!");
+  tfts.setTextColor(TFT_WHITE, TFT_BLACK);
 
 #ifdef GEOLOCATION_ENABLED
-  tfts.println("Geoloc query");
+  tfts.setTextColor(TFT_NAVY, TFT_BLACK);
+  tfts.println("GeoLoc query..."); Serial.println("GeoLoc query...");
   if (GetGeoLocationTimeZoneOffset()) {
-    tfts.print("TZ: ");
-    tfts.println(GeoLocTZoffset);
+    tfts.print("TZ: "); Serial.print("TZ: ");
+    tfts.println(GeoLocTZoffset); Serial.println(GeoLocTZoffset);
     uclock.setTimeZoneOffset(GeoLocTZoffset * 3600);
-    Serial.print("Saving config...");
+    Serial.println(); Serial.print("Saving config! Triggerd by timezone change...");
     stored_config.save();
-    Serial.println(" Done.");
+    Serial.println("Done.");
+    tfts.println("Done!"); Serial.println("Done!");
+    tfts.setTextColor(TFT_WHITE, TFT_BLACK);
   } else {
-    Serial.println("Geolocation failed.");    
-    tfts.println("Geo FAILED");
+    tfts.setTextColor(TFT_RED, TFT_BLACK);
+    tfts.println("GeoLoc FAILED"); Serial.println("GeoLoc failed!");
+    tfts.setTextColor(TFT_WHITE, TFT_BLACK);
   }
 #endif
 
@@ -133,9 +147,10 @@ void setup() {
   }
   tfts.current_graphic = uclock.getActiveGraphicIdx();
 
-  tfts.println("Done with setup.");
+  tfts.setTextColor(TFT_WHITE, TFT_BLACK);
+  tfts.println("Done with Setup!"); Serial.println("Done with Setup!");
 
-  // Leave boot up messages on screen for a few seconds.
+  // Leave boot up messages on screen for a few seconds (10x200ms = 2 sec)
   for (uint8_t ndx=0; ndx < 10; ndx++) {
     tfts.print(">");
     delay(200);
@@ -144,7 +159,7 @@ void setup() {
   // Start up the clock displays.
   tfts.fillScreen(TFT_BLACK);
   uclock.loop();
-  updateClockDisplay(TFTs::force);
+  updateClockDisplay(TFTs::force); // Draw all the clock digits
   Serial.println("Setup finished.");
 }
 
@@ -383,8 +398,7 @@ void loop() {
 
   EveryFullHour(true); // night or daytime
 
-  // Update the clock.
-  updateClockDisplay();
+  updateClockDisplay(); // Draw only the changed clock digits!
   
   UpdateDstEveryNight();
 

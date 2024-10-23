@@ -81,20 +81,20 @@ void TFTs::showNoMqttStatus() {
   }
 
 void TFTs::showTemperature() { 
-  #ifdef ONE_WIRE_BUS_PIN
-   if (fTemperature > -30) { // only show if temperature is valid
-      chip_select.setHoursOnes();
-      setTextColor(TFT_CYAN, TFT_BLACK);
-      fillRect(0, TFT_HEIGHT - 17, TFT_WIDTH, 17, TFT_BLACK);
-      setCursor(5, TFT_HEIGHT - 17, 2);  // Font 2. 16 pixel high
-      print("T: ");
-      print(sTemperatureTxt);
-      print(" C");
-   }
+#ifdef ONE_WIRE_BUS_PIN
+    if (fTemperature > -30) { // only show if temperature is valid
+        chip_select.setHoursOnes();
+        setTextColor(TFT_CYAN, TFT_BLACK);
+        fillRect(0, TFT_HEIGHT - 17, TFT_WIDTH, 17, TFT_BLACK);
+        setCursor(5, TFT_HEIGHT - 17, 2);  // Font 2. 16 pixel high
+        print("T: ");
+        print(sTemperatureTxt);
+        print(" C");
+    }
 #ifdef DEBUG_OUTPUT
     Serial.println("Temperature to LCD");
 #endif    
-  #endif
+#endif
 }
 
 void TFTs::setDigit(uint8_t digit, uint8_t value, show_t show) {
