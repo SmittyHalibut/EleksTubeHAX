@@ -394,9 +394,9 @@ void loop() {
     int8_t menu_change = menu.getChange();
 
     if (menu_state == Menu::idle) {
-      // We just changed into idle, so force redraw everything, and save the config.
-      updateClockDisplay(TFTs::force);
-      Serial.print("Saving config...");
+      // We just changed into idle, so force a redraw of all clock digits and save the config.
+      updateClockDisplay(TFTs::force); // redraw all the clock digits
+      Serial.println(); Serial.print("Saving config! Triggered from leaving menu...");
       stored_config.save();
       Serial.println(" Done.");
     }
@@ -406,7 +406,6 @@ void loop() {
         if (menu_change != 0) {
           backlights.setNextPattern(menu_change);
         }
-
         setupMenu();
         tfts.println("Pattern:");
         tfts.println(backlights.getPatternStr());
@@ -435,8 +434,7 @@ void loop() {
           uclock.toggleTwelveHour();
           tfts.setDigit(HOURS_TENS, uclock.getHoursTens(), TFTs::force);
           tfts.setDigit(HOURS_ONES, uclock.getHoursOnes(), TFTs::force);
-        }
-        
+        }        
         setupMenu();
         tfts.println("Hour format");
         tfts.println(uclock.getTwelveHour() ? "12 hour" : "24 hour"); 
@@ -446,77 +444,143 @@ void loop() {
         if (menu_change != 0) {
           uclock.toggleBlankHoursZero();
           tfts.setDigit(HOURS_TENS, uclock.getHoursTens(), TFTs::force);
-        }
-        
+        }        
         setupMenu();
         tfts.println("Blank zero?");
         tfts.println(uclock.getBlankHoursZero() ? "yes" : "no");
       }
       // UTC Offset, hours
       else if (menu_state == Menu::utc_offset_hour) {
+        time_t currOffset = uclock.getTimeZoneOffset();
+
         if (menu_change != 0) {
-          uclock.adjustTimeZoneOffset(menu_change * 3600);
+          // calculate the new offset
+          time_t newOffsetAdjustmentValue = menu_change * 3600;
+          time_t newOffset = currOffset + newOffsetAdjustmentValue;          
+          double newOffsetInHours = static_cast<double>(newOffset) / 3600;
 
-          EveryFullHour();
+          // Check if the sign of the offset has changed (passed over +/-0 hours)
+          if ((currOffset < 0 && newOffset > 0) || (currOffset > 0 && newOffset < 0)) {
+              newOffset = newOffsetInHours * 3600;
+          }
 
+          // If the minutes part of the offset is 0, we want to change from +12 to -12 or vice versa (without changing the shown time on the displays)
+          // if the minutes part is not 0, we want to wrap around to the other side but keep the minutes part (i.e. from 11:45 directly to -11:45)
+          // so we will change the shown time on the displays if the minutes part is not 0!
+          // Only other choice would be to go to the next offset without a minute part (i.e. from 11:15 to 12:00 and then to -12:00) so minutes part would be lost.
+          bool offsetWrapAround = false;
+          // Check if the new offset is within the allowed range of -12 to +12 hours
+          if (newOffset > 43200) { // overflow (12*3600 = 43200 -> set to -12 hour)
+              int currentOffsetMinutesPartAsSeconds = newOffset % 3600;
+              if (currentOffsetMinutesPartAsSeconds == 0) { // offset was exactly +12 hours, minutes part is 0
+                  newOffset = -43200; // set to -12 hours
+                  offsetWrapAround = true;
+              } else {
+                  newOffset = -39600 + (-currentOffsetMinutesPartAsSeconds);  // wrap around to the negative side but add the minutes part
+                  offsetWrapAround = true;
+              }
+          }
+          if (newOffset < -43200 && !offsetWrapAround) { // underflow (-12*3600 = -43200 -> set to +12 hour)
+              int currentOffsetMinutesPartAsSeconds = newOffset % 3600;
+              if (currentOffsetMinutesPartAsSeconds == 0) { // offset was exactly -12 hours, minutes part is 0
+                  newOffset = 43200; // set to +12 hours
+              } else {
+                  currentOffsetMinutesPartAsSeconds = -currentOffsetMinutesPartAsSeconds; // make the minutes part positive
+                  newOffset = 39600 + currentOffsetMinutesPartAsSeconds; // wrap around to the positive side but add the minutes part
+              }
+          }
+          uclock.setTimeZoneOffset(newOffset); // set the new offset
+          uclock.loop(); // update the clock time -> will "flicker" the menu for a short time, but without, menu is not redrawn at all
+// TODO: check if needed!
+// EveryFullHour(); // check if we need dimming for the night, because timezone was changed
           tfts.setDigit(HOURS_TENS, uclock.getHoursTens(), TFTs::yes);
           tfts.setDigit(HOURS_ONES, uclock.getHoursOnes(), TFTs::yes);
+          currOffset = uclock.getTimeZoneOffset(); // get the new offset as current offset for the menu
         }
-
         setupMenu();
         tfts.println("UTC Offset");
         tfts.println(" +/- Hour");
-        time_t offset = uclock.getTimeZoneOffset();
-        int8_t offset_hour = offset/3600;
-        int8_t offset_min = (offset%3600)/60;
-        if(offset_min < 0) {
+        char offsetStr[11];
+        int8_t offset_hour = currOffset/3600;
+        int8_t offset_min = (currOffset%3600)/60;
+        if(offset_min <= 0 && offset_hour <= 0) { // negative timezone value -> Make them positive and print a minus in front
           offset_min = -offset_min;
+          offset_hour = -offset_hour;
+          snprintf(offsetStr, sizeof(offsetStr), "-%d:%02d", offset_hour, offset_min);
+        } else {
+          if(offset_min >= 0 && offset_hour >= 0) {// postive timezone value for hours and minutes -> show a plus in front
+              snprintf(offsetStr, sizeof(offsetStr), "+%d:%02d", offset_hour, offset_min);
+          }
         }
-        tfts.printf("%d:%02d\n", offset_hour, offset_min);
-      }
-      // UTC Offset, 15 minutes
+        if(offset_min == 0 && offset_hour == 0) { // we don't want a sign in front of the 0:00 case
+            snprintf(offsetStr, sizeof(offsetStr), "%d:%02d", offset_hour, offset_min);
+        }
+        tfts.println(offsetStr);
+      } // END UTC Offset, hours
+      // BEGIN UTC Offset, 15 minutes
       else if (menu_state == Menu::utc_offset_15m) {
+        time_t currOffset = uclock.getTimeZoneOffset();
+
         if (menu_change != 0) {
-          uclock.adjustTimeZoneOffset(menu_change * 900);
+          time_t newOffsetAdjustmentValue = menu_change * 900; // calculate the new offset
+          time_t newOffset = currOffset + newOffsetAdjustmentValue;
 
-          EveryFullHour();
-
+          // check if the new offset is within the allowed range of -12 to +12 hours
+          // same behaviour as for the +/-1 hour offset, but with 15 minutes steps
+          bool offsetWrapAround = false;
+          if (newOffset > 43200) { // we just "passed" +12 hours -> set to -12 hours
+            newOffset = -43200;
+            offsetWrapAround = true;
+          }
+          if (newOffset == -43200 && !offsetWrapAround) { // we just passed -12 hours -> set to +12 hours
+            newOffset = 43200;
+          }
+          uclock.setTimeZoneOffset(newOffset); // set the new offset
+          uclock.loop(); // update the clock time -> will "flicker" the menu for a short time, but without, menu is not redrawn at all
+// TODO: check if needed!
+// EveryFullHour(); // check if we need dimming for the night, because timezone was changed          
           tfts.setDigit(HOURS_TENS, uclock.getHoursTens(), TFTs::yes);
           tfts.setDigit(HOURS_ONES, uclock.getHoursOnes(), TFTs::yes);
           tfts.setDigit(MINUTES_TENS, uclock.getMinutesTens(), TFTs::yes);
           tfts.setDigit(MINUTES_ONES, uclock.getMinutesOnes(), TFTs::yes);
+          currOffset = uclock.getTimeZoneOffset(); // get the new offset as current offset for the menu
         }
-
         setupMenu();
         tfts.println("UTC Offset");
         tfts.println(" +/- 15m");
-        time_t offset = uclock.getTimeZoneOffset();
-        int8_t offset_hour = offset/3600;
-        int8_t offset_min = (offset%3600)/60;
-        if(offset_min < 0) {
+        char offsetStr[11];
+        int8_t offset_hour = currOffset/3600;
+        int8_t offset_min = (currOffset%3600)/60;
+        if(offset_min <= 0 && offset_hour <= 0) { // negative timezone value -> Make them positive and print a minus in front
           offset_min = -offset_min;
+          offset_hour = -offset_hour;
+          snprintf(offsetStr, sizeof(offsetStr), "-%d:%02d", offset_hour, offset_min);
+        } else {
+          if(offset_min >= 0 && offset_hour >= 0) {// postive timezone value for hours and minutes -> show a plus in front
+              snprintf(offsetStr, sizeof(offsetStr), "+%d:%02d", offset_hour, offset_min);
+          }
         }
-        tfts.printf("%d:%02d\n", offset_hour, offset_min);
-      }
-      // select clock "font"
+        if(offset_min == 0 && offset_hour == 0) { // we don't want a sign in front of the 0:00 case so overwrite the string
+            snprintf(offsetStr, sizeof(offsetStr), "%d:%02d", offset_hour, offset_min);
+        }
+        tfts.println(offsetStr);
+      } // END UTC Offset, 15 minutes
+      // BGEIN select clock face
       else if (menu_state == Menu::selected_graphic) {
         if (menu_change != 0) {
           uclock.adjustClockGraphicsIdx(menu_change);
 
           if(tfts.current_graphic != uclock.getActiveGraphicIdx()) {
             tfts.current_graphic = uclock.getActiveGraphicIdx();
-            updateClockDisplay(TFTs::force);   // redraw everything
+            updateClockDisplay(TFTs::force); // redraw all the clock digits
           }
         }
-
         setupMenu();
         tfts.println("Selected");
-        tfts.println(" graphic:");
+        tfts.println("graphic:");
         tfts.printf("    %d\n", uclock.getActiveGraphicIdx());
       }
-     
-
-#ifdef WIFI_USE_WPS   ////  WPS code
+#ifdef WIFI_USE_WPS   //  WPS code
       // connect to WiFi using wps pushbutton mode
       else if (menu_state == Menu::start_wps) {
         if (menu_change != 0) { // button was pressed
@@ -528,15 +592,14 @@ void loop() {
             tfts.setCursor(0, 0, 4);  // Font 4. 26 pixel high
             WiFiStartWps();
           }
-        }
-        
+        }        
         setupMenu();
         tfts.println("Connect to WiFi?");
         tfts.println("Left=WPS");
       }
-#endif   
+#endif
     }
-  }
+  } // if (menu.stateChanged())
 
   uint32_t time_in_loop = millis() - millis_at_top;
   if (time_in_loop < 20) {
@@ -658,9 +721,14 @@ void HandleGesture() {
 #endif // NovelLife_SE Clone XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
 void setupMenu() {
+  // Prepare drawing of the menu texts
+
+  // use most left display
   tfts.chip_select.setHoursTens();
   tfts.setTextColor(TFT_WHITE, TFT_BLACK);
+  //use lower half of the display, fill with black
   tfts.fillRect(0, 120, 135, 120, TFT_BLACK);
+  // use font 4. 26 pixel high
   tfts.setCursor(0, 124, 4);  // Font 4. 26 pixel high
 }
 
