@@ -41,8 +41,10 @@ Clock         uclock;
 Menu          menu;
 StoredConfig  stored_config;
 
-bool          FullHour        = false;
+#ifdef DIMMING
+bool          isDimmingNeeded = false;
 uint8_t       hour_old        = 255;
+#endif
 bool          DstNeedsUpdate  = false;
 uint8_t       yesterday       = 0;
 
@@ -51,7 +53,10 @@ uint32_t lastMqttCommandExecuted = (uint32_t) -1;
 // Helper function, defined below.
 void updateClockDisplay(TFTs::show_t show=TFTs::yes);
 void setupMenu(void);
-void EveryFullHour(bool loopUpdate=false);
+#ifdef DIMMING
+bool isNightTime(uint8_t current_hour);
+void checkDimmingNeeded(void);
+#endif
 void UpdateDstEveryNight(void);
 #ifdef HARDWARE_NovelLife_SE_CLOCK // NovelLife_SE Clone XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 void GestureStart();
@@ -381,7 +386,9 @@ void loop() {
   backlights.loop();
   uclock.loop();
 
-  EveryFullHour(true); // night or daytime
+#ifdef DIMMING
+  checkDimmingNeeded(); // night or day time brightness change
+#endif
 
   // Update the clock.
   updateClockDisplay();
@@ -465,34 +472,60 @@ void loop() {
           }
 
           // If the minutes part of the offset is 0, we want to change from +12 to -12 or vice versa (without changing the shown time on the displays)
-          // if the minutes part is not 0, we want to wrap around to the other side but keep the minutes part (i.e. from 11:45 directly to -11:45)
-          // so we will change the shown time on the displays if the minutes part is not 0!
-          // Only other choice would be to go to the next offset without a minute part (i.e. from 11:15 to 12:00 and then to -12:00) so minutes part would be lost.
-          bool offsetWrapAround = false;
-          // Check if the new offset is within the allowed range of -12 to +12 hours
-          if (newOffset > 43200) { // overflow (12*3600 = 43200 -> set to -12 hour)
-              int currentOffsetMinutesPartAsSeconds = newOffset % 3600;
-              if (currentOffsetMinutesPartAsSeconds == 0) { // offset was exactly +12 hours, minutes part is 0
-                  newOffset = -43200; // set to -12 hours
-                  offsetWrapAround = true;
-              } else {
-                  newOffset = -39600 + (-currentOffsetMinutesPartAsSeconds);  // wrap around to the negative side but add the minutes part
-                  offsetWrapAround = true;
-              }
+          // If the minutes part is not 0:
+          // **1st choice: We want to wrap around to the other side and change the minutes part (i.e. from 11:45 directly to -11:15).
+          // this will make the commanded +/- "one hour" change, but changes the minutes part from 45 to 15 and from 15 to 45.
+          // 2nd choice would be to wrap around but keep the minutes part (i.e. from 11:45 directly to -11:45), but this would change the time shown on the displays.
+          // 3rd choice would be to go to the next offset without a minute part (i.e. from 11:15 to 12:00 and then to -12:00), so minutes part would be lost.
+          // ** implemented in the moment
+
+          // 1st choice implementation
+          if (newOffset > 43200) { // overflow (12*3600 = 43200 -> subtract 24 hours)
+            newOffset = newOffset - 86400;
+          }else {
+            if (newOffset < -43200) { // underflow (-12*3600 = -43200 -> add 24 hours)
+              newOffset = newOffset + 86400;
+            }
           }
-          if (newOffset < -43200 && !offsetWrapAround) { // underflow (-12*3600 = -43200 -> set to +12 hour)
-              int currentOffsetMinutesPartAsSeconds = newOffset % 3600;
-              if (currentOffsetMinutesPartAsSeconds == 0) { // offset was exactly -12 hours, minutes part is 0
-                  newOffset = 43200; // set to +12 hours
-              } else {
-                  currentOffsetMinutesPartAsSeconds = -currentOffsetMinutesPartAsSeconds; // make the minutes part positive
-                  newOffset = 39600 + currentOffsetMinutesPartAsSeconds; // wrap around to the positive side but add the minutes part
-              }
-          }
+          
+          // // 2nd choice implementation
+          // bool offsetWrapAround = false;
+          // // Check if the new offset is within the allowed range of -12 to +12 hours
+          // if (newOffset > 43200) { // overflow (12*3600 = 43200 -> set to -12 hour)
+          //   int currentOffsetMinutesPartAsSeconds = newOffset % 3600;
+          //   if (currentOffsetMinutesPartAsSeconds == 0) { // offset was exactly +12 hours, minutes part is 0
+          //     newOffset = -43200; // set to -12 hours
+          //     offsetWrapAround = true;
+          //   } else {
+          //     newOffset = -39600 + (-currentOffsetMinutesPartAsSeconds);  // wrap around to the negative side but add the minutes part
+          //     offsetWrapAround = true;
+          //   }
+          // }
+          // if (newOffset < -43200 && !offsetWrapAround) { // underflow (-12*3600 = -43200 -> set to +12 hour)
+          //   int currentOffsetMinutesPartAsSeconds = newOffset % 3600;
+          //   if (currentOffsetMinutesPartAsSeconds == 0) { // offset was exactly -12 hours, minutes part is 0
+          //     newOffset = 43200; // set to +12 hours
+          //   } else {
+          //     currentOffsetMinutesPartAsSeconds = -currentOffsetMinutesPartAsSeconds; // make the minutes part positive
+          //     newOffset = 39600 + currentOffsetMinutesPartAsSeconds; // wrap around to the positive side but add the minutes part
+          //   }
+          // }
+
+          // // 3rd choice implementation
+          // bool offsetWrapAround = false;
+          // if (newOffset > 43200) { // we just "passed" +12 hours -> set to -12 hours
+          //   newOffset = -43200;
+          //   offsetWrapAround = true;
+          // }
+          // if (newOffset == -43200 && !offsetWrapAround) { // we just passed -12 hours -> set to +12 hours
+          //   newOffset = 43200;
+          // }
+
           uclock.setTimeZoneOffset(newOffset); // set the new offset
           uclock.loop(); // update the clock time -> will "flicker" the menu for a short time, but without, menu is not redrawn at all
-// TODO: check if needed!
-// EveryFullHour(); // check if we need dimming for the night, because timezone was changed
+#ifdef DIMMING
+          checkDimmingNeeded(); // check if we need dimming for the night, because timezone was changed
+#endif
           tfts.setDigit(HOURS_TENS, uclock.getHoursTens(), TFTs::yes);
           tfts.setDigit(HOURS_ONES, uclock.getHoursOnes(), TFTs::yes);
           currOffset = uclock.getTimeZoneOffset(); // get the new offset as current offset for the menu
@@ -509,22 +542,22 @@ void loop() {
           snprintf(offsetStr, sizeof(offsetStr), "-%d:%02d", offset_hour, offset_min);
         } else {
           if(offset_min >= 0 && offset_hour >= 0) {// postive timezone value for hours and minutes -> show a plus in front
-              snprintf(offsetStr, sizeof(offsetStr), "+%d:%02d", offset_hour, offset_min);
+            snprintf(offsetStr, sizeof(offsetStr), "+%d:%02d", offset_hour, offset_min);
           }
         }
         if(offset_min == 0 && offset_hour == 0) { // we don't want a sign in front of the 0:00 case
-            snprintf(offsetStr, sizeof(offsetStr), "%d:%02d", offset_hour, offset_min);
+          snprintf(offsetStr, sizeof(offsetStr), "%d:%02d", offset_hour, offset_min);
         }
         tfts.println(offsetStr);
       } // END UTC Offset, hours
       // BEGIN UTC Offset, 15 minutes
       else if (menu_state == Menu::utc_offset_15m) {
         time_t currOffset = uclock.getTimeZoneOffset();
-
+        
         if (menu_change != 0) {
           time_t newOffsetAdjustmentValue = menu_change * 900; // calculate the new offset
           time_t newOffset = currOffset + newOffsetAdjustmentValue;
-
+          
           // check if the new offset is within the allowed range of -12 to +12 hours
           // same behaviour as for the +/-1 hour offset, but with 15 minutes steps
           bool offsetWrapAround = false;
@@ -535,10 +568,12 @@ void loop() {
           if (newOffset == -43200 && !offsetWrapAround) { // we just passed -12 hours -> set to +12 hours
             newOffset = 43200;
           }
+          
           uclock.setTimeZoneOffset(newOffset); // set the new offset
           uclock.loop(); // update the clock time -> will "flicker" the menu for a short time, but without, menu is not redrawn at all
-// TODO: check if needed!
-// EveryFullHour(); // check if we need dimming for the night, because timezone was changed          
+#ifdef DIMMING          
+          checkDimmingNeeded(); // check if we need dimming for the night, because timezone was changed
+#endif          
           tfts.setDigit(HOURS_TENS, uclock.getHoursTens(), TFTs::yes);
           tfts.setDigit(HOURS_ONES, uclock.getHoursOnes(), TFTs::yes);
           tfts.setDigit(MINUTES_TENS, uclock.getMinutesTens(), TFTs::yes);
@@ -557,11 +592,11 @@ void loop() {
           snprintf(offsetStr, sizeof(offsetStr), "-%d:%02d", offset_hour, offset_min);
         } else {
           if(offset_min >= 0 && offset_hour >= 0) {// postive timezone value for hours and minutes -> show a plus in front
-              snprintf(offsetStr, sizeof(offsetStr), "+%d:%02d", offset_hour, offset_min);
+            snprintf(offsetStr, sizeof(offsetStr), "+%d:%02d", offset_hour, offset_min);
           }
         }
         if(offset_min == 0 && offset_hour == 0) { // we don't want a sign in front of the 0:00 case so overwrite the string
-            snprintf(offsetStr, sizeof(offsetStr), "%d:%02d", offset_hour, offset_min);
+          snprintf(offsetStr, sizeof(offsetStr), "%d:%02d", offset_hour, offset_min);
         }
         tfts.println(offsetStr);
       } // END UTC Offset, 15 minutes
@@ -732,46 +767,35 @@ void setupMenu() {
   tfts.setCursor(0, 124, 4);  // Font 4. 26 pixel high
 }
 
-bool isNightTime(uint8_t current_hour) {
-    if (DAY_TIME < NIGHT_TIME) {
-      // "Night" spans across midnight
-      return (current_hour < DAY_TIME) || (current_hour >= NIGHT_TIME);
-    }
-    else {
-      // "Night" starts after midnight, entirely contained within the day
-      return (current_hour >= NIGHT_TIME) && (current_hour < DAY_TIME);  
-    }
+#ifdef DIMMING
+bool isNightTime(uint8_t current_hour) { // check the actual hour is in the defined "night time"
+  if (DAY_TIME < NIGHT_TIME) { // "Night" spans across midnight so it is split between two days
+    return (current_hour < DAY_TIME) || (current_hour >= NIGHT_TIME);
+  }
+  else { // "Night" starts after midnight, entirely contained within the current day
+    return (current_hour >= NIGHT_TIME) && (current_hour < DAY_TIME);
+  }
 }
 
-void EveryFullHour(bool loopUpdate) {
-  // dim the clock at night
-  #ifdef DIMMING
-  uint8_t current_hour = uclock.getHour24();
-  FullHour = current_hour != hour_old;
-  if (FullHour) {
-    Serial.print("current hour = ");
-    Serial.println(current_hour);
-    if (isNightTime(current_hour)) {
-      Serial.println("Setting night mode (dimmed)");
+void checkDimmingNeeded() { // dim the display in the defined night time
+  uint8_t current_hour = uclock.getHour24(); // for internal calcs we always use 24h format
+  isDimmingNeeded = current_hour != hour_old; //check, if the hour has changed since last loop (from time passing by or from timezone change)
+  if (isDimmingNeeded) {
+    Serial.print("current hour = "); Serial.println(current_hour);
+    if (isNightTime(current_hour)) { //check if it is in the defined night time
+      Serial.println("Set to night mode (dimmed)!");
       tfts.dimming = TFT_DIMMED_INTENSITY;
-      tfts.InvalidateImageInBuffer(); // invalidate; reload images with new dimming value
-      backlights.dimming = true;
-      if (menu.getState() == Menu::idle || !loopUpdate) { // otherwise erases the menu
-        updateClockDisplay(TFTs::force); // update all
-      }
+      backlights.setDimming(true);
     } else {
-      Serial.println("Setting daytime mode (normal brightness)");
+      Serial.println("Set to daytime mode (normal brightness)!");
       tfts.dimming = 255; // 0..255
-      tfts.InvalidateImageInBuffer(); // invalidate; reload images with new dimming value
-      backlights.dimming = false;
-      if (menu.getState() == Menu::idle || !loopUpdate) { // otherwise erases the menu
-        updateClockDisplay(TFTs::force); // update all
-      }
-    }
+      backlights.setDimming(false);
+    }    
+    updateClockDisplay(TFTs::force); // redraw all the clock digits -> software dimming will be done here
     hour_old = current_hour;
   }
-  #endif   
 }
+#endif // DIMMING
 
 void UpdateDstEveryNight() {
   uint8_t currentDay = uclock.getDay();
