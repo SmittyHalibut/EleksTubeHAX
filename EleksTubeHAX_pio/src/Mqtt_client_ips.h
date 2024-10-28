@@ -12,7 +12,7 @@ extern bool MqttCommandBackPower;
 extern bool MqttCommandPowerReceived;
 extern bool MqttCommandMainPowerReceived;
 extern bool MqttCommandBackPowerReceived;
-extern int  MqttCommandState;
+extern int MqttCommandState;
 extern bool MqttCommandStateReceived;
 extern uint8_t MqttCommandBrightness;
 extern uint8_t MqttCommandMainBrightness;
@@ -66,6 +66,5 @@ void MqttStart();
 void MqttLoopFrequently();
 void MqttLoopInFreeTime();
 void MqttReportBackEverything(bool force);
-
 
 #endif /* mqtt_client_H_ */

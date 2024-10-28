@@ -7,4 +7,4 @@ extern bool bTemperatureUpdated;
 
 void PeriodicReadTemperature(void);
 
-#endif  // TEMPSENSOR_H_
+#endif // TEMPSENSOR_H_
