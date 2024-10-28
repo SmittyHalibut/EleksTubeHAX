@@ -466,7 +466,7 @@ void callback(char* topic, byte* payload, unsigned int length) {  // A new messa
   }
   #endif
 
-#ifdef MQTT_HOME_ASSISTANT
+  #ifdef MQTT_HOME_ASSISTANT
   char message[length + 1];
   sprintf(message, "%c", (char)payload[0]);
   for (int i = 1; i < length; i++) {
@@ -476,7 +476,6 @@ void callback(char* topic, byte* payload, unsigned int length) {  // A new messa
   Serial.print(topic);
   Serial.print(" ");
   Serial.println(message);
-
   if (strcmp(command[0], "main") == 0 && strcmp(command[1], "set") == 0) {
     JsonDocument doc;
     deserializeJson(doc, payload, length);
@@ -516,7 +515,6 @@ void callback(char* topic, byte* payload, unsigned int length) {  // A new messa
       MqttCommandBackColorPhase = backlights.hueToPhase(doc["color"]["h"]);   
       MqttCommandBackColorPhaseReceived = true;
       }
-    
     doc.clear();
   }
   if (strcmp(command[0], "use_twelve_hours") == 0 && strcmp(command[1], "set") == 0) {
@@ -527,7 +525,6 @@ void callback(char* topic, byte* payload, unsigned int length) {  // A new messa
       MqttCommandUseTwelveHours = strcmp(doc["state"], MQTT_STATE_ON) == 0;
       MqttCommandUseTwelveHoursReceived = true;
     }
-
     doc.clear();
   }
   if (strcmp(command[0], "blank_zero_hours") == 0 && strcmp(command[1], "set") == 0) {
@@ -538,7 +535,6 @@ void callback(char* topic, byte* payload, unsigned int length) {  // A new messa
       MqttCommandBlankZeroHours = strcmp(doc["state"], MQTT_STATE_ON) == 0;
       MqttCommandBlankZeroHoursReceived = true;
     }
-
     doc.clear();
   }
   if (strcmp(command[0], "pulse_bpm") == 0 && strcmp(command[1], "set") == 0) {
@@ -549,7 +545,6 @@ void callback(char* topic, byte* payload, unsigned int length) {  // A new messa
       MqttCommandPulseBpm = doc["state"];
       MqttCommandPulseBpmReceived = true;
     }
-
     doc.clear();
   }
   if (strcmp(command[0], "breath_bpm") == 0 && strcmp(command[1], "set") == 0) {
@@ -560,7 +555,6 @@ void callback(char* topic, byte* payload, unsigned int length) {  // A new messa
       MqttCommandBreathBpm = doc["state"];
       MqttCommandBreathBpmReceived = true;
     }
-
     doc.clear();
   }
   if (strcmp(command[0], "rainbow_duration") == 0 && strcmp(command[1], "set") == 0) {
@@ -571,10 +565,9 @@ void callback(char* topic, byte* payload, unsigned int length) {  // A new messa
       MqttCommandRainbowSec = doc["state"];
       MqttCommandRainbowSecReceived = true;
     }
-
     doc.clear();
   }
-#endif
+  #endif
  }
 
 void MqttLoopFrequently(){
