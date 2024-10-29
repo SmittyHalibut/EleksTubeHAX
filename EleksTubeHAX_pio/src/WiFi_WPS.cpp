@@ -121,8 +121,8 @@ void WifiBegin()  {
       }
     }
   }
-#else
-  // NO WPS -- Try using hard coded credentials
+#else //NO WPS -- Try using hard coded credentials
+
   WiFi.begin(WIFI_SSID, WIFI_PASSWD); 
   WiFi.onEvent(WiFiEvent);
   unsigned long StartTime = millis();
@@ -139,13 +139,19 @@ void WifiBegin()  {
       return; // exit loop, exit procedure, continue clock startup
     }
   }
-#endif // WIFI_USE_WPS
+  
+#endif
+
  
   WifiState = connected;
+  
   tfts.println("\nConnected! IP:");
   tfts.println(WiFi.localIP());
-  Serial.println(); Serial.print("Connected to "); Serial.println(WiFi.SSID());
-  Serial.print("IP address: "); Serial.println(WiFi.localIP());
+  Serial.println("");
+  Serial.print("Connected to ");
+  Serial.println(WiFi.SSID());
+  Serial.print("IP address: ");
+  Serial.println(WiFi.localIP());  
   delay(200);
 }
 
@@ -163,7 +169,7 @@ void WiFiStartWps() {
   sprintf(stored_config.config.wifi.ssid, ""); 
   sprintf(stored_config.config.wifi.password, ""); 
   stored_config.config.wifi.WPS_connected = 0x11; // invalid = different than 0x55
-  Serial.println(); Serial.print("Saving config! Triggered from WPS start...");
+  Serial.println(""); Serial.print("Saving config! Triggered from WPS start...");
   stored_config.save();
   Serial.println(" Done.");
    
@@ -183,7 +189,7 @@ void WiFiStartWps() {
 
   wpsInitConfig();
   esp_wifi_wps_enable(&wps_config);
-  esp_wifi_wps_start(0);
+  esp_wifi_wps_start(0);  
 
 
   // loop until connected
@@ -196,7 +202,8 @@ void WiFiStartWps() {
   tfts.setTextColor(TFT_WHITE, TFT_BLACK);
   sprintf(stored_config.config.wifi.ssid, "%s", WiFi.SSID());
 //   memset(stored_config.config.wifi.ssid, '\0', sizeof(stored_config.config.wifi.ssid));
-//   strcpy(stored_config.config.wifi.ssid, WiFi.SSID());
+//   strcpy(stored_config.config.wifi.ssid, WiFi.SSID()); 
+     
   sprintf(stored_config.config.wifi.password, ""); // can't save a password from WPS
   stored_config.config.wifi.WPS_connected = StoredConfig::valid;
   Serial.println(); Serial.print("Saving config! Triggered from WPS success...");

@@ -84,16 +84,19 @@ void setup() {
 #ifdef HARDWARE_NovelLife_SE_CLOCK // NovelLife_SE Clone XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
   //Init the Gesture sensor
   tfts.setTextColor(TFT_ORANGE, TFT_BLACK);
-  tfts.print("Gest start..."); Serial.print("Gesture Sensor start...");
+  tfts.print("Gest start...");
+  Serial.print("Gesture Sensor start...");
   GestureStart(); //TODO put into class
-  tfts.println("Done!"); Serial.println("Done!");
+  tfts.println("Done!");
+  Serial.println("Done!");
   tfts.setTextColor(TFT_WHITE, TFT_BLACK);
 #endif
 
   // Setup WiFi connection. Must be done before setting up Clock.
   // This is done outside Clock so the network can be used for other things.
   tfts.setTextColor(TFT_DARKGREEN, TFT_BLACK);
-  tfts.println("WiFi start..."); Serial.println("WiFi start...");
+  tfts.println("WiFi start...");
+  Serial.println("WiFi start...");
   WifiBegin();
   tfts.setTextColor(TFT_WHITE, TFT_BLACK);
 
@@ -106,33 +109,42 @@ void setup() {
 
   // Setup the clock.  It needs WiFi to be established already.
   tfts.setTextColor(TFT_MAGENTA, TFT_BLACK);
-  tfts.print("Clock start..."); Serial.print("Clock start...");
+  tfts.print("Clock start...");
+  Serial.print("Clock start...");
   uclock.begin(&stored_config.config.uclock);
-  tfts.println("Done!"); Serial.println("Done!");
+  tfts.println("Done!");
+  Serial.println("Done!");
   tfts.setTextColor(TFT_WHITE, TFT_BLACK);
 
   // Setup MQTT
   tfts.setTextColor(TFT_YELLOW, TFT_BLACK);
-  tfts.print("MQTT start..."); Serial.print("MQTT start...");
+  tfts.print("MQTT start...");
+  Serial.print("MQTT start...");
   MqttStart();
-  tfts.println("Done!"); Serial.println("Done!");
+  tfts.println("Done!");
+  Serial.println("Done!");
   tfts.setTextColor(TFT_WHITE, TFT_BLACK);
 
 #ifdef GEOLOCATION_ENABLED
   tfts.setTextColor(TFT_NAVY, TFT_BLACK);
-  tfts.println("GeoLoc query..."); Serial.println("GeoLoc query...");
+  tfts.println("GeoLoc query...");
+  Serial.println("GeoLoc query...");
   if (GetGeoLocationTimeZoneOffset()) {
-    tfts.print("TZ: "); Serial.print("TZ: ");
-    tfts.println(GeoLocTZoffset); Serial.println(GeoLocTZoffset);
+    tfts.print("TZ: ");
+    Serial.print("TZ: ");
+    tfts.println(GeoLocTZoffset);
+    Serial.println(GeoLocTZoffset);
     uclock.setTimeZoneOffset(GeoLocTZoffset * 3600);
-    Serial.println(); Serial.print("Saving config! Triggerd by timezone change...");
-    stored_config.save();
-    Serial.println("Done.");
-    tfts.println("Done!"); Serial.println("Done!");
+    Serial.println();
+    Serial.print("Saving config! Triggerd by timezone change...");
+    stored_config.save();    
+    tfts.println("Done!");
+    Serial.println("Done!");
     tfts.setTextColor(TFT_WHITE, TFT_BLACK);
   } else {
     tfts.setTextColor(TFT_RED, TFT_BLACK);
-    tfts.println("GeoLoc FAILED"); Serial.println("GeoLoc failed!");
+    tfts.println("GeoLoc FAILED");
+    Serial.println("GeoLoc failed!");
     tfts.setTextColor(TFT_WHITE, TFT_BLACK);
   }
 #endif
@@ -148,7 +160,8 @@ void setup() {
   tfts.current_graphic = uclock.getActiveGraphicIdx();
 
   tfts.setTextColor(TFT_WHITE, TFT_BLACK);
-  tfts.println("Done with Setup!"); Serial.println("Done with Setup!");
+  tfts.println("Done with Setup!");
+  Serial.println("Done with Setup!");
 
   // Leave boot up messages on screen for a few seconds (10x200ms = 2 sec)
   for (uint8_t ndx=0; ndx < 10; ndx++) {
