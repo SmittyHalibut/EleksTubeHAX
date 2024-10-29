@@ -417,6 +417,10 @@ void checkMqtt() {
 }
 
 void callback(char* topic, byte* payload, unsigned int length) {  // A new message has been received
+  #ifdef DEBUG_OUTPUT
+  Serial.print("Received MQTT topic: ");
+  Serial.print(topic);                       // long output
+  #endif    
   int commandNumber = 10;
   char* command[commandNumber];
   commandNumber = splitCommand(topic, command, commandNumber);
