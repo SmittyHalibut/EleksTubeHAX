@@ -149,7 +149,7 @@ double round1(double value) {
 void sendToBroker(const char* topic, const char* message) {
   if (MQTTclient.connected()) {
     char topicArr[100];
-    sprintf(topicArr, "%s/%s", MQTT_CLIENT, topic);
+    snprintf(topicArr, sizeof(topicArr), "%s/%s", MQTT_CLIENT, topic);
     MQTTclient.publish(topicArr, message, true);
 #ifdef DEBUG_OUTPUT // long output
     Serial.print("Sending to MQTT: ");
@@ -220,7 +220,8 @@ void MqttReportState(bool force) {
       MQTTclient.publish(topic, buffer, true);
       LastSentBackPowerState = MqttStatusBackPower;
       LastSentBackBrightness = MqttStatusBackBrightness;
-      strcpy(LastSentBackPattern, MqttStatusBackPattern);
+      strncpy(LastSentBackPattern, MqttStatusBackPattern, sizeof(LastSentBackPattern) - 1);
+      LastSentBackPattern[sizeof(LastSentBackPattern) - 1] = '\0';
       LastSentBackColorPhase = MqttStatusBackColorPhase;
 
       Serial.print("TX MQTT: ");
@@ -349,9 +350,9 @@ void MqttStart() {
     }
       
   #ifndef MQTT_HOME_ASSISTANT
-    char subscibeTopic[100];
-    sprintf(subscibeTopic, "%s/#", MQTT_CLIENT);
-    MQTTclient.subscribe(subscibeTopic);  //Subscribes to all messages send to the device
+    char subscribeTopic[100];
+    snprintf(subscribeTopic, sizeof(subscribeTopic), "%s/#", MQTT_CLIENT);
+    MQTTclient.subscribe(subscribeTopic);  //Subscribes to all messages send to the device
 
     sendToBroker("report/online", "true");  // Reports that the device is online
     sendToBroker("report/firmware", FIRMWARE_VERSION);  // Reports the firmware version
@@ -361,27 +362,27 @@ void MqttStart() {
   #endif
 
   #ifdef MQTT_HOME_ASSISTANT
-    char subscibeTopic[100];
-    sprintf(subscibeTopic, "%s/main/set", MQTT_CLIENT);
-    MQTTclient.subscribe(subscibeTopic);
+    char subscribeTopic[100];
+    snprintf(subscribeTopic, sizeof(subscribeTopic), "%s/main/set", MQTT_CLIENT);
+    MQTTclient.subscribe(subscribeTopic);
 
-    sprintf(subscibeTopic, "%s/back/set", MQTT_CLIENT);
-    MQTTclient.subscribe(subscibeTopic);
+    snprintf(subscribeTopic, sizeof(subscribeTopic), "%s/back/set", MQTT_CLIENT);
+    MQTTclient.subscribe(subscribeTopic);
 
-    sprintf(subscibeTopic, "%s/use_twelve_hours/set", MQTT_CLIENT);
-    MQTTclient.subscribe(subscibeTopic);
+    snprintf(subscribeTopic, sizeof(subscribeTopic), "%s/use_twelve_hours/set", MQTT_CLIENT);
+    MQTTclient.subscribe(subscribeTopic);
 
-    sprintf(subscibeTopic, "%s/blank_zero_hours/set", MQTT_CLIENT);
-    MQTTclient.subscribe(subscibeTopic);
+    snprintf(subscribeTopic, sizeof(subscribeTopic), "%s/blank_zero_hours/set", MQTT_CLIENT);
+    MQTTclient.subscribe(subscribeTopic);
 
-    sprintf(subscibeTopic, "%s/pulse_bpm/set", MQTT_CLIENT);
-    MQTTclient.subscribe(subscibeTopic);
+    snprintf(subscribeTopic, sizeof(subscribeTopic), "%s/pulse_bpm/set", MQTT_CLIENT);
+    MQTTclient.subscribe(subscribeTopic);
 
-    sprintf(subscibeTopic, "%s/breath_bpm/set", MQTT_CLIENT);
-    MQTTclient.subscribe(subscibeTopic);
+    snprintf(subscribeTopic, sizeof(subscribeTopic), "%s/breath_bpm/set", MQTT_CLIENT);
+    MQTTclient.subscribe(subscribeTopic);
 
-    sprintf(subscibeTopic, "%s/rainbow_duration/set", MQTT_CLIENT);
-    MQTTclient.subscribe(subscibeTopic);
+    snprintf(subscribeTopic, sizeof(subscribeTopic), "%s/rainbow_duration/set", MQTT_CLIENT);
+    MQTTclient.subscribe(subscribeTopic);
   #endif
   }
 #endif
@@ -423,31 +424,23 @@ void callback(char* topic, byte* payload, unsigned int length) {  // A new messa
   int commandNumber = 10;
   char* command[commandNumber];
   commandNumber = splitCommand(topic, command, commandNumber);
-
-  #ifndef MQTT_HOME_ASSISTANT
+  
   char message[length + 1];
-  sprintf(message, "%c", (char)payload[0]);
-  for (int i = 1; i < length; i++) {
-      sprintf(message, "%s%c", message, (char)payload[i]);
-  }
-  #ifdef DEBUG_OUTPUT
-  Serial.print("\t     Message: ");
-  Serial.println(message);
-  #else    
-  Serial.print("MQTT RX: ");
-  Serial.print(command[0]);
-  Serial.print("/");
-  Serial.print(command[1]);
-  Serial.print("/");
-  Serial.println(message);
-  #endif    
+  strncpy(message, (char*)payload, length);
+  message[length] = '\0';
 
   if (commandNumber < 2) {
-    // otherwise code below crashes on the strmp on non-initialized pointers in command[] array
-    Serial.println("Number of command in MQTT message < 2!");
-    return; 
+      Serial.println("Detected number of commands in MQTT message is lower then 2! -> Ignoring message because it is not valid!");
+      return;
   }
-    
+
+  Serial.println();
+  Serial.print("RX MQTT: ");
+  Serial.print(topic);
+  Serial.print(" ");
+  Serial.println(message);
+
+  #ifndef MQTT_HOME_ASSISTANT
   //------------------Decide what to do depending on the topic and message---------------------------------
   if (strcmp(command[0], "directive") == 0 && strcmp(command[1], "powerState") == 0) {  // Turn On or OFF
     if (strcmp(message, "ON") == 0) {
@@ -467,15 +460,6 @@ void callback(char* topic, byte* payload, unsigned int length) {  // A new messa
   #endif
 
   #ifdef MQTT_HOME_ASSISTANT
-  char message[length + 1];
-  sprintf(message, "%c", (char)payload[0]);
-  for (int i = 1; i < length; i++) {
-      sprintf(message, "%s%c", message, (char)payload[i]);
-  }
-  Serial.print("RX MQTT: ");
-  Serial.print(topic);
-  Serial.print(" ");
-  Serial.println(message);
   if (strcmp(command[0], "main") == 0 && strcmp(command[1], "set") == 0) {
     JsonDocument doc;
     deserializeJson(doc, payload, length);
@@ -508,7 +492,8 @@ void callback(char* topic, byte* payload, unsigned int length) {  // A new messa
       MqttCommandBackBrightnessReceived = true;
     }
     if(doc.containsKey("effect")) {
-      strcpy(MqttCommandBackPattern, doc["effect"]);
+      strncpy(MqttCommandBackPattern, doc["effect"], sizeof(MqttCommandBackPattern) - 1);
+      MqttCommandBackPattern[sizeof(MqttCommandBackPattern) - 1] = '\0';
       MqttCommandBackPatternReceived = true;
       }
     if(doc.containsKey("color")) {
@@ -585,16 +570,16 @@ void MqttLoopInFreeTime(){
 }
 
 void MqttReportBattery() {
-  char message2[5];
-  sprintf(message2, "%d", MqttStatusBattery);
-  sendToBroker("report/battery", message2); 
-} 
+  char message[5];
+  snprintf(message, sizeof(message), "%d", MqttStatusBattery);
+  sendToBroker("report/battery", message); 
+}
 
 void MqttReportStatus() {
   if (LastSentStatus != MqttStatusState) {
-    char message2[5];
-    sprintf(message2, "%d", MqttStatusState);
-    sendToBroker("report/setpoint", message2);
+    char message[5];
+    snprintf(message, sizeof(message), "%d", MqttStatusState);
+    sendToBroker("report/setpoint", message);
     LastSentStatus = MqttStatusState;
   }
 }    
@@ -620,7 +605,7 @@ void MqttReportWiFiSignal() {
   int SignalLevel = WiFi.RSSI();
   // ignore deviations smaller than 3 dBm
   if (abs(SignalLevel - LastSentSignalLevel) > 2) {
-    sprintf(signal, "%d", SignalLevel);
+    snprintf(signal, sizeof(signal), "%d", SignalLevel);
     sendToBroker("report/signal", signal);  // Reports the signal strength
     LastSentSignalLevel = SignalLevel;
   }
@@ -635,8 +620,8 @@ void MqttReportNotification(String message) {
   // send only different notification, do not re-send same notifications!
   if (NotificationChecksum != LastNotificationChecksum) {
     // string to char array
-    char msg2[message.length() + 1]; 
-    strcpy(msg2, message.c_str());    
+    char msg2[message.length() + 1];
+    strncpy(msg2, message.c_str(), sizeof(msg2) - 1);
     sendToBroker("report/notification", msg2);
     LastNotificationChecksum = NotificationChecksum;
   }
@@ -644,8 +629,8 @@ void MqttReportNotification(String message) {
 
 void MqttReportGraphic(bool force) {
   if (force || MqttStatusGraphic != LastSentGraphic) {
-    char graphic[2] = "";
-    sprintf(graphic, "%i", MqttStatusGraphic);
+    char graphic[3]; // Increased size to accommodate null terminator
+    snprintf(graphic, sizeof(graphic), "%i", MqttStatusGraphic);
     sendToBroker("graphic", graphic);  // Reports the signal strength
 
     LastSentGraphic = MqttStatusGraphic;
