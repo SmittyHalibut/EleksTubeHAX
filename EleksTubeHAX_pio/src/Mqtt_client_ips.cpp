@@ -464,16 +464,16 @@ void callback(char* topic, byte* payload, unsigned int length) {  // A new messa
     JsonDocument doc;
     deserializeJson(doc, payload, length);
     
-    if(doc.containsKey("state")) {
-      MqttCommandMainPower = doc["state"] == MQTT_STATE_ON;
+    if(doc["state"].is<const char*>()) {
+      MqttCommandMainPower = strcmp(doc["state"], MQTT_STATE_ON) == 0;
       MqttCommandMainPowerReceived = true;
     }
-    if(doc.containsKey("brightness")) {
+    if(doc["brightness"].is<int>()) {
        MqttCommandMainBrightness = doc["brightness"];
        MqttCommandMainBrightnessReceived = true;
      }
-    if(doc.containsKey("effect")) {
-      MqttCommandMainGraphic = tfts.nameToClockFace(doc["effect"]);   
+    if(doc["effect"].is<const char*>()) {
+      MqttCommandMainGraphic = tfts.nameToClockFace(doc["effect"]);
       MqttCommandMainGraphicReceived = true;
       }
 
@@ -483,20 +483,20 @@ void callback(char* topic, byte* payload, unsigned int length) {  // A new messa
     JsonDocument doc;
     deserializeJson(doc, payload, length);
     
-    if(doc.containsKey("state")) {
-      MqttCommandBackPower = doc["state"] == MQTT_STATE_ON;
+    if(doc["state"].is<const char*>()) {
+      MqttCommandBackPower = strcmp(doc["state"], MQTT_STATE_ON) == 0;
       MqttCommandBackPowerReceived = true;
     }
-    if(doc.containsKey("brightness")) {
+    if(doc["brightness"].is<int>()) {    
       MqttCommandBackBrightness = doc["brightness"];
       MqttCommandBackBrightnessReceived = true;
     }
-    if(doc.containsKey("effect")) {
+    if(doc["effect"].is<const char*>()) {
       strncpy(MqttCommandBackPattern, doc["effect"], sizeof(MqttCommandBackPattern) - 1);
       MqttCommandBackPattern[sizeof(MqttCommandBackPattern) - 1] = '\0';
       MqttCommandBackPatternReceived = true;
-      }
-    if(doc.containsKey("color")) {
+    }
+    if(doc["color"].is<JsonObject>()) {
       MqttCommandBackColorPhase = backlights.hueToPhase(doc["color"]["h"]);   
       MqttCommandBackColorPhaseReceived = true;
       }
@@ -506,8 +506,8 @@ void callback(char* topic, byte* payload, unsigned int length) {  // A new messa
     JsonDocument doc;
     deserializeJson(doc, payload, length);
     
-    if(doc.containsKey("state")) {
-      MqttCommandUseTwelveHours = doc["state"] == MQTT_STATE_ON;
+    if(doc["state"].is<const char*>()) {
+      MqttCommandUseTwelveHours = strcmp(doc["state"], MQTT_STATE_ON) == 0;
       MqttCommandUseTwelveHoursReceived = true;
     }
     doc.clear();
@@ -516,8 +516,8 @@ void callback(char* topic, byte* payload, unsigned int length) {  // A new messa
     JsonDocument doc;
     deserializeJson(doc, payload, length);
     
-    if(doc.containsKey("state")) {
-      MqttCommandBlankZeroHours = doc["state"] == MQTT_STATE_ON;
+    if(doc["state"].is<const char*>()) {
+      MqttCommandBlankZeroHours = strcmp(doc["state"], MQTT_STATE_ON) == 0;
       MqttCommandBlankZeroHoursReceived = true;
     }
     doc.clear();
@@ -526,8 +526,8 @@ void callback(char* topic, byte* payload, unsigned int length) {  // A new messa
     JsonDocument doc;
     deserializeJson(doc, payload, length);
     
-    if(doc.containsKey("state")) {
-      MqttCommandPulseBpm = uint8_t(doc["state"]);
+    if(doc["state"].is<uint8_t>()) {
+      MqttCommandPulseBpm = doc["state"];
       MqttCommandPulseBpmReceived = true;
     }
     doc.clear();
@@ -536,8 +536,8 @@ void callback(char* topic, byte* payload, unsigned int length) {  // A new messa
     JsonDocument doc;
     deserializeJson(doc, payload, length);
     
-    if(doc.containsKey("state")) {
-      MqttCommandBreathBpm = uint8_t(doc["state"]);
+    if(doc["state"].is<uint8_t>()) {
+      MqttCommandBreathBpm = doc["state"];
       MqttCommandBreathBpmReceived = true;
     }
     doc.clear();
@@ -546,8 +546,8 @@ void callback(char* topic, byte* payload, unsigned int length) {  // A new messa
     JsonDocument doc;
     deserializeJson(doc, payload, length);
     
-    if(doc.containsKey("state")) {
-      MqttCommandRainbowSec = float(doc["state"]);
+    if(doc["state"].is<float>()) {
+      MqttCommandRainbowSec = doc["state"];
       MqttCommandRainbowSecReceived = true;
     }
     doc.clear();
