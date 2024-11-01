@@ -98,9 +98,9 @@ void WifiBegin()  {
   } else {
     // data is saved, connect now
     // WiFi credentials are known, connect
-    tfts.println("Joining wifi");
+    tfts.println("Joining WiFi");
     tfts.println(stored_config.config.wifi.ssid);
-    Serial.print("Joining wifi ");
+    Serial.print("Joining WiFi ");
     Serial.println(stored_config.config.wifi.ssid);
   
     // https://stackoverflow.com/questions/48024780/esp32-wps-reconnect-on-power-on
@@ -121,18 +121,20 @@ void WifiBegin()  {
       }
     }
   }
-#else   ////NO WPS -- Hard coded credentials
+#else //NO WPS -- Try using hard coded credentials
 
   WiFi.begin(WIFI_SSID, WIFI_PASSWD); 
   WiFi.onEvent(WiFiEvent);
   unsigned long StartTime = millis();
   while ((WiFi.status() != WL_CONNECTED)) {
     delay(500);
-    tfts.print(".");
-    Serial.print(".");
+    tfts.print(">");
+    Serial.print(">");
     if ((millis() - StartTime) > (WIFI_CONNECT_TIMEOUT_SEC * 1000)) {
-      Serial.println("\r\nWiFi connection timeout!");
+      tfts.setTextColor(TFT_RED, TFT_BLACK);
       tfts.println("\nTIMEOUT!");
+      tfts.setTextColor(TFT_WHITE, TFT_BLACK);
+      Serial.println("\r\nWiFi connection timeout!");
       WifiState = disconnected;
       return; // exit loop, exit procedure, continue clock startup
     }
@@ -142,10 +144,9 @@ void WifiBegin()  {
 
  
   WifiState = connected;
-
-  tfts.println("\n Connected!");
-  tfts.println(WiFi.localIP());
   
+  tfts.println("\nConnected! IP:");
+  tfts.println(WiFi.localIP());
   Serial.println("");
   Serial.print("Connected to ");
   Serial.println(WiFi.SSID());
@@ -168,7 +169,7 @@ void WiFiStartWps() {
   sprintf(stored_config.config.wifi.ssid, ""); 
   sprintf(stored_config.config.wifi.password, ""); 
   stored_config.config.wifi.WPS_connected = 0x11; // invalid = different than 0x55
-  Serial.print("Saving config.");
+  Serial.println(""); Serial.print("Saving config! Triggered from WPS start...");
   stored_config.save();
   Serial.println(" Done.");
    
@@ -199,13 +200,13 @@ void WiFiStartWps() {
     Serial.print(".");
   }
   tfts.setTextColor(TFT_WHITE, TFT_BLACK);
-  Serial.print("Saving config.");
-  sprintf(stored_config.config.wifi.ssid, "%s", WiFi.SSID()); 
+  sprintf(stored_config.config.wifi.ssid, "%s", WiFi.SSID());
 //   memset(stored_config.config.wifi.ssid, '\0', sizeof(stored_config.config.wifi.ssid));
 //   strcpy(stored_config.config.wifi.ssid, WiFi.SSID()); 
      
   sprintf(stored_config.config.wifi.password, ""); // can't save a password from WPS
   stored_config.config.wifi.WPS_connected = StoredConfig::valid;
+  Serial.println(); Serial.print("Saving config! Triggered from WPS success...");
   stored_config.save();
   Serial.println(" WPS finished."); 
 }
