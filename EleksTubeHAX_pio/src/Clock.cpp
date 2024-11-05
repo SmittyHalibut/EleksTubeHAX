@@ -100,7 +100,7 @@ void Clock::loop() {
 // Static methods used for sync provider to TimeLib library.
 time_t Clock::syncProvider() {
   Serial.println("syncProvider()");
-  time_t ntp_now, rtc_now;
+  time_t rtc_now;
   rtc_now = RtcGet();
 
   if (millis() - millis_last_ntp > refresh_ntp_every_ms || millis_last_ntp == 0) {
@@ -110,7 +110,7 @@ time_t Clock::syncProvider() {
 //      ntpTimeClient.forceUpdate();  // maybe this breaks the NTP requests as this should not be done more than every minute.
       if (ntpTimeClient.update()) {
         Serial.print(".");
-        ntp_now = ntpTimeClient.getEpochTime();
+        time_t ntp_now = ntpTimeClient.getEpochTime();
         Serial.println("NTP query done.");
         Serial.print("NTP time = ");
         Serial.println(ntpTimeClient.getFormattedTime());

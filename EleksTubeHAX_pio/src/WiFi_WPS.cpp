@@ -166,8 +166,8 @@ void WifiReconnect() {
 #ifdef WIFI_USE_WPS   ////  WPS code
 void WiFiStartWps() {
   // erase settings
-  sprintf(stored_config.config.wifi.ssid, ""); 
-  sprintf(stored_config.config.wifi.password, ""); 
+  snprintf(stored_config.config.wifi.ssid, sizeof(stored_config.config.wifi.ssid), "%s", WiFi.SSID().c_str());
+  stored_config.config.wifi.password[0] = '\0'; // empty string as password
   stored_config.config.wifi.WPS_connected = 0x11; // invalid = different than 0x55
   Serial.println(""); Serial.print("Saving config! Triggered from WPS start...");
   stored_config.save();
@@ -200,12 +200,9 @@ void WiFiStartWps() {
     Serial.print(".");
   }
   tfts.setTextColor(TFT_WHITE, TFT_BLACK);
-  sprintf(stored_config.config.wifi.ssid, "%s", WiFi.SSID());
-//   memset(stored_config.config.wifi.ssid, '\0', sizeof(stored_config.config.wifi.ssid));
-//   strcpy(stored_config.config.wifi.ssid, WiFi.SSID()); 
-     
-  sprintf(stored_config.config.wifi.password, ""); // can't save a password from WPS
-  stored_config.config.wifi.WPS_connected = StoredConfig::valid;
+  snprintf(stored_config.config.wifi.ssid, sizeof(stored_config.config.wifi.ssid), "%s", WiFi.SSID().c_str()); // Copy the SSID into the stored configuration safely
+  stored_config.config.wifi.password[0] = '\0'; // Since the password cannot be retrieved from WPS, set it to an empty string
+  stored_config.config.wifi.WPS_connected = StoredConfig::valid; // Mark the configuration as valid
   Serial.println(); Serial.print("Saving config! Triggered from WPS success...");
   stored_config.save();
   Serial.println(" WPS finished."); 

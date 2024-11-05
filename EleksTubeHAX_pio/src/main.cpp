@@ -490,8 +490,7 @@ void loop() {
         if (menu_change != 0) {
           // calculate the new offset
           time_t newOffsetAdjustmentValue = menu_change * 3600;
-          time_t newOffset = currOffset + newOffsetAdjustmentValue;
-          double newOffsetInHours = static_cast<double>(newOffset) / 3600;
+          time_t newOffset = currOffset + newOffsetAdjustmentValue;          
           
           // check if the new offset is within the allowed range of -12 to +12 hours
           // If the minutes part of the offset is 0, we want to change from +12 to -12 or vice versa (without changing the shown time on the displays)

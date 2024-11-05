@@ -18,7 +18,7 @@
 
 class StoredConfig {
 public:
-  StoredConfig() : prefs(), config_size(sizeof(config)), loaded(false) {}
+  StoredConfig() : prefs(), config_size(sizeof(config)), loaded(false), config() {}
   void begin()    { prefs.begin(SAVED_CONFIG_NAMESPACE, false); Serial.print("Config size: "); Serial.println(config_size); }
   void load()     { prefs.getBytes(SAVED_CONFIG_NAMESPACE, &config, config_size); loaded = true; }
   void save()     { prefs.putBytes(SAVED_CONFIG_NAMESPACE, &config, config_size); }
