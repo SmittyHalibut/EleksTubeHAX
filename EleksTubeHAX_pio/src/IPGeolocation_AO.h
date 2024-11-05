@@ -36,7 +36,7 @@ struct IPGeo {
 class IPGeolocation
 {
   public:
-    IPGeolocation(String Key);
+    explicit IPGeolocation(String Key);
     IPGeolocation(String Key, String API); // Use IPG for api.ipgeolocation.io and ABSTRACT for app.abstractapi.com/api/ip-geolocation
     bool updateStatus(IPGeo *I);
     String getResponse();

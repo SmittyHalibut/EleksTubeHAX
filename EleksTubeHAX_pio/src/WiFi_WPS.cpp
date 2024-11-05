@@ -217,7 +217,6 @@ void WiFiStartWps() {
 bool GetGeoLocationTimeZoneOffset() {
   Serial.println("Starting Geolocation query...");
 // https://app.abstractapi.com/api/ip-geolocation/    // free for 5k loopkups per month.
-// Live test:  https://ipgeolocation.abstractapi.com/v1/?api_key=e11dc0f9bab446bfa9957aad2c4ad064
   IPGeolocation location(GEOLOCATION_API_KEY,"ABSTRACT");
   IPGeo IPG;
   if (location.updateStatus(&IPG)) {

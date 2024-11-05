@@ -470,7 +470,7 @@ void TFTs::DrawImage(uint8_t file_index) {
   
   bool oldSwapBytes = getSwapBytes();
   setSwapBytes(true);
-  pushImage(0,0, TFT_WIDTH, TFT_HEIGHT, (uint16_t *)UnpackedImageBuffer);
+  pushImage(0, 0, TFT_WIDTH, TFT_HEIGHT, reinterpret_cast<uint16_t *>(UnpackedImageBuffer));
   setSwapBytes(oldSwapBytes);
 
 #ifdef DEBUG_OUTPUT
