@@ -470,7 +470,7 @@ void TFTs::DrawImage(uint8_t file_index) {
   
   bool oldSwapBytes = getSwapBytes();
   setSwapBytes(true);
-  pushImage(0,0, TFT_WIDTH, TFT_HEIGHT, (uint16_t *)UnpackedImageBuffer);
+  pushImage(0, 0, TFT_WIDTH, TFT_HEIGHT, reinterpret_cast<uint16_t *>(UnpackedImageBuffer));
   setSwapBytes(oldSwapBytes);
 
 #ifdef DEBUG_OUTPUT
@@ -486,17 +486,17 @@ void TFTs::DrawImage(uint8_t file_index) {
 
 uint16_t TFTs::read16(fs::File &f) {
   uint16_t result;
-  ((uint8_t *)&result)[0] = f.read(); // LSB
-  ((uint8_t *)&result)[1] = f.read(); // MSB
+  reinterpret_cast<uint8_t*>(&result)[0] = f.read(); // LSB
+  reinterpret_cast<uint8_t*>(&result)[1] = f.read(); // MSB
   return result;
 }
 
 uint32_t TFTs::read32(fs::File &f) {
   uint32_t result;
-  ((uint8_t *)&result)[0] = f.read(); // LSB
-  ((uint8_t *)&result)[1] = f.read();
-  ((uint8_t *)&result)[2] = f.read();
-  ((uint8_t *)&result)[3] = f.read(); // MSB
+  reinterpret_cast<uint8_t*>(&result)[0] = f.read(); // LSB
+  reinterpret_cast<uint8_t*>(&result)[1] = f.read();
+  reinterpret_cast<uint8_t*>(&result)[2] = f.read();
+  reinterpret_cast<uint8_t*>(&result)[3] = f.read(); // MSB
   return result;
 }
 
