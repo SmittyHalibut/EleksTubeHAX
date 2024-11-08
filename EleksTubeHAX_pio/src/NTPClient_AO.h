@@ -31,9 +31,9 @@ class NTPClient {
     bool          sendNTPPacket();
 
   public:
-    NTPClient(UDP& udp);
-    NTPClient(UDP& udp, long timeOffset);
-    NTPClient(UDP& udp, const char* poolServerName);
+    explicit NTPClient(UDP& udp);
+    explicit NTPClient(UDP& udp, long timeOffset);
+    explicit NTPClient(UDP& udp, const char* poolServerName);
     NTPClient(UDP& udp, const char* poolServerName, long timeOffset);
     NTPClient(UDP& udp, const char* poolServerName, long timeOffset, unsigned long updateInterval);
 

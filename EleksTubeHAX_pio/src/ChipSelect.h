@@ -20,8 +20,8 @@ public:
   // So 0 is disabled, 1 is enabled (even though CS is active low, this gets mapped.)
   // So bit 0 (LSB), is index 0, is SECONDS_ONES
   // Translation to what the 74HC595 uses is done in update()
-  void setDigitMap(uint8_t map, bool update_=true)   { digits_map = map; if (update_) update(); }
-  uint8_t getDigitMap()                        { return digits_map; }
+  void setDigitMap(uint8_t map, bool update_=true)  {  digits_map = map; if (update_) update(); }
+  uint8_t getDigitMap() { return digits_map; }
 
   // Helper functions
   // Sets just the one digit by digit number
@@ -52,6 +52,5 @@ private:
   const uint8_t all_on = 0x3F;
   const uint8_t all_off = 0x00;
 };
-
 
 #endif // CHIP_SELECT_H

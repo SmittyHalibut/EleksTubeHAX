@@ -14,11 +14,8 @@
 
 class Button {
 public:
-  Button( 
-      uint8_t bpin,
-      uint8_t active_state=LOW,
-      uint32_t long_press_ms=500)
-    : bpin(bpin), active_state(active_state), long_press_ms(long_press_ms),
+  explicit Button(uint8_t bpin, uint8_t active_state=LOW, uint32_t long_press_ms=500)
+    : bpin(bpin), active_state(active_state), long_press_ms(long_press_ms), 
       down_last_time(false), state_changed(false), millis_at_last_transition(0), button_state(idle) {}
 
   /*
