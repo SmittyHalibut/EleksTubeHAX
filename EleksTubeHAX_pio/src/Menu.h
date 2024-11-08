@@ -12,7 +12,7 @@
 class Menu
 {
 public:
-  Menu() : state(idle), change(0), millis_last_button_press(0) {}
+  Menu() : state(idle), change(0), millis_last_button_press(0), state_changed(false) {}
   void begin() {}
   void loop(Buttons &buttons);
 

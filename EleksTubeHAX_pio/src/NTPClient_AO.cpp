@@ -163,7 +163,7 @@ bool NTPClient::forceUpdate()
   if (_packetBuffer[16] == 0 && _packetBuffer[17] == 0 &&
       _packetBuffer[18] == 0 && _packetBuffer[19] == 0 &&
       _packetBuffer[20] == 0 && _packetBuffer[21] == 0 &&
-      _packetBuffer[22] == 0 && _packetBuffer[22] == 0) // Check for ReferenceTimestamp != 0
+      _packetBuffer[22] == 0 && _packetBuffer[23] == 0) // Check for ReferenceTimestamp != 0
   {
 #ifdef DEBUG_NTPClient
     Serial.println("err: Incorrect NTP Ref Timestamp");
