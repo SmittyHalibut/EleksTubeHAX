@@ -770,7 +770,6 @@ void checkDimmingNeeded() { // dim the display in the defined night time
       backlights.setDimming(false);
     }
     updateClockDisplay(TFTs::force); // redraw all the clock digits -> software dimming will be done here
-    }
     hour_old = current_hour;
   }
 }
