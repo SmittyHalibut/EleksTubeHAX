@@ -9,19 +9,20 @@
 #define IPGeolocation_h
 
 #define DEBUG
-#define GEO_CONN_TIMEOUT_SEC  15
+#define GEO_CONN_TIMEOUT_SEC 15
 
 #ifndef DEBUGPRINT
-  #ifdef DEBUG
-    #define DEBUGPRINT(x)  Serial.println (x)
-  #else
-    #define DEBUGPRINT(x)
-  #endif
+#ifdef DEBUG
+#define DEBUGPRINT(x) Serial.println(x)
+#else
+#define DEBUGPRINT(x)
+#endif
 #endif
 
 #include "Arduino.h"
 
-struct IPGeo {
+struct IPGeo
+{
   String tz;
   double offset;
   bool is_dst;
