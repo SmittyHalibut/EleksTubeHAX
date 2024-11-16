@@ -5,9 +5,9 @@
 #
 # app0 must be aligned on 0x10000 (!)
 #
-# Name,   Type, SubType, Offset,  Size, Flags
-# partition table          0x0000,   0x9000,  <- automatically generated, do not un-comment.
-nvs,      data, nvs,       0x9000,   0x7000,
-app0,     app,  factory,  0x10000, 0x120000,
+# Name,   Type, SubType, Offset,   Size,     Flags
+# partition table        0x000000, 0x009000, <- automatically generated, do not un-comment.
+nvs,      data, nvs,     0x009000, 0x007000,
+app0,     app,  factory, 0x010000, 0x120000,
 spiffs,   data, spiffs,  0x130000, 0x2D0000,
 # end of 4 MB flash      0x400000

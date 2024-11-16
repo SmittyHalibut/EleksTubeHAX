@@ -331,6 +331,7 @@ void MqttStart()
     MQTTclient.setCallback(callback);
     MQTTclient.setBufferSize(2048);
 
+    Serial.println("");
     Serial.println("Connecting to MQTT...");
     if (MQTTclient.connect(MQTT_CLIENT, MQTT_USERNAME, MQTT_PASSWORD))
     {
@@ -341,14 +342,15 @@ void MqttStart()
     {
       if (MQTTclient.state() == 5)
       {
-        Serial.println("Connection not allowed by broker, possible reasons:");
+        Serial.println("Error: Connection not allowed by broker, possible reasons:");
         Serial.println("- Device is already online. Wait some seconds until it appears offline");
         Serial.println("- Wrong Username or password. Check credentials");
         Serial.println("- Client Id does not belong to this username, verify ClientId");
       }
       else
       {
-        Serial.print("Not possible to connect to Broker Error code:");
+        Serial.println("Error: Not possible to connect to Broker!");
+        Serial.print("Error code:");
         Serial.println(MQTTclient.state());
       }
       return; // do not continue if not connected
@@ -539,6 +541,7 @@ void callback(char *topic, byte *payload, unsigned int length)
       MqttCommandUseTwelveHours = strcmp(doc["state"], MQTT_STATE_ON) == 0;
       MqttCommandUseTwelveHoursReceived = true;
     }
+
     doc.clear();
   }
   if (strcmp(command[0], "blank_zero_hours") == 0 && strcmp(command[1], "set") == 0)
@@ -551,6 +554,7 @@ void callback(char *topic, byte *payload, unsigned int length)
       MqttCommandBlankZeroHours = strcmp(doc["state"], MQTT_STATE_ON) == 0;
       MqttCommandBlankZeroHoursReceived = true;
     }
+
     doc.clear();
   }
   if (strcmp(command[0], "pulse_bpm") == 0 && strcmp(command[1], "set") == 0)
@@ -563,6 +567,7 @@ void callback(char *topic, byte *payload, unsigned int length)
       MqttCommandPulseBpm = doc["state"];
       MqttCommandPulseBpmReceived = true;
     }
+
     doc.clear();
   }
   if (strcmp(command[0], "breath_bpm") == 0 && strcmp(command[1], "set") == 0)
@@ -575,6 +580,7 @@ void callback(char *topic, byte *payload, unsigned int length)
       MqttCommandBreathBpm = doc["state"];
       MqttCommandBreathBpmReceived = true;
     }
+
     doc.clear();
   }
   if (strcmp(command[0], "rainbow_duration") == 0 && strcmp(command[1], "set") == 0)

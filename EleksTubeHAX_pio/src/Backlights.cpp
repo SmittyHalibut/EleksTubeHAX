@@ -156,7 +156,7 @@ void Backlights::breathPattern()
 void Backlights::testPattern()
 {
   const uint8_t num_colors = 4; // or 3 if you don't want black
-  uint8_t num_states = NUM_DIGITS * num_colors;
+  uint8_t num_states = NUM_BACKLIGHT_LEDS * num_colors;
   uint8_t state = (millis() / test_ms_delay) % num_states;
 
   uint8_t digit = state / num_colors;
@@ -237,7 +237,7 @@ void Backlights::rainbowPattern()
 {
   // Divide by 3 to spread it out some, so the whole rainbow isn't displayed at once.
   // TODO Make this /3 a parameter
-  const uint16_t phase_per_digit = (max_phase / NUM_DIGITS) / 3;
+  const uint16_t phase_per_digit = (max_phase / NUM_BACKLIGHT_LEDS) / 3;
 
   // Rainbow roatation speed now configurable
   uint16_t duration = uint16_t(round(getRainbowDuration() * 1000));

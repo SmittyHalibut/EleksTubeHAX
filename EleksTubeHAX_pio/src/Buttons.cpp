@@ -103,3 +103,51 @@ const String Button::state_str[Button::num_states] =
      "down_long",
      "up_edge",
      "up_long_edge"};
+
+//--------------------------------------------
+
+#ifdef ONE_BUTTON_ONLY_MENU
+// One Button in Buttons only
+void Buttons::begin()
+{
+  mode.begin();
+}
+
+void Buttons::loop()
+{
+  mode.loop();
+}
+
+bool Buttons::stateChanged()
+{
+  return mode.stateChanged();
+}
+
+#endif
+
+#ifndef ONE_BUTTON_ONLY_MENU
+// Buttons
+void Buttons::begin()
+{
+  left.begin();
+  mode.begin();
+  right.begin();
+  power.begin();
+}
+
+void Buttons::loop()
+{
+  left.loop();
+  mode.loop();
+  right.loop();
+  power.loop();
+}
+
+bool Buttons::stateChanged()
+{
+  return left.stateChanged() ||
+         mode.stateChanged() ||
+         right.stateChanged() ||
+         power.stateChanged();
+}
+#endif

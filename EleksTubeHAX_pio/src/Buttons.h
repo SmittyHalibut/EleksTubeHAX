@@ -54,6 +54,9 @@ public:
   String getStateStr() { return state_str[button_state]; }
   bool stateChanged() { return state_changed; }
   void setDownEdgeState() { button_state = down_edge; }
+  void setDownLongEdgeState() { button_state = down_long_edge; }
+  void setUpEdgeState() { button_state = up_edge; }
+  void setUpLongEdgeState() { button_state = up_long_edge; }
   uint32_t millisInState() { return millis_at_last_loop - millis_at_last_transition; }
 
   bool isIdle() { return button_state == idle; }
@@ -83,38 +86,45 @@ private:
   bool isButtonDown() { return digitalRead(bpin) == active_state; }
 };
 
+#ifdef ONE_BUTTON_ONLY_MENU
+
+class Buttons
+{
+public:
+  Buttons() : mode(BUTTON_MODE_PIN) {}
+
+  void begin();
+  void loop();
+  bool stateChanged();
+
+  // Just making them public, so we don't have to proxy everything.
+  Button mode;
+
+private:
+};
+
+#endif
+
 /*
  * A simple helper class to call common functions on all buttons at once.
  */
+#ifndef ONE_BUTTON_ONLY_MENU
 
 class Buttons
 {
 public:
   Buttons() : left(BUTTON_LEFT_PIN), mode(BUTTON_MODE_PIN), right(BUTTON_RIGHT_PIN), power(BUTTON_POWER_PIN) {}
 
-  void begin()
-  {
-    left.begin();
-    mode.begin();
-    right.begin();
-    power.begin();
-  }
-  void loop()
-  {
-    left.loop();
-    mode.loop();
-    right.loop();
-    power.loop();
-  }
-  bool stateChanged()
-  {
-    return left.stateChanged() || mode.stateChanged() || right.stateChanged() || power.stateChanged();
-  }
+  void begin();
+  void loop();
+  bool stateChanged();
 
   // Just making them public, so we don't have to proxy everything.
   Button left, mode, right, power;
 
 private:
 };
+
+#endif
 
 #endif // BUTTONS_H

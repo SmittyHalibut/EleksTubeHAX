@@ -81,7 +81,7 @@ void setup()
   menu.begin();
 
   // Setup the displays (TFTs) initaly and show bootup message(s)
-  tfts.begin(); // and count number of clock faces available
+  tfts.begin();
   tfts.fillScreen(TFT_BLACK);
   tfts.setTextColor(TFT_WHITE, TFT_BLACK);
   tfts.setCursor(0, 0, 2); // Font 2. 16 pixel high
@@ -297,7 +297,7 @@ void loop()
   {
     MqttCommandMainBrightnessReceived = false;
     tfts.dimming = MqttCommandMainBrightness;
-    tfts.InvalidateImageInBuffer();
+    tfts.ProcessUpdatedDimming();
     updateClockDisplay(TFTs::force);
   }
 
@@ -441,11 +441,14 @@ void loop()
 #endif // NovelLife_SE Clone XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
   // Power button: If in menu, exit menu. Else turn off displays and backlight.
-  if (buttons.power.isDownEdge() && (menu.getState() == Menu::idle))
+#ifndef ONE_BUTTON_ONLY_MENU
+  if (buttons.power.isUpEdge() && (menu.getState() == Menu::idle))
   {
+#ifdef DEBUG_OUTPUT
+    Serial.println("Power button pressed.");
+#endif
     tfts.chip_select.setAll();
     tfts.fillScreen(TFT_BLACK);
-
     tfts.toggleAllDisplays();
     if (tfts.isEnabled())
     {
@@ -454,11 +457,11 @@ void loop()
 #endif
       tfts.chip_select.setAll();
       tfts.fillScreen(TFT_BLACK);
-
       updateClockDisplay(TFTs::force);
     }
     backlights.togglePower();
   }
+#endif
 
   menu.loop(buttons); // Must be called after buttons.loop()
   backlights.loop();
@@ -780,7 +783,7 @@ void GestureStart()
   }
 }
 
-// Handle Interrupt from gesture sensor and simulate a short button press (state down_edge) of the corresponding button, if a gesture is detected
+// Handle Interrupt from gesture sensor and simulate a short button press of the corresponding button, if a gesture is detected
 void HandleGestureInterupt()
 {
   if (isr_flag == 1)
@@ -809,27 +812,27 @@ void HandleGesture()
     switch (apds.readGesture())
     {
     case DIR_UP:
-      buttons.left.setDownEdgeState();
+      buttons.left.setUpEdgeState();
       Serial.println("Gesture detected! LEFT");
       break;
     case DIR_DOWN:
-      buttons.right.setDownEdgeState();
+      buttons.right.setUpEdgeState();
       Serial.println("Gesture detected! RIGHT");
       break;
     case DIR_LEFT:
-      buttons.power.setDownEdgeState();
+      buttons.power.setUpEdgeState();
       Serial.println("Gesture detected! DOWN");
       break;
     case DIR_RIGHT:
-      buttons.mode.setDownEdgeState();
+      buttons.mode.setUpEdgeState();
       Serial.println("Gesture detected! UP");
       break;
     case DIR_NEAR:
-      buttons.mode.setDownEdgeState();
+      buttons.mode.setUpEdgeState();
       Serial.println("Gesture detected! NEAR");
       break;
     case DIR_FAR:
-      buttons.power.setDownEdgeState();
+      buttons.power.setUpEdgeState();
       Serial.println("Gesture detected! FAR");
       break;
     default:
@@ -877,12 +880,14 @@ void checkDimmingNeeded()
     { // check if it is in the defined night time
       Serial.println("Set to night time mode (dimmed)!");
       tfts.dimming = TFT_DIMMED_INTENSITY;
+      tfts.ProcessUpdatedDimming();
       backlights.setDimming(true);
     }
     else
     {
-      Serial.println("Set to day time mode (normal brightness)!");
+      Serial.println("Setting daytime mode (max brightness)");
       tfts.dimming = 255; // 0..255
+      tfts.ProcessUpdatedDimming();
       backlights.setDimming(false);
     }
     updateClockDisplay(TFTs::force); // redraw all the clock digits -> software dimming will be done here
