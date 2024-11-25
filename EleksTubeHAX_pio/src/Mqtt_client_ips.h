@@ -2,6 +2,7 @@
 #define mqtt_client_H_
 
 #include "GLOBAL_DEFINES.h"
+#include <FS.h>
 
 extern bool MqttConnected;
 

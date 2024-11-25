@@ -49,7 +49,7 @@
 // #define MQTT_HOME_ASSISTANT_DISCOVERY_HW_VERSION "2.3.04"
 #define MQTT_BROKER "smartnest.cz"                   // Broker host
 #define MQTT_PORT 1883                               // Broker port
-// #define MQTT_USE_TLS                                 // Use TLS for MQTT connection (set CA/root cert in Mqtt_client_ips.cpp - Default is Let's Encrypt CA certificate)
+// #define MQTT_USE_TLS                                 // Use TLS for MQTT connection (set CA cert in data subfolder as ca-root.pem - Default is Let's Encrypt CA certificate)
 #define MQTT_USERNAME "__enter_your_username_here__" // Username from Smartnest
 #define MQTT_PASSWORD "__enter_your_api_key_here__"  // Password from Smartnest or API key (under MY Account)
 #define MQTT_CLIENT "__enter_your_device_id_here__"  // Device Id from Smartnest
