@@ -328,14 +328,21 @@ void MqttReportState(bool force)
 #ifdef MQTT_USE_TLS
 bool loadCARootCert()
 {
-  const char *filename = "/ca-root.pem";
+  const char *filename = "/mqtt-ca-root.pem";
   Serial.println("Loading CA Root Certificate");
+
+  // Check if the PEM file exists
+  if (!SPIFFS.exists(filename))
+  {
+    Serial.println("ERROR: File not found mqtt-ca-root.pem");
+    return false;
+  }
 
   // Open the PEM file in read mode
   File file = SPIFFS.open(filename, "r");
   if (!file)
   {
-    Serial.println("ERROR: Failed to open ca-root.pem");
+    Serial.println("ERROR: Failed to open mqtt-ca-root.pem");
     return false;
   }
 
@@ -343,7 +350,7 @@ bool loadCARootCert()
   size_t size = file.size();
   if (size == 0)
   {
-    Serial.println("ERROR: Empty ca-root.pem");
+    Serial.println("ERROR: Empty mqtt-ca-root.pem");
     file.close();
     return false;
   }
