@@ -5,17 +5,14 @@
 
 void TFTs::begin()
 {
-  // Start with all displays selected.
   chip_select.begin();
-  chip_select.setAll();
+  chip_select.setAll(); // Start with all displays selected
 
-  // Turn power on to displays.
-  pinMode(TFT_ENABLE_PIN, OUTPUT);
-  enableAllDisplays();
-  InvalidateImageInBuffer();
-
-  // Initialize the super class.
-  init();
+  pinMode(TFT_ENABLE_PIN, OUTPUT); // Set pin for turning display power on and off.
+  InvalidateImageInBuffer();       // Signal, that the image in the buffer is invalid and needs to be reloaded and refilled
+  init();                          // Initialize the super class.
+  fillScreen(TFT_BLACK);           // to avoid/reduce flickering patterns on the screens
+  enableAllDisplays();             // Signal, that the displays are enabled now
 
   // Set SPIFFS ready
   if (!SPIFFS.begin())
@@ -33,14 +30,13 @@ void TFTs::reinit()
 {
   // Start with all displays selected.
   chip_select.begin();
-  chip_select.setAll();
+  chip_select.setAll(); // Start again with all displays selected.
 
-  // Turn power on to displays.
-  pinMode(TFT_ENABLE_PIN, OUTPUT);
-  enableAllDisplays();
-
-  // Initialize the super class.
-  init();
+  pinMode(TFT_ENABLE_PIN, OUTPUT); // Set pin for turning display power on and off.
+  InvalidateImageInBuffer();       // Signal, that the image in the buffer is invalid and needs to be reloaded and refilled
+  init();                          // Initialize the super class (again).
+  fillScreen(TFT_BLACK);           // to avoid/reduce flickering patterns on the screens
+  enableAllDisplays();             // Signal, that the displays are enabled now
 }
 
 void TFTs::clear()
@@ -142,22 +138,26 @@ void TFTs::setDigit(uint8_t digit, uint8_t value, show_t show)
 
 void TFTs::showDigit(uint8_t digit)
 {
-  chip_select.setDigit(digit);
+  if (enabled)
+  { // only do this, if the displays are enabled
+    chip_select.setDigit(digit);
 
-  if (digits[digit] == blanked)
-  {
-    fillScreen(TFT_BLACK);
-  }
-  else
-  {
-    uint8_t file_index = current_graphic * 10 + digits[digit];
-    DrawImage(file_index);
+    if (digits[digit] == blanked)
+    { // Blank Zero
+      fillScreen(TFT_BLACK);
+    }
+    else
+    {
+      uint8_t file_index = current_graphic * 10 + digits[digit];
+      DrawImage(file_index);
 
-    uint8_t NextNumber = digits[SECONDS_ONES] + 1;
-    if (NextNumber > 9)
-      NextNumber = 0; // pre-load only seconds, because they are drawn first
-    NextFileRequired = current_graphic * 10 + NextNumber;
+      uint8_t NextNumber = digits[SECONDS_ONES] + 1;
+      if (NextNumber > 9)
+        NextNumber = 0; // pre-load only seconds, because they are drawn first
+      NextFileRequired = current_graphic * 10 + NextNumber;
+    }
   }
+  // else { } //display is disabled, do nothing
 }
 
 void TFTs::LoadNextImage()
