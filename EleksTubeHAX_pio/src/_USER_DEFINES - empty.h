@@ -40,7 +40,8 @@
 #define GEOLOCATION_API_KEY "__enter_your_api_key_here__"
 
 // ************* MQTT config *************
-// #define MQTT_ENABLED // enable general MQTT support
+// #define MQTT_ENABLED                       // enable general MQTT support
+#define MQTT_SAVE_PREFERENCES_AFTER_SEC 60 // auto save config X seconds after last MQTT message received
 
 // --- MQTT Home Assistant settings ---
 // You will either need a local MQTT broker to use MQTT with Home Assistant (e.g. Mosquitto) or use an internet-based broker with Home Assistant support.
@@ -69,7 +70,9 @@
 #define MQTT_USERNAME "__enter_your_username_here__" // Username from Smartnest
 #define MQTT_PASSWORD "__enter_your_api_key_here__"  // Password from Smartnest or API key (under MY Account)
 #define MQTT_CLIENT "__enter_your_device_id_here__"  // Device Id from Smartnest
-#define MQTT_SAVE_PREFERENCES_AFTER_SEC 60
+// #define MQTT_USE_TLS                                 // Use TLS for MQTT connection. Setting a root CA certificate is needed!
+                                                     // Don't forget to copy the correct certificate file into the 'data' folder and rename it to mqtt-ca-root.pem!
+                                                     // Example CA cert (Let's Encrypt CA cert) can be found in the 'data - other graphics' subfolder in the root of this repo
 
 // ************* Optional temperature sensor *************
 // #define ONE_WIRE_BUS_PIN   4  // DS18B20 connected to GPIO4; comment this line if sensor is not connected

@@ -11,20 +11,25 @@
  */
 
 #include "Mqtt_client_ips.h"
-#include "WiFi.h"         // for ESP32
+#include <WiFi.h>         // for ESP32
 #include <PubSubClient.h> // Download and install this library first from: https://www.arduinolibraries.info/libraries/pub-sub-client
 #include <ArduinoJson.h>
 #include "TempSensor.h"
 #include "TFTs.h"
 #include "Backlights.h"
 #include "Clock.h"
+#ifdef MQTT_USE_TLS
+#include <WiFiClientSecure.h> // for secure WiFi client
+
+WiFiClientSecure espClient;
+#else
+WiFiClient espClient;
+#endif
+PubSubClient MQTTclient(espClient);
 
 #define concat2(first, second) first second
 #define concat3(first, second, third) first second third
 #define concat4(first, second, third, fourth) first second third fourth
-
-WiFiClient espClient;
-PubSubClient MQTTclient(espClient);
 
 #define MQTT_STATE_ON "ON"
 #define MQTT_STATE_OFF "OFF"
@@ -320,6 +325,54 @@ void MqttReportState(bool force)
 #endif
 }
 
+#ifdef MQTT_USE_TLS
+bool loadCARootCert()
+{
+  const char *filename = "/mqtt-ca-root.pem";
+  Serial.println("Loading CA Root Certificate");
+
+  // Check if the PEM file exists
+  if (!SPIFFS.exists(filename))
+  {
+    Serial.println("ERROR: File not found mqtt-ca-root.pem");
+    return false;
+  }
+
+  // Open the PEM file in read mode
+  File file = SPIFFS.open(filename, "r");
+  if (!file)
+  {
+    Serial.println("ERROR: Failed to open mqtt-ca-root.pem");
+    return false;
+  }
+
+  // Get the size of the file
+  size_t size = file.size();
+  if (size == 0)
+  {
+    Serial.println("ERROR: Empty mqtt-ca-root.pem");
+    file.close();
+    return false;
+  }
+
+  // Use the loadCA() method to load the certificate directly from the file stream
+  bool result = espClient.loadCACert(file, size);
+
+  file.close();
+
+  if (result)
+  {
+    Serial.println("CA Root Certificate loaded successfully");
+  }
+  else
+  {
+    Serial.println("ERROR: Failed to load CA Root Certificate");
+  }
+
+  return result;
+}
+#endif
+
 void MqttStart()
 {
 #ifdef MQTT_ENABLED
@@ -330,7 +383,15 @@ void MqttStart()
     MQTTclient.setServer(MQTT_BROKER, MQTT_PORT);
     MQTTclient.setCallback(callback);
     MQTTclient.setBufferSize(2048);
+#ifdef MQTT_USE_TLS
+    bool result = loadCARootCert();
+    if (!result)
+    {
+      return; // load certificate failed -> do not continue
+    }
+#endif
 
+    Serial.println("");
     Serial.println("Connecting to MQTT...");
     if (MQTTclient.connect(MQTT_CLIENT, MQTT_USERNAME, MQTT_PASSWORD))
     {
@@ -341,14 +402,15 @@ void MqttStart()
     {
       if (MQTTclient.state() == 5)
       {
-        Serial.println("Connection not allowed by broker, possible reasons:");
+        Serial.println("Error: Connection not allowed by broker, possible reasons:");
         Serial.println("- Device is already online. Wait some seconds until it appears offline");
         Serial.println("- Wrong Username or password. Check credentials");
         Serial.println("- Client Id does not belong to this username, verify ClientId");
       }
       else
       {
-        Serial.print("Not possible to connect to Broker Error code:");
+        Serial.println("Error: Not possible to connect to Broker!");
+        Serial.print("Error code:");
         Serial.println(MQTTclient.state());
       }
       return; // do not continue if not connected

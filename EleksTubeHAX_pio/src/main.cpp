@@ -126,10 +126,10 @@ void setup()
   // Setup MQTT
   tfts.setTextColor(TFT_YELLOW, TFT_BLACK);
   tfts.print("MQTT start...");
-  Serial.print("MQTT start...");
+  Serial.println("MQTT start...");
   MqttStart();
   tfts.println("Done!");
-  Serial.println("Done!");
+  Serial.println("MQTT start Done!");
   tfts.setTextColor(TFT_WHITE, TFT_BLACK);
 
 #ifdef GEOLOCATION_ENABLED
