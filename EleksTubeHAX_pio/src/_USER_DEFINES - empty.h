@@ -41,7 +41,7 @@
 
 // ************* MQTT config *************
 // #define MQTT_ENABLED                       // enable general MQTT support
-// #define MQTT_SAVE_PREFERENCES_AFTER_SEC 60 // auto save config X seconds after last MQTT message received
+#define MQTT_SAVE_PREFERENCES_AFTER_SEC 60 // auto save config X seconds after last MQTT message received
 
 // --- MQTT Home Assistant settings ---
 // You will either need a local MQTT broker to use MQTT with Home Assistant (e.g. Mosquitto) or use an internet-based broker with Home Assistant support.
