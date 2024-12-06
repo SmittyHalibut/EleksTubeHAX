@@ -4,6 +4,7 @@
 #include "GLOBAL_DEFINES.h"
 #include <FS.h>
 
+#ifdef MQTT_ENABLED
 extern bool MqttConnected;
 
 // commands from server
@@ -67,5 +68,7 @@ void MqttStart();
 void MqttLoopFrequently();
 void MqttLoopInFreeTime();
 void MqttReportBackEverything(bool force);
+
+#endif // MQTT_ENABLED
 
 #endif /* mqtt_client_H_ */
