@@ -15,7 +15,7 @@
 #include "Menu.h"
 #include "StoredConfig.h"
 #include "WiFi_WPS.h"
-#if defined(MQTT_ENABLED)
+#ifdef MQTT_ENABLED
 #include "Mqtt_client_ips.h"
 #endif
 #include "TempSensor_inc.h"
@@ -125,7 +125,7 @@ void setup()
   Serial.println("Done!");
   tfts.setTextColor(TFT_WHITE, TFT_BLACK);
 
-#if defined(MQTT_ENABLED)
+#ifdef MQTT_ENABLED
   // Setup MQTT
   tfts.setTextColor(TFT_YELLOW, TFT_BLACK);
   tfts.print("MQTT start...");
@@ -199,7 +199,7 @@ void loop()
   // Do all the maintenance work
   WifiReconnect(); // if not connected attempt to reconnect
 
-#if defined(MQTT_ENABLED)
+#ifdef MQTT_ENABLED
   MqttLoopFrequently();
 
   bool MqttCommandReceived =
@@ -719,7 +719,7 @@ void loop()
     time_in_loop = millis() - millis_at_top;
     if (time_in_loop < 20)
     {
-#if defined(MQTT_ENABLED)
+#ifdef MQTT_ENABLED
       MqttLoopInFreeTime();
 #endif
       PeriodicReadTemperature();

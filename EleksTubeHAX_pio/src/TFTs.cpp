@@ -119,7 +119,7 @@ void TFTs::setDigit(uint8_t digit, uint8_t value, show_t show)
         showNoWifiStatus();
       }
 
-#if defined(MQTT_ENABLED)
+#ifdef MQTT_ENABLED
     if (digit == SECONDS_TENS)
       if (!MqttConnected)
       {
