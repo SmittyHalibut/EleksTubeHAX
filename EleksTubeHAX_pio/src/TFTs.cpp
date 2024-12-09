@@ -119,11 +119,13 @@ void TFTs::setDigit(uint8_t digit, uint8_t value, show_t show)
         showNoWifiStatus();
       }
 
+#ifdef MQTT_ENABLED
     if (digit == SECONDS_TENS)
       if (!MqttConnected)
       {
         showNoMqttStatus();
       }
+#endif
 
     if (digit == HOURS_ONES)
     {
@@ -545,18 +547,18 @@ void TFTs::DrawImage(uint8_t file_index)
 uint16_t TFTs::read16(fs::File &f)
 {
   uint16_t result;
-  reinterpret_cast<uint8_t*>(&result)[0] = f.read(); // LSB
-  reinterpret_cast<uint8_t*>(&result)[1] = f.read(); // MSB
+  reinterpret_cast<uint8_t *>(&result)[0] = f.read(); // LSB
+  reinterpret_cast<uint8_t *>(&result)[1] = f.read(); // MSB
   return result;
 }
 
 uint32_t TFTs::read32(fs::File &f)
 {
   uint32_t result;
-  reinterpret_cast<uint8_t*>(&result)[0] = f.read(); // LSB
-  reinterpret_cast<uint8_t*>(&result)[1] = f.read();
-  reinterpret_cast<uint8_t*>(&result)[2] = f.read();
-  reinterpret_cast<uint8_t*>(&result)[3] = f.read(); // MSB
+  reinterpret_cast<uint8_t *>(&result)[0] = f.read(); // LSB
+  reinterpret_cast<uint8_t *>(&result)[1] = f.read();
+  reinterpret_cast<uint8_t *>(&result)[2] = f.read();
+  reinterpret_cast<uint8_t *>(&result)[3] = f.read(); // MSB
   return result;
 }
 

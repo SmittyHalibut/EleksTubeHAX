@@ -161,7 +161,7 @@ Some clocks needs a button pressed while the powering phase (plugging the USB ca
 
 If you just want to use this firmware without setting up the development tools and libraries and everything, navigate to folder `\pre-built-firmware\` and modify `_ESP32 write flash.cmd` to upload the version for your clock.
 
-More info can be found in the `\pre-built-firmware\` folder in the [README.MD](pre-built-firmware\README.md).
+More info can be found in the `\pre-built-firmware\` folder in the [README.MD](pre-built-firmware/README.md).
 Like:
 
 - Features enabled in the images
@@ -194,7 +194,7 @@ For more info ask your favorite search engine or AI Chatbot :)
 ### 4.6 Lost firmware file
 
 If you lost your orginal firmware file and wants to restore the orginal firmware you normaly have a problem, because even if you get a backup file from another user, it is locked to the MAC address of the other ESP32 MAC.
-Under some conditions, it should be possible to change the encoded MAC address in the firmware. This worked for EleksTube Gen1 clocks. See [Issue 8]('https://github.com/SmittyHalibut/EleksTubeHAX/issues/8').
+Under some conditions, it should be possible to change the encoded MAC address in the firmware. This worked for EleksTube Gen1 clocks. See [Issue 8](https://github.com/SmittyHalibut/EleksTubeHAX/issues/8).
 
 Note: There is no gurantee, that you are able to change the MAC address in the firmware file successfully! If the orginal manufacturer decides to encode the MAC address or hide it, the descriped method will not work!
 
@@ -467,11 +467,11 @@ Note: The `_USER_DEFINES.h` is included in the default `.gitignore` file, so tha
 
 If you want to integrate the clock into your Home Assistant, you need to make sure, that Home Assistant and the clock uses the same MQTT broker.
 
-Currently, you will need a local MQTT broker for this.
-
 Normally you will already have a MQTT broker running locally, which supports the HA discovery and communication messages, like Mosquitto.
 If not done already, you can set it up easily via an Add-On in HA.
-See: [Home Assistant MQTT Integration]("https://www.home-assistant.io/integrations/mqtt/")
+See: [Home Assistant MQTT Integration](https://www.home-assistant.io/integrations/mqtt/)
+
+You can also use an internet-based broker which supports "Home Assistant messages" (topics) for discovery and communication, like HiveMQ.
 
 If you set up the broker, you first need to enter the used IP, port, username and password of it into the matching `MQTT_*` defines in your `_USER_DEFINES.h` (MQTT config section). You have to define `MQTT_ENABLED` as well.
 
@@ -481,16 +481,14 @@ After flashing the firmware, the clock will first try connect to the WiFi and th
 
 If the connection was successfull the clock sends the discovery messages for HA and the device should be vissible in the MQTT integration.
 
-Note: In the moment, no known internet-based/non-local MQTT broker, which supports HA discovery and communication messages is useable. This may/will change in the future.
-
 Note: If you change your used clock faces in the data folder, the `clockfaces.txt` in the `data` folder needs to be changed too. This is, because the shown names in HA for the clock faces under "Main light" are hard coded and read from there.
 
 Note: `#define MQTT_CLIENT` is used as a unique device name (i.e. it should be different if you have several IPS clocks) and is the "root" part of the topic for all entities that will be interacted with via MQTT.
 
-In the future: If you want to use an internet-based broker, you can use i.e. HiveMQ. You will need to create an account there and set it up in HA and in here.
-See: [Connect HA to HiveMQ]("https://www.hivemq.com/blog/connect-home-assistant-to-hivemq-cloud/")
+Note: If you want to use an internet-based broker, you can use HiveMQ. You will need to create an account there and set it up in HA and in here. 'MQTT_USE_TLS' must be defined, because HiveMQ only supports encrypted connections. The HiveMQ TLS cert is based on the root CA of Let's Encrypt, so you also need to copy the 'mqtt-ca-root.pem' file from the 'data - other graphics' folder into the 'data' folder of the PIO project and upload the data partiton (file system) with the changed app partition. Other brokers or your localy used cert for your MQTT broker may need another root CA to be set.
+See: [Connect HA to HiveMQ](https://www.hivemq.com/blog/connect-home-assistant-to-hivemq-cloud/)
 
-##### 5.6.4.1.2 Used integration
+##### 5.6.4.1.2 Used integrations
 
 Interactions between the firmware of the clock and Home Assistant is done like descriped in the MQTT integration documentations (see below).
 
@@ -536,7 +534,7 @@ The settings for the LED modes and the general clock settings can only be set fr
 
 ##### 5.6.5.2.1 Setup
 
-If the `MQTT_HOME_ASSISTANT` define is not enabled, just `MQTT_ENABLED`, the MQTT support is very limited in the moment!
+If the `MQTT_HOME_ASSISTANT` define is NOT enabled, just `MQTT_ENABLED`, the MQTT support is very limited in the moment!
 
 You can still use MQTT to control the clock, but only via direct MQTT messages, sent from a MQTT client (like MQTT Explorer or similar or from a WebUI/API of the internet-based broker).
 
@@ -549,6 +547,8 @@ For pure MQTT support you can either use any internet-based MQTT broker (i.e. sm
 If you choose an internet based one, you will need to create an account, (maybe setting up the device there and get the ID) and fill in the data into the matching `MQTT_*` defines in your `_USER_DEFINES.h` (MQTT config section).
 
 If you choose a local one, you will need to set up the broker on your local network and do the same.
+
+Note: If you want to use encrypted connection to your broker, you need to enable 'MQTT_USE_TLS' and copy a valid root CA cert file to the 'data' folder. See the notes under the HA section for HiveMQ above.
 
 #### 5.6.5.3 Debugging MQTT
 
